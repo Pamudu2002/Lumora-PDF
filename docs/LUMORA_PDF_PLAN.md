@@ -307,7 +307,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 0.1 Create repo structure (section 3.7): pnpm workspace, Cargo workspace, `apps/desktop` via `create-tauri-app` (React + TypeScript + Vite), crates scaffolded with `lib.rs` stubs.
 - [x] 0.2 Tooling: rustfmt, clippy config, ESLint (typescript-eslint, react-hooks), Prettier, Vitest, `deny.toml` (license allow-list from section 1), EditorConfig, `.gitattributes` with Git LFS for `tests/corpus/**/*.pdf`.
 - [x] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
-- [ ] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
+- [x] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
 - [ ] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
 - [ ] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
 - [ ] 0.7 Tauri: `open_document(path) -> DocSummary`, `close_document(docId)` commands via `tauri-specta`; generated TS bindings in `src/lib/ipc/`.
@@ -328,6 +328,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.1: pnpm + Cargo workspaces, `apps/desktop` from create-tauri-app (React 19, Vite 8, TS 6), five `lumora-*` crate stubs; installed Rust 1.99 stable.
 - 2026-10-09 — 0.2: ESLint 10 (strict type-checked) + Prettier + Vitest/jsdom, rustfmt/clippy config, `deny.toml`, `pnpm check-licenses`, EditorConfig, LF + Git LFS `.gitattributes`.
 - 2026-10-09 — 0.3: Tailwind 4 theme mapped onto the design tokens (default palette removed; ESLint bans raw hex), `tokens.css` from the design handoff, Radix-based Button/IconButton/Tooltip/SegmentedControl/Notice, Light/Dark/System theme via a Zustand settings store, bundled Newsreader.
+- 2026-10-09 — 0.4: `pnpm fetch-pdfium` (Node, SHA-256-pinned PDFium chromium/7881, no V8/XFA, plus its license notices), bundled via per-platform `tauri.*.conf.json` resources; binding verified by the engine tests (0.5).
 
 ---
 
@@ -618,6 +619,8 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | `cargo deny` ignores RUSTSEC-2024-0370 (`proc-macro-error`) | Build-time only, transitive via Tauri's gtk3 Linux stack; no upgrade available upstream |
 | 2026-10-09 | Design tokens come from `docs/design/lumora.css` (teal brand), not the placeholder indigo block in section 4 | The design handoff is the newer source of truth for the UI |
 | 2026-10-09 | Newsreader bundled via `@fontsource/newsreader` (OFL-1.1); the JS license check allows OFL only for named font packages | CLAUDE.md approves Newsreader (OFL) for brand moments, bundled for offline use |
+| 2026-10-09 | `fetch-pdfium` is one Node script (`scripts/fetch-pdfium.mjs`) instead of `.ps1` + `.sh` | One source of truth for the version and checksums on every OS; Node is already required |
+| 2026-10-09 | PDFium pinned to `chromium/7881`, the newest API `pdfium-render` 0.9.4 supports (`pdfium_7881` feature) | Binary and bindings must match; bump both together |
 | _(Claude Code: add new decisions here)_ | | |
 
 ---

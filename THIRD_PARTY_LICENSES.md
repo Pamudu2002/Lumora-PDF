@@ -12,6 +12,14 @@ whenever you add one.
 
 | Component | Version | License | Source |
 |---|---|---|---|
+| PDFium (prebuilt, no V8/XFA) | `chromium/7881` (151.0.7881.0) | BSD-3-Clause AND Apache-2.0 | [bblanchon/pdfium-binaries](https://github.com/bblanchon/pdfium-binaries) build of [PDFium](https://pdfium.googlesource.com/pdfium/); build scripts MIT |
+
+PDFium statically includes third-party code under its own permissive licenses: FreeType (FreeType
+License), libjpeg-turbo (IJG + BSD-3-Clause + Zlib), OpenJPEG (BSD-2-Clause), libpng (libpng
+license), zlib (Zlib), LittleCMS (MIT), libtiff (libtiff license), AGG 2.3 (BSD-style), ICU
+(Unicode-3.0), Abseil (Apache-2.0), simdutf (MIT/Apache-2.0), fast_float (MIT/Apache-2.0) and
+LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app in
+`pdfium/licenses/` (copied by `pnpm fetch-pdfium`).
 
 ## Rust crates (direct dependencies)
 
