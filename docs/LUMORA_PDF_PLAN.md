@@ -611,7 +611,6 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | Tiles via `lumora://` custom protocol | Avoid JSON-encoding bitmaps over IPC |
 | 2026-10-09 | Lumora PDF is fully free: every feature for everyone, no Pro tier | Product decision. Never add feature gating, license keys, trials, upsell UI or ads. Costs stay low because everything runs on-device. |
 | 2026-10-09 | Release profile keeps `panic = "unwind"` (the Tauri template uses `abort`) | A panic on the engine worker or a command thread is caught, logged and shown as a friendly error instead of killing the app |
-| 2026-10-09 | Release profile keeps `panic = "unwind"` (the Tauri template uses `abort`) | A panic on the engine worker or a command thread is caught, logged and shown as a friendly error instead of killing the app |
 | _(Claude Code: add new decisions here)_ | | |
 
 ---
