@@ -316,7 +316,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 0.10 Test corpus: `tests/corpus/README.md` describing categories (text, scanned, huge >200 pages, >100 MB, forms, encrypted, broken/malformed, CJK/Indic/Arabic fonts, rotated pages, annotations from Acrobat). Start with ≥ 30 files, target ≥ 500 over time. Only include files with redistributable licenses (or keep private files out of git).
 - [x] 0.11 Golden render test: render page 1 of each corpus file at scale 1.0 and compare with `tests/golden/` within a pixel tolerance (`cargo test -p lumora-engine --features golden`).
 - [x] 0.12 Logging (`tracing`) to file in the app data dir; a panic hook that logs and shows a friendly error.
-- [ ] 0.13 GitHub Actions `ci.yml`: Windows runner — fmt, clippy, tests, cargo-deny, pnpm lint/typecheck/test, `tauri build` artifact upload.
+- [x] 0.13 GitHub Actions `ci.yml`: Windows runner — fmt, clippy, tests, cargo-deny, pnpm lint/typecheck/test, `tauri build` artifact upload.
 - [ ] 0.14 `README.md`, `CLAUDE.md` (section 12), `THIRD_PARTY_LICENSES.md`.
 
 **Acceptance criteria**
@@ -337,6 +337,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.10: 53-file corpus in Git LFS (47 PDFium test files, BSD-3, pinned commit; 6 generated CC0 files via `scripts/generate-corpus.mjs`, `--large` makes a >100 MB file outside git), `manifest.json` with measured outcomes/passwords, README with categories and gaps (CJK/Indic/Arabic, Acrobat annotations); `tests/corpus.rs` checks every entry. Found and fixed thumbnails of 14,400 pt pages (MIN_SCALE).
 - 2026-10-09 — 0.11: `--features golden` test renders page 1 of all 49 openable corpus files at scale 1.0 by stitching 512 px tiles (pages >2048 px use a 2048 px thumbnail), compares with `tests/golden/**.png` (LFS) at ±16 per channel / 0.2% of pixels, writes actual + diff images to `tests/golden/_diff/` on failure; `LUMORA_UPDATE_GOLDEN=1` rewrites.
 - 2026-10-09 — 0.12: `tracing` to daily-rotated files (7 kept) in the app log dir (`%LOCALAPPDATA%com.lumora.pdflogs`), `LUMORA_LOG` filter; panic hook logs, appends a synchronous `crash.log` record with backtrace, and emits a typed `AppErrorEvent` that the UI shows as a friendly notice; protocol handler always answers even if rendering panics. Verified in the running app.
+- 2026-10-09 — 0.13: `.github/workflows/ci.yml` on `windows-latest`: Git LFS checkout, fetch-pdfium, fmt, clippy, tests, golden (diff artifacts on failure), bindings-drift check, cargo-deny, lint/typecheck/test, JS licenses, `tauri build` → NSIS installer artifact. Local `pnpm build` produces a 5.27 MiB installer; release exe verified with bundled PDFium and strict CSP. Not yet run on GitHub (nothing pushed).
 
 ---
 

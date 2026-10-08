@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  windows:
+    name: Windows — checks, tests and installer
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out (with Git LFS test corpus)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust builds
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch PDFium
+        run: pnpm fetch-pdfium
+
+      # Rust
+      - name: cargo fmt
+        run: cargo fmt --all --check
+
+      - name: cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test
+        run: cargo test --workspace
+
+      - name: Golden render test
+        run: cargo test -p lumora-engine --features golden --test golden
+
+      - name: Upload golden diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-diffs
+          path: tests/golden/_diff/
+          if-no-files-found: ignore
+
+      - name: TypeScript bindings are up to date
+        shell: bash
+        run: |
+          # `cargo test` regenerated them; fail if that changed the committed file.
+          git diff --exit-code -- apps/desktop/src/lib/ipc/bindings.ts \
+            || { echo "::error::bindings.ts is stale. Run 'pnpm gen:ipc' and commit it."; exit 1; }
+
+      - name: cargo deny
+        run: cargo deny check
+
+      # JavaScript
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: JavaScript licenses
+        run: pnpm check-licenses
+
+      # Installer
+      - name: Build Windows installer
+        run: pnpm build
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumora-pdf-windows-x64-${{ github.sha }}
+          path: target/release/bundle/nsis/*.exe
+          if-no-files-found: error
