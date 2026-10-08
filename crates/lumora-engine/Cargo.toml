@@ -8,7 +8,20 @@ authors.workspace = true
 repository.workspace = true
 publish.workspace = true
 
+[features]
+# Golden render tests against tests/corpus (needs PDFium; see tests/golden.rs).
+golden = []
+
 [dependencies]
+crossbeam-channel = "0.5"
+# The PDFium API version must match the binary from `pnpm fetch-pdfium` (scripts/fetch-pdfium.mjs).
+pdfium-render = { version = "0.9.4", default-features = false, features = ["pdfium_7881", "thread_safe"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+tracing = "0.1"
+
+[dev-dependencies]
+png = "0.18"
 
 [lints]
 workspace = true

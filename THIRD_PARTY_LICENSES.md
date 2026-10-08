@@ -27,6 +27,11 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 |---|---|---|
 | `tauri`, `tauri-build` | App shell | MIT OR Apache-2.0 |
 | `serde`, `serde_json` | Serialization | MIT OR Apache-2.0 |
+| `pdfium-render` | Rust bindings to PDFium | MIT OR Apache-2.0 |
+| `crossbeam-channel` | Engine worker request lanes | MIT OR Apache-2.0 |
+| `thiserror` | Error types | MIT OR Apache-2.0 |
+| `tracing` | Logging | MIT |
+| `png` (dev) | Test image decoding | MIT OR Apache-2.0 |
 
 ## JavaScript packages (direct dependencies)
 

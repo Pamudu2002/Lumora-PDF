@@ -308,7 +308,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 0.2 Tooling: rustfmt, clippy config, ESLint (typescript-eslint, react-hooks), Prettier, Vitest, `deny.toml` (license allow-list from section 1), EditorConfig, `.gitattributes` with Git LFS for `tests/corpus/**/*.pdf`.
 - [x] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
 - [x] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
-- [ ] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
+- [x] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
 - [ ] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
 - [ ] 0.7 Tauri: `open_document(path) -> DocSummary`, `close_document(docId)` commands via `tauri-specta`; generated TS bindings in `src/lib/ipc/`.
 - [ ] 0.8 Tauri: `lumora://` async protocol handler serving tiles (section 3.5) + a TS helper `tileUrl(...)` that works on Windows/macOS/Linux.
@@ -329,6 +329,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.2: ESLint 10 (strict type-checked) + Prettier + Vitest/jsdom, rustfmt/clippy config, `deny.toml`, `pnpm check-licenses`, EditorConfig, LF + Git LFS `.gitattributes`.
 - 2026-10-09 — 0.3: Tailwind 4 theme mapped onto the design tokens (default palette removed; ESLint bans raw hex), `tokens.css` from the design handoff, Radix-based Button/IconButton/Tooltip/SegmentedControl/Notice, Light/Dark/System theme via a Zustand settings store, bundled Newsreader.
 - 2026-10-09 — 0.4: `pnpm fetch-pdfium` (Node, SHA-256-pinned PDFium chromium/7881, no V8/XFA, plus its license notices), bundled via per-platform `tauri.*.conf.json` resources; binding verified by the engine tests (0.5).
+- 2026-10-09 — 0.5: `PdfEngine` trait + `PdfiumEngine` actor (one worker thread owns PDFium and all docs; render lane served before query lane; per-request panic catch; 6-page cache per doc); tiles rendered with an origin offset so form fields still draw; 7 integration tests on real PDFium (tiles, thumbnails, rotation, malformed files, 8 threads).
 
 ---
 
@@ -621,6 +622,8 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | Newsreader bundled via `@fontsource/newsreader` (OFL-1.1); the JS license check allows OFL only for named font packages | CLAUDE.md approves Newsreader (OFL) for brand moments, bundled for offline use |
 | 2026-10-09 | `fetch-pdfium` is one Node script (`scripts/fetch-pdfium.mjs`) instead of `.ps1` + `.sh` | One source of truth for the version and checksums on every OS; Node is already required |
 | 2026-10-09 | PDFium pinned to `chromium/7881`, the newest API `pdfium-render` 0.9.4 supports (`pdfium_7881` feature) | Binary and bindings must match; bump both together |
+| 2026-10-09 | `DocId` is `u32` (plan sketch: `u64`) | Maps to a plain JS number over IPC; ids are never reused within a run |
+| 2026-10-09 | `PageSize` has no `rotation` field yet; sizes are display sizes with /Rotate applied | PDFium reports rotation only for loaded pages, and loading every page at open is slow; add it when editing needs it |
 | _(Claude Code: add new decisions here)_ | | |
 
 ---
