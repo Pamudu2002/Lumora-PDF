@@ -339,6 +339,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.12: `tracing` to daily-rotated files (7 kept) in the app log dir (`%LOCALAPPDATA%com.lumora.pdflogs`), `LUMORA_LOG` filter; panic hook logs, appends a synchronous `crash.log` record with backtrace, and emits a typed `AppErrorEvent` that the UI shows as a friendly notice; protocol handler always answers even if rendering panics. Verified in the running app.
 - 2026-10-09 — 0.13: `.github/workflows/ci.yml` on `windows-latest`: Git LFS checkout, fetch-pdfium, fmt, clippy, tests, golden (diff artifacts on failure), bindings-drift check, cargo-deny, lint/typecheck/test, JS licenses, `tauri build` → NSIS installer artifact. Local `pnpm build` produces a 5.27 MiB installer; release exe verified with bundled PDFium and strict CSP. Not yet run on GitHub (nothing pushed).
 - 2026-10-09 — 0.14: README (setup, commands, layout, architecture); CLAUDE.md already existed (fuller than section 12) — added the new commands; THIRD_PARTY_LICENSES.md kept current through Phase 0.
+- 2026-10-09 — Acceptance: (1) verified — real app opens a PDF, page 1 sharp at 100% and 200% (125% display); (2) verified — malformed files show a notice, corpus test covers 11 malformed files; (3) pending — CI workflow written and every step passes locally, but it has not run on GitHub yet.
 
 ---
 
