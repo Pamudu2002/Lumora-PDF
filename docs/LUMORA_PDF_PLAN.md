@@ -309,7 +309,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
 - [x] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
 - [x] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
-- [ ] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
+- [x] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
 - [ ] 0.7 Tauri: `open_document(path) -> DocSummary`, `close_document(docId)` commands via `tauri-specta`; generated TS bindings in `src/lib/ipc/`.
 - [ ] 0.8 Tauri: `lumora://` async protocol handler serving tiles (section 3.5) + a TS helper `tileUrl(...)` that works on Windows/macOS/Linux.
 - [ ] 0.9 UI: open file via dialog (Tauri dialog plugin) and drag-and-drop; show page 1 using tiles.
@@ -330,6 +330,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.3: Tailwind 4 theme mapped onto the design tokens (default palette removed; ESLint bans raw hex), `tokens.css` from the design handoff, Radix-based Button/IconButton/Tooltip/SegmentedControl/Notice, Light/Dark/System theme via a Zustand settings store, bundled Newsreader.
 - 2026-10-09 — 0.4: `pnpm fetch-pdfium` (Node, SHA-256-pinned PDFium chromium/7881, no V8/XFA, plus its license notices), bundled via per-platform `tauri.*.conf.json` resources; binding verified by the engine tests (0.5).
 - 2026-10-09 — 0.5: `PdfEngine` trait + `PdfiumEngine` actor (one worker thread owns PDFium and all docs; render lane served before query lane; per-request panic catch; 6-page cache per doc); tiles rendered with an origin offset so form fields still draw; 7 integration tests on real PDFium (tiles, thumbnails, rotation, malformed files, 8 threads).
+- 2026-10-09 — 0.6: `lumora-render` — `TileGrid`/milli-scale tile math, byte-bounded LRU `TileCache` of encoded images (256 MB default, keyed with doc revision + dark mode, per-doc eviction), PNG (default, fast) and lossless WebP encoding (opaque images drop alpha), `TileService` (cache → engine → encode).
 
 ---
 

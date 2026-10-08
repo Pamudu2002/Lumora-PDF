@@ -9,6 +9,12 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+image-webp = "0.2.4"
+lru = "0.18.5"
+lumora-engine.workspace = true
+png = "0.18.1"
+thiserror = "2"
+tracing = "0.1"
 
 [lints]
 workspace = true

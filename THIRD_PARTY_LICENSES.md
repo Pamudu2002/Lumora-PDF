@@ -31,7 +31,9 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `crossbeam-channel` | Engine worker request lanes | MIT OR Apache-2.0 |
 | `thiserror` | Error types | MIT OR Apache-2.0 |
 | `tracing` | Logging | MIT |
-| `png` (dev) | Test image decoding | MIT OR Apache-2.0 |
+| `png` | PNG tile encoding | MIT OR Apache-2.0 |
+| `image-webp` | WebP tile encoding | MIT OR Apache-2.0 |
+| `lru` | Tile cache | MIT |
 
 ## JavaScript packages (direct dependencies)
 
