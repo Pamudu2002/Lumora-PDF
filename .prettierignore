@@ -1,0 +1,11 @@
+node_modules
+dist
+target
+pnpm-lock.yaml
+Cargo.lock
+docs/design
+apps/desktop/src-tauri/gen
+apps/desktop/src/lib/ipc/bindings.ts
+tests/corpus
+tests/golden
+*.md

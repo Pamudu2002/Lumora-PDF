@@ -13,10 +13,14 @@
     "build": "pnpm --filter @lumora/desktop tauri build",
     "tauri": "pnpm --filter @lumora/desktop tauri",
     "fetch-pdfium": "node scripts/fetch-pdfium.mjs",
-    "lint": "pnpm -r lint",
+    "lint": "prettier --check . && pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check-licenses": "node scripts/check-licenses.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9"
   }
 }

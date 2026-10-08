@@ -1,0 +1,53 @@
+# cargo-deny policy for Lumora PDF. Run: `cargo deny check`.
+# License allow-list from docs/LUMORA_PDF_PLAN.md section 1. GPL, LGPL and AGPL are forbidden.
+
+[graph]
+targets = [
+  "x86_64-pc-windows-msvc",
+  "aarch64-pc-windows-msvc",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+]
+all-features = false
+
+[advisories]
+version = 2
+yanked = "warn"
+ignore = [
+  # proc-macro-error: unmaintained compile-time macro crate, pulled in by gtk-rs 0.18 (Tauri Linux
+  # stack via muda/tao). No runtime code; no upgrade available until Tauri moves off gtk3-rs.
+  { id = "RUSTSEC-2024-0370", reason = "build-time only, transitive via Tauri gtk3 stack, no fix upstream" },
+]
+
+[licenses]
+version = 2
+confidence-threshold = 0.93
+allow = [
+  "MIT",
+  "MIT-0",
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Zlib",
+  "MPL-2.0",
+  "Unicode-3.0",
+  "Unicode-DFS-2016",
+  "CC0-1.0",
+]
+
+[licenses.private]
+# Our own crates are unpublished (publish = false) and are not license-checked.
+ignore = true
+
+[bans]
+multiple-versions = "allow"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

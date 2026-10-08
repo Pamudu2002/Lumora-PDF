@@ -29,3 +29,14 @@ whenever you add one.
 | `vite`, `@vitejs/plugin-react` | Build tool | MIT |
 | `typescript` | Type checking | Apache-2.0 |
 | `@types/react`, `@types/react-dom`, `@types/node` | Type definitions | MIT |
+
+## Development tools (not shipped)
+
+| Package / tool | Used for | License |
+|---|---|---|
+| `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | Linting | MIT |
+| `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` | React lint rules | MIT |
+| `prettier` | Formatting | MIT |
+| `vitest`, `jsdom` | Unit tests | MIT |
+| `@testing-library/react`, `@testing-library/dom` | Component tests | MIT |
+| `cargo-deny` | License and advisory checks | MIT OR Apache-2.0 |
