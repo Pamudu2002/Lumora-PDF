@@ -5,6 +5,7 @@ import { Viewer } from "@/features/viewer/Viewer";
 import { useApplyTheme } from "@/lib/theme/useApplyTheme";
 import { useDocumentsStore } from "@/stores/documents";
 import { Home } from "./Home";
+import { useAppErrors } from "./useAppErrors";
 import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpening";
 
 export function App() {
@@ -16,10 +17,25 @@ export function App() {
   const openFileDialog = useOpenFileDialog();
   useOpenShortcut(openFileDialog);
   const dragging = useFileDrop();
+  const [internalError, dismissInternalError] = useAppErrors();
 
   return (
     <TooltipProvider delayDuration={400}>
       <div className="flex h-full flex-col bg-surface text-ink">
+        {internalError ? (
+          <Notice
+            tone="warning"
+            className="m-2 mb-0"
+            action={
+              <Button size="sm" variant="ghost" onClick={dismissInternalError}>
+                Dismiss
+              </Button>
+            }
+          >
+            Something went wrong inside Lumora. Your files are safe; if this keeps happening,
+            restart Lumora PDF. Details were saved to the log.
+          </Notice>
+        ) : null}
         {failure ? (
           <Notice
             tone="danger"

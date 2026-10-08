@@ -1,3 +1,4 @@
+import { emit } from "@tauri-apps/api/event";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { useDocumentsStore } from "@/stores/documents";
@@ -70,5 +71,13 @@ describe("App", () => {
     const alert = screen.getByRole("alert");
     expect(alert.textContent).toContain("broken.pdf");
     expect(alert.textContent).toContain("damaged or isn't a PDF");
+  });
+
+  it("shows a friendly notice when the Rust side reports an internal error", async () => {
+    render(<App />);
+    // Let the event listener register.
+    await act(() => Promise.resolve());
+    await act(() => emit("app-error-event", { detail: "boom" }));
+    expect(screen.getByRole("alert").textContent).toContain("Something went wrong inside Lumora");
   });
 });

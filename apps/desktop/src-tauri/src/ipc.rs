@@ -3,16 +3,18 @@
 //! Regenerate `apps/desktop/src/lib/ipc/bindings.ts` with `pnpm gen:ipc` after changing a command
 //! or an IPC type. CI fails if the committed file is out of date.
 
-use tauri_specta::{Builder, collect_commands};
+use tauri_specta::{Builder, collect_commands, collect_events};
 
-use crate::commands;
+use crate::{commands, logging};
 
-/// Every command exposed to the UI.
+/// Every command and event exposed to the UI.
 pub fn builder() -> Builder<tauri::Wry> {
-    Builder::<tauri::Wry>::new().commands(collect_commands![
-        commands::documents::open_document,
-        commands::documents::close_document,
-    ])
+    Builder::<tauri::Wry>::new()
+        .commands(collect_commands![
+            commands::documents::open_document,
+            commands::documents::close_document,
+        ])
+        .events(collect_events![logging::AppErrorEvent])
 }
 
 #[cfg(test)]

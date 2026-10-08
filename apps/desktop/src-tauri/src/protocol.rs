@@ -8,6 +8,7 @@
 //! On Windows the WebView reaches custom schemes as `http://lumora.localhost/…`; elsewhere as
 //! `lumora://localhost/…`. Only the path and query matter here.
 
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::Arc;
 
 use lumora_engine::{DocId, EngineError, PageIndex};
@@ -135,10 +136,14 @@ pub fn handle<R: Runtime>(
     let app = ctx.app_handle().clone();
     let uri = request.uri().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        let response = match ImageRequest::parse(uri.path(), uri.query()) {
-            None => text_response(StatusCode::BAD_REQUEST, "malformed lumora:// path"),
-            Some(req) => respond(&app, req),
-        };
+        // Always answer, even if rendering panics, so the image request never hangs.
+        let response = catch_unwind(AssertUnwindSafe(|| {
+            match ImageRequest::parse(uri.path(), uri.query()) {
+                None => text_response(StatusCode::BAD_REQUEST, "malformed lumora:// path"),
+                Some(req) => respond(&app, req),
+            }
+        }))
+        .unwrap_or_else(|_| text_response(StatusCode::INTERNAL_SERVER_ERROR, "internal error"));
         responder.respond(response);
     });
 }
