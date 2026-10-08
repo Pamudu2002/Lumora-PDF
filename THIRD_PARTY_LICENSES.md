@@ -35,12 +35,14 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `image-webp` | WebP tile encoding | MIT OR Apache-2.0 |
 | `lru` | Tile cache | MIT |
 | `tauri-specta`, `specta`, `specta-typescript` | Typed IPC and generated TypeScript bindings | MIT |
+| `tauri-plugin-dialog` | Native open-file dialog | MIT OR Apache-2.0 |
 
 ## JavaScript packages (direct dependencies)
 
 | Package | Used for | License |
 |---|---|---|
 | `@tauri-apps/api`, `@tauri-apps/cli` | Tauri frontend API and CLI | MIT OR Apache-2.0 |
+| `@tauri-apps/plugin-dialog` | Native open-file dialog | MIT OR Apache-2.0 |
 | `react`, `react-dom` | UI | MIT |
 | `@radix-ui/react-slot`, `@radix-ui/react-tooltip`, `@radix-ui/react-toggle-group` | Accessible UI primitives | MIT |
 | `lucide-react` | Icons | ISC |
