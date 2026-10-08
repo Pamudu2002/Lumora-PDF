@@ -136,7 +136,10 @@ async function main() {
     // PDFium and its bundled third-party notices (FreeType, libjpeg-turbo, ICU, …) ship with the app.
     rmSync(join(outDir, "licenses"), { recursive: true, force: true });
     cpSync(join(extractDir, "licenses"), join(outDir, "licenses"), { recursive: true });
-    copyFileSync(join(extractDir, "LICENSE"), join(outDir, "licenses", "pdfium-binaries-build.txt"));
+    copyFileSync(
+      join(extractDir, "LICENSE"),
+      join(outDir, "licenses", "pdfium-binaries-build.txt"),
+    );
     if (existsSync(join(extractDir, "VERSION"))) {
       copyFileSync(join(extractDir, "VERSION"), join(outDir, "VERSION"));
     }
