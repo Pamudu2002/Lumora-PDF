@@ -26,6 +26,20 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
       "@typescript-eslint/consistent-type-imports": "error",
+      // Design rule: no raw hex colors in components; use tokens (var(--brand), bg-brand, …).
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+          message:
+            "Use a design token (Tailwind token class or var(--token)) instead of a raw hex color.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}\\b/]",
+          message:
+            "Use a design token (Tailwind token class or var(--token)) instead of a raw hex color.",
+        },
+      ],
     },
   },
 );

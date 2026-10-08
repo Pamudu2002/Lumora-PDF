@@ -306,7 +306,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 
 - [x] 0.1 Create repo structure (section 3.7): pnpm workspace, Cargo workspace, `apps/desktop` via `create-tauri-app` (React + TypeScript + Vite), crates scaffolded with `lib.rs` stubs.
 - [x] 0.2 Tooling: rustfmt, clippy config, ESLint (typescript-eslint, react-hooks), Prettier, Vitest, `deny.toml` (license allow-list from section 1), EditorConfig, `.gitattributes` with Git LFS for `tests/corpus/**/*.pdf`.
-- [ ] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
+- [x] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
 - [ ] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
 - [ ] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
 - [ ] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
@@ -327,6 +327,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 **Progress log**
 - 2026-10-09 — 0.1: pnpm + Cargo workspaces, `apps/desktop` from create-tauri-app (React 19, Vite 8, TS 6), five `lumora-*` crate stubs; installed Rust 1.99 stable.
 - 2026-10-09 — 0.2: ESLint 10 (strict type-checked) + Prettier + Vitest/jsdom, rustfmt/clippy config, `deny.toml`, `pnpm check-licenses`, EditorConfig, LF + Git LFS `.gitattributes`.
+- 2026-10-09 — 0.3: Tailwind 4 theme mapped onto the design tokens (default palette removed; ESLint bans raw hex), `tokens.css` from the design handoff, Radix-based Button/IconButton/Tooltip/SegmentedControl/Notice, Light/Dark/System theme via a Zustand settings store, bundled Newsreader.
 
 ---
 
@@ -615,6 +616,8 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | License allow-list also accepts `MIT-0`, `0BSD`, `Apache-2.0 WITH LLVM-exception` and `Unicode-DFS-2016` | Strictly more permissive variants of allowed licenses; common in the Rust/JS ecosystems |
 | 2026-10-09 | Workspace `rust-version = 1.90` | The MSRV-aware resolver otherwise picks `time`/`quick-xml` versions with open advisories |
 | 2026-10-09 | `cargo deny` ignores RUSTSEC-2024-0370 (`proc-macro-error`) | Build-time only, transitive via Tauri's gtk3 Linux stack; no upgrade available upstream |
+| 2026-10-09 | Design tokens come from `docs/design/lumora.css` (teal brand), not the placeholder indigo block in section 4 | The design handoff is the newer source of truth for the UI |
+| 2026-10-09 | Newsreader bundled via `@fontsource/newsreader` (OFL-1.1); the JS license check allows OFL only for named font packages | CLAUDE.md approves Newsreader (OFL) for brand moments, bundled for offline use |
 | _(Claude Code: add new decisions here)_ | | |
 
 ---

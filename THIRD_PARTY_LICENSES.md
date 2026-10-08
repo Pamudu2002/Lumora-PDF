@@ -26,6 +26,10 @@ whenever you add one.
 |---|---|---|
 | `@tauri-apps/api`, `@tauri-apps/cli` | Tauri frontend API and CLI | MIT OR Apache-2.0 |
 | `react`, `react-dom` | UI | MIT |
+| `@radix-ui/react-slot`, `@radix-ui/react-tooltip`, `@radix-ui/react-toggle-group` | Accessible UI primitives | MIT |
+| `lucide-react` | Icons | ISC |
+| `zustand` | UI state | MIT |
+| `@fontsource/newsreader` | Newsreader font files (bundled, brand moments only) | OFL-1.1 (approved for fonts) |
 | `vite`, `@vitejs/plugin-react` | Build tool | MIT |
 | `typescript` | Type checking | Apache-2.0 |
 | `@types/react`, `@types/react-dom`, `@types/node` | Type definitions | MIT |
@@ -34,6 +38,7 @@ whenever you add one.
 
 | Package / tool | Used for | License |
 |---|---|---|
+| `tailwindcss`, `@tailwindcss/vite` | CSS utilities (build time) | MIT |
 | `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | Linting | MIT |
 | `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` | React lint rules | MIT |
 | `prettier` | Formatting | MIT |

@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Theme switch: `data-theme="light|dark"` on <html> (set by the settings store). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Tailwind theme mapped onto the Lumora tokens. The default palette is removed so components can only
+ * use token colors (no raw hex in components).
+ *
+ * Some names are shared with tokens.css (`--radius-sm`, `--shadow-page`, `--font-ui`, …). Tailwind emits
+ * them inside `@layer theme`; the unlayered declarations in tokens.css always win the cascade, so the
+ * token value is what applies (no cycle).
+ */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-raised: var(--surface-raised);
+  --color-paper: var(--paper);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-selected: var(--selected);
+  --color-focus: var(--focus);
+  --color-lumen: var(--lumen);
+  --color-lumen-soft: var(--lumen-soft);
+  --color-lumen-ink: var(--lumen-ink);
+  --color-on-lumen: var(--on-lumen);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-scrim: var(--scrim);
+
+  --font-*: initial;
+  --font-ui: var(--font-ui);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --text-*: initial;
+  --text-caption: 11px;
+  --text-caption--line-height: 16px;
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-body: 13px;
+  --text-body--line-height: 20px;
+  --text-title: 15px;
+  --text-title--line-height: 22px;
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 28px;
+  --text-headline: 28px;
+  --text-headline--line-height: 34px;
+  --text-display: 44px;
+  --text-display--line-height: 48px;
+  --text-mono: 12px;
+  --text-mono--line-height: 18px;
+
+  --radius-*: initial;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-*: initial;
+  --shadow-page: var(--shadow-page);
+  --shadow-popover: var(--shadow-popover);
+  --shadow-dialog: var(--shadow-dialog);
+
+  --spacing-titlebar: var(--titlebar-h);
+  --spacing-toolbar: var(--toolbar-h);
+  --spacing-subtoolbar: var(--subtoolbar-h);
+  --spacing-control: var(--control-h);
+  --spacing-control-sm: var(--control-h-sm);
+  --spacing-sidebar: var(--sidebar-w);
+  --spacing-panel: var(--panel-w);
+  --spacing-thumb: var(--thumb-w);
+  --spacing-icon-md: var(--icon-md);
+  --spacing-icon-sm: var(--icon-sm);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--text-selection);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

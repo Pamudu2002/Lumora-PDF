@@ -17,8 +17,15 @@ const ALLOWED = new Set([
   "0BSD",
 ]);
 
+// Font packages may use the SIL Open Font License (approved for bundled fonts such as Newsreader;
+// see CLAUDE.md "UI rules"). Only packages named here get the exception.
+const OFL_FONT_PACKAGES = new Set(["@fontsource/newsreader"]);
+
 /** True when an SPDX expression is satisfied by the allow-list (simple AND/OR, no nesting). */
-function isAllowed(expression) {
+function isAllowed(expression, name) {
+  if (expression === "OFL-1.1" && OFL_FONT_PACKAGES.has(name)) {
+    return true;
+  }
   const cleaned = expression.replace(/[()]/g, "").trim();
   return cleaned
     .split(/\s+OR\s+/)
@@ -36,7 +43,7 @@ let count = 0;
 for (const [license, packages] of Object.entries(byLicense)) {
   for (const pkg of packages) {
     count += 1;
-    if (!isAllowed(license)) {
+    if (!isAllowed(license, pkg.name)) {
       violations.push(`${pkg.name}@${pkg.versions.join(",")}: ${license}`);
     }
   }
