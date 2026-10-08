@@ -1,0 +1,25 @@
+[package]
+name = "lumora-desktop"
+description = "Lumora PDF desktop app (Tauri shell)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lib]
+# The `_lib` suffix keeps the lib name distinct from the bin name (cargo#8519 on Windows).
+name = "lumora_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints]
+workspace = true

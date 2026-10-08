@@ -1,0 +1,22 @@
+{
+  "name": "lumora-pdf",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Lumora PDF — a fast, private, offline-first PDF reader and editor",
+  "type": "module",
+  "packageManager": "pnpm@10.15.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @lumora/desktop tauri dev",
+    "build": "pnpm --filter @lumora/desktop tauri build",
+    "tauri": "pnpm --filter @lumora/desktop tauri",
+    "fetch-pdfium": "node scripts/fetch-pdfium.mjs",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  }
+}

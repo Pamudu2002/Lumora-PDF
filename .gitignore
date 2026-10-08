@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build output
+/target/
+dist/
+dist-ssr/
+*.tsbuildinfo
+apps/desktop/src-tauri/gen/schemas/
+
+# PDFium binaries (downloaded by `pnpm fetch-pdfium`)
+apps/desktop/src-tauri/resources/pdfium/*
+!apps/desktop/src-tauri/resources/pdfium/.gitkeep
+
+# Test output
+tests/golden/_diff/
+test-results/
+playwright-report/
+coverage/
+
+# Logs
+*.log
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+*.local
+*.sw?

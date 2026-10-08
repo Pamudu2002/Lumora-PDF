@@ -1,0 +1,40 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "apps/desktop/src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Lumora"]
+repository = "https://github.com/Pamudu2002/Lumora-PDF"
+publish = false
+
+[workspace.dependencies]
+# Internal crates
+lumora-engine = { path = "crates/lumora-engine" }
+lumora-core = { path = "crates/lumora-core" }
+lumora-render = { path = "crates/lumora-render" }
+lumora-jobs = { path = "crates/lumora-jobs" }
+lumora-store = { path = "crates/lumora-store" }
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+dbg_macro = "warn"
+todo = "warn"
+
+# See https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+# Keep unwinding (not "abort") so a panic on a worker thread is caught, logged and
+# reported to the user instead of killing the app. See the plan's decision log.
+panic = "unwind"
+strip = true
