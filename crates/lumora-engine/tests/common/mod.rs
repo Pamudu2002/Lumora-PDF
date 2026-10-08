@@ -23,7 +23,9 @@ pub fn pdfium_library() -> PdfiumLibrary {
             } else {
                 "libpdfium.so"
             };
-            repo_root().join("apps/desktop/src-tauri/resources/pdfium").join(name)
+            repo_root()
+                .join("apps/desktop/src-tauri/resources/pdfium")
+                .join(name)
         });
     assert!(
         path.exists(),
@@ -94,7 +96,10 @@ pub fn write_pdf(path: &Path, title: &str, pages: &[TestPage]) {
         out.push_str(&format!("{} 0 obj\n{body}\nendobj\n", i + 1));
     }
     let xref = out.len();
-    out.push_str(&format!("xref\n0 {}\n0000000000 65535 f \n", objects.len() + 1));
+    out.push_str(&format!(
+        "xref\n0 {}\n0000000000 65535 f \n",
+        objects.len() + 1
+    ));
     for offset in offsets {
         out.push_str(&format!("{offset:010} 00000 n \n"));
     }
