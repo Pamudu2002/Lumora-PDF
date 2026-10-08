@@ -50,6 +50,9 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 cargo deny check
+pnpm check-licenses                   # JS dependency licenses
+pnpm gen:ipc                          # regenerate src/lib/ipc/bindings.ts after changing a Tauri command
+cargo test -p lumora-engine --features golden --test golden   # golden renders (LUMORA_UPDATE_GOLDEN=1 to update)
 ```
 
 **A task is not done until all of the checks above pass.**

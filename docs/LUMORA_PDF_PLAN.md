@@ -317,7 +317,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 0.11 Golden render test: render page 1 of each corpus file at scale 1.0 and compare with `tests/golden/` within a pixel tolerance (`cargo test -p lumora-engine --features golden`).
 - [x] 0.12 Logging (`tracing`) to file in the app data dir; a panic hook that logs and shows a friendly error.
 - [x] 0.13 GitHub Actions `ci.yml`: Windows runner — fmt, clippy, tests, cargo-deny, pnpm lint/typecheck/test, `tauri build` artifact upload.
-- [ ] 0.14 `README.md`, `CLAUDE.md` (section 12), `THIRD_PARTY_LICENSES.md`.
+- [x] 0.14 `README.md`, `CLAUDE.md` (section 12), `THIRD_PARTY_LICENSES.md`.
 
 **Acceptance criteria**
 - `pnpm tauri dev` on Windows opens a PDF and shows page 1 sharply at 100% and 200% zoom.
@@ -338,6 +338,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 0.11: `--features golden` test renders page 1 of all 49 openable corpus files at scale 1.0 by stitching 512 px tiles (pages >2048 px use a 2048 px thumbnail), compares with `tests/golden/**.png` (LFS) at ±16 per channel / 0.2% of pixels, writes actual + diff images to `tests/golden/_diff/` on failure; `LUMORA_UPDATE_GOLDEN=1` rewrites.
 - 2026-10-09 — 0.12: `tracing` to daily-rotated files (7 kept) in the app log dir (`%LOCALAPPDATA%com.lumora.pdflogs`), `LUMORA_LOG` filter; panic hook logs, appends a synchronous `crash.log` record with backtrace, and emits a typed `AppErrorEvent` that the UI shows as a friendly notice; protocol handler always answers even if rendering panics. Verified in the running app.
 - 2026-10-09 — 0.13: `.github/workflows/ci.yml` on `windows-latest`: Git LFS checkout, fetch-pdfium, fmt, clippy, tests, golden (diff artifacts on failure), bindings-drift check, cargo-deny, lint/typecheck/test, JS licenses, `tauri build` → NSIS installer artifact. Local `pnpm build` produces a 5.27 MiB installer; release exe verified with bundled PDFium and strict CSP. Not yet run on GitHub (nothing pushed).
+- 2026-10-09 — 0.14: README (setup, commands, layout, architecture); CLAUDE.md already existed (fuller than section 12) — added the new commands; THIRD_PARTY_LICENSES.md kept current through Phase 0.
 
 ---
 
