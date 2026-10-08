@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Lumora PDF — Viewer</title>
+<link rel="stylesheet" href="../lumora.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0d6767}a:hover{color:#0a5656}
+</style>
+</head>
+<body>
+<div class="app" data-theme="light">
+
+  <header class="lu-titlebar">
+    <div class="lu-appmark">Lumora <span>PDF</span></div>
+    <div class="lu-tab is-active"><span class="lu-tab__name">Lumora PDF plan.pdf</span><button class="lu-iconbtn" aria-label="Close tab"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="lu-tab"><span class="lu-tab__name">Lease agreement.pdf</span><button class="lu-iconbtn" aria-label="Close tab"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="lu-tab"><span class="lu-tab__name">Research notes.pdf</span><button class="lu-iconbtn" aria-label="Close tab"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <button class="lu-iconbtn lu-iconbtn--sm" style="margin: 0 0 4px 2px" aria-label="Open file"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <div class="lu-winctl">
+      <button aria-label="Minimize"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 12h12"></path></svg></button>
+      <button aria-label="Maximize"><svg class="lu-icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg></button>
+      <button aria-label="Close window"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <nav class="lu-toolbar" aria-label="Tools">
+    <button class="lu-iconbtn is-active" aria-label="Toggle sidebar"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button>
+    <button class="lu-iconbtn is-active" aria-label="Find (Ctrl+F)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></button>
+    <div class="lu-groups" role="tablist">
+      <button class="lu-group is-active" role="tab" aria-selected="true">View</button>
+      <button class="lu-group" role="tab">Annotate</button>
+      <button class="lu-group" role="tab">Organize</button>
+      <button class="lu-group" role="tab">Fill &amp; sign</button>
+      <button class="lu-group" role="tab">Edit</button>
+      <button class="lu-group" role="tab">Protect</button>
+      <button class="lu-group" role="tab">Convert</button>
+    </div>
+    <button class="lu-iconbtn" aria-label="Print (Ctrl+P)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M7 9V4h10v5"></path><rect x="4" y="9" width="16" height="8" rx="1"></rect><path d="M7 14h10v6H7z"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Share or export"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M12 4v11M8 8l4-4 4 4"></path><path d="M5 14v6h14v-6"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="More"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button>
+  </nav>
+
+  <div class="lu-subtoolbar" aria-label="View tools">
+    <div class="lu-seg" role="radiogroup" aria-label="Page layout">
+      <button role="radio">Single</button>
+      <button class="is-on" role="radio" aria-checked="true">Continuous</button>
+      <button role="radio">Two-page</button>
+    </div>
+    <span class="lu-sep"></span>
+    <button class="lu-iconbtn" aria-label="Fit width"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Fit page"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Rotate view"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-3-6.2"></path><path d="M20 4v5h-5"></path></svg></button>
+    <span class="lu-sep"></span>
+    <button class="lu-iconbtn" aria-label="Page dark mode"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Read aloud"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10z"></path><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"></path></svg></button>
+    <div style="flex: 1"></div>
+    <button class="lu-iconbtn" aria-label="Document properties"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.5"></path></svg></button>
+  </div>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="sidebar__tabs" role="tablist">
+        <button class="lu-iconbtn is-active" role="tab" aria-selected="true" aria-label="Thumbnails"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+        <button class="lu-iconbtn" role="tab" aria-label="Outline"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"></path></svg></button>
+        <button class="lu-iconbtn" role="tab" aria-label="Comments"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg></button>
+        <button class="lu-iconbtn" role="tab" aria-label="Find results"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></button>
+      </div>
+      <div class="sidebar__head"><h2 class="sidebar__title">Pages</h2><span class="lu-row__meta">6 pages</span></div>
+      <div class="lu-thumbs">
+        <button class="lu-thumb is-current" aria-label="Page 1" aria-current="page"><span class="lu-thumb__page"><span class="tt" style="top: 14px; width: 74px"></span><span class="tl" style="top: 26px; width: 40px"></span><span class="tt" style="top: 40px; width: 34px; height: 4px"></span><span class="tl" style="top: 50px; width: 80px"></span><span class="tl" style="top: 57px; width: 76px"></span><span class="tl" style="top: 64px; width: 70px"></span><span class="tt" style="top: 76px; width: 50px; height: 4px"></span><span class="tl" style="top: 86px; width: 80px"></span><span class="tl" style="top: 93px; width: 62px"></span><span class="tl" style="top: 104px; width: 80px; height: 18px; background: #eef1f0"></span></span><span class="lu-thumb__num">1</span></button>
+        <button class="lu-thumb" aria-label="Page 2"><span class="lu-thumb__page"><span class="tt" style="top: 14px; width: 40px; height: 4px"></span><span class="tl" style="top: 24px; width: 80px"></span><span class="tl" style="top: 31px; width: 78px"></span><span class="tl" style="top: 38px; width: 66px"></span><span class="tl" style="top: 50px; width: 80px; height: 30px; background: #eef1f0"></span><span class="tt" style="top: 90px; width: 44px; height: 4px"></span><span class="tl" style="top: 100px; width: 80px"></span><span class="tl" style="top: 107px; width: 72px"></span><span class="tl" style="top: 114px; width: 58px"></span></span><span class="lu-thumb__num">2</span></button>
+        <button class="lu-thumb" aria-label="Page 3"><span class="lu-thumb__page"><span class="tt" style="top: 14px; width: 52px; height: 4px"></span><span class="tl" style="top: 24px; width: 80px"></span><span class="tl" style="top: 31px; width: 74px"></span><span class="tl" style="top: 38px; width: 80px"></span><span class="tl" style="top: 45px; width: 50px"></span><span class="tl" style="top: 58px; width: 80px; height: 40px; background: #eef1f0"></span><span class="tl" style="top: 108px; width: 76px"></span><span class="tl" style="top: 115px; width: 64px"></span></span><span class="lu-thumb__num">3</span></button>
+      </div>
+    </aside>
+
+    <main class="stage" aria-label="Document">
+      <article class="page" style="width: 640px; height: 828px; margin-top: 24px; padding: 56px 64px">
+        <h1>Lumora PDF — Product &amp; Technical Plan</h1>
+        <div class="meta">Version 1 · October 2026</div>
+        <h2>Overview</h2>
+        <p>Lumora PDF is a fast, private, offline-first PDF reader and editor by Lumora, built for everyday PDF work. It ships on Windows first, then Linux, macOS and iOS/iPadOS from one codebase.</p>
+        <p>Vision: everything people do with PDFs — read, annotate, organize, fill, sign, edit, OCR — in a small app that opens instantly, works without an account, and never sends documents to the cloud unless the user asks.</p>
+        <h2>PDF engine and licensing</h2>
+        <p>Lumora PDF uses <span class="mark mark--hit">PDFium</span> for rendering, text, annotations and forms, plus qpdf or lopdf for structure work. Both allow closed-source commercial use and sit behind Lumora's own engine interface.</p>
+        <table>
+          <thead><tr><th>Engine</th><th>Used for</th><th>License</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mark mark--hit-active">PDFium</span></td><td>Rendering, text, annotations, forms</td><td>BSD-3 / Apache 2.0</td></tr>
+            <tr><td>qpdf</td><td>Merge, split, encrypt, repair</td><td>Apache 2.0</td></tr>
+            <tr><td>lopdf</td><td>Object-level edits from Rust</td><td>MIT</td></tr>
+            <tr><td>Tesseract</td><td>OCR</td><td>Apache 2.0</td></tr>
+          </tbody>
+        </table>
+        <h2>Tech stack</h2>
+        <p>Lumora PDF is built with Tauri 2: a React and TypeScript interface on top of a Rust core that drives <span class="mark mark--hit">PDFium</span>. One codebase covers Windows, Linux, macOS, iOS and Android, and the installed app stays small.</p>
+        <p>Every PDF operation flows through the engine adapter, and every edit is a command, so undo and redo work everywhere.</p>
+      </article>
+
+      <div class="lu-search" role="search" style="position: absolute; top: 12px; right: 16px">
+        <div class="lu-search__field"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input class="lu-input" value="PDFium" aria-label="Find in document"></div>
+        <span class="lu-search__count">2 of 9</span>
+        <button class="lu-toggle" aria-label="Match case" aria-pressed="false">Aa</button>
+        <button class="lu-toggle" aria-label="Whole words" aria-pressed="false">W</button>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Previous result"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"></path></svg></button>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Next result"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Close find"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+
+      <div class="lu-zoombar" style="position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%)">
+        <div class="lu-zoombar__page"><input class="lu-input" value="1" aria-label="Page number"><span>/ 6</span></div>
+        <span class="lu-sep"></span>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Zoom out"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg></button>
+        <button class="lu-zoombar__zoom" aria-label="Zoom level">100%</button>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Zoom in"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+        <span class="lu-sep"></span>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Fit width"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"></path></svg></button>
+      </div>
+    </main>
+  </div>
+
+  <footer class="statusbar">
+    <span>6 pages</span><span>1.2 MB</span><span>PDF 1.7</span>
+    <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 4px"><svg class="lu-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Runs on this device</span>
+  </footer>
+</div>
+</body>
+</html>

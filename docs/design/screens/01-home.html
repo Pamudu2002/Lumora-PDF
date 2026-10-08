@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Lumora PDF — Home</title>
+<link rel="stylesheet" href="../lumora.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0d6767}a:hover{color:#0a5656}
+</style>
+</head>
+<body>
+<div class="app" data-theme="light">
+
+  <header class="lu-titlebar">
+    <div class="lu-appmark">Lumora <span>PDF</span></div>
+    <div class="lu-tab is-active"><svg class="lu-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"></path></svg><span class="lu-tab__name" style="padding-right: 6px">Home</span></div>
+    <button class="lu-iconbtn lu-iconbtn--sm" style="margin: 0 0 4px 2px" aria-label="Open file"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <div class="lu-winctl">
+      <button aria-label="Minimize"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 12h12"></path></svg></button>
+      <button aria-label="Maximize"><svg class="lu-icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg></button>
+      <button aria-label="Close window"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; min-height: 0; overflow: hidden; background: var(--surface); display: flex; justify-content: center; padding: 48px 32px 32px">
+    <div style="width: 100%; max-width: 1040px; display: flex; flex-direction: column; gap: 32px">
+
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h1 style="margin: 0; font-family: var(--font-display); font-size: 44px; line-height: 48px; font-weight: 500; letter-spacing: -0.015em; color: var(--ink)">Pick up where you left off</h1>
+          <p style="margin: 0; font-size: 13px; color: var(--ink-muted)">Every feature is free. Your files open and stay on this device — no account needed.</p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <button class="lu-btn"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M5 5h14v4H5zM5 13h6v6H5zM15 13h4v6h-4z"></path></svg>Settings</button>
+          <button class="lu-btn lu-btn--primary"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M4 7h6l2 2h8v10H4z"></path></svg>Open file</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+        <div style="grid-column: span 1; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-lg); background: var(--surface-sunken); padding: 20px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px">
+          <span style="width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--brand-soft); color: var(--brand)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"></path><path d="M5 14v6h14v-6"></path></svg></span>
+          <div style="font-size: 15px; line-height: 22px; font-weight: 600">Drop PDFs here</div>
+          <div style="font-size: 12px; line-height: 16px; color: var(--ink-muted)">Or press <span class="lu-kbd">Ctrl+O</span> to browse. Drop several files to merge them.</div>
+        </div>
+        <div style="grid-column: span 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+          <a class="lu-card" href="04-organize.html" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--ink)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><path d="M7 4v5a5 5 0 0 0 5 5a5 5 0 0 1 5 5v1"></path><path d="M17 4v5a5 5 0 0 1-3 4.6"></path><path d="M4 7l3-3 3 3M14 7l3-3 3 3"></path></svg><span style="font-weight: 600">Merge files</span><span class="lu-row__meta">Combine PDFs and images into one file</span></a>
+          <a class="lu-card" href="04-organize.html" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--ink)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg><span style="font-weight: 600">Organize pages</span><span class="lu-row__meta">Reorder, rotate, split and extract</span></a>
+          <a class="lu-card" href="05-fill-and-sign.html" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--ink)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><path d="M4 20l4-1 11-11-3-3L5 16z"></path><path d="M14 20h6"></path></svg><span style="font-weight: 600">Fill &amp; sign</span><span class="lu-row__meta">Complete forms and add your signature</span></a>
+          <button class="lu-card" style="font: inherit; text-align: left; padding: 14px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); cursor: pointer"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><path d="M8 4h8M8 20h8M4 8v8M20 8v8"></path><path d="M9 12h6"></path></svg><span style="font-weight: 600">Compress</span><span class="lu-row__meta">Shrink large files for email</span></button>
+          <button class="lu-card" style="font: inherit; text-align: left; padding: 14px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"></path><path d="M8 12h8M8 9h5M8 15h6"></path></svg></span><span style="font-weight: 600">Make searchable</span><span class="lu-row__meta">OCR scans, on this device</span></button>
+          <button class="lu-card" style="font: inherit; text-align: left; padding: 14px; display: flex; flex-direction: column; gap: 8px; color: var(--ink); cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24" style="color: var(--brand)"><rect x="3" y="5" width="8" height="14" rx="1"></rect><rect x="13" y="5" width="8" height="14" rx="1"></rect><path d="M6 9h2M6 12h2M16 9h2M16 12h2"></path></svg></span><span style="font-weight: 600">Compare files</span><span class="lu-row__meta">See what changed between versions</span></button>
+        </div>
+      </div>
+
+      <section style="display: flex; flex-direction: column; gap: 8px; min-height: 0">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+          <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em">Recent files</h2>
+          <div class="lu-search__field" style="position: relative; display: flex; align-items: center"><svg class="lu-icon" viewBox="0 0 24 24" style="position: absolute; left: 10px; color: var(--ink-muted)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><input class="lu-input" placeholder="Search in your PDFs" aria-label="Search in your PDFs" style="padding-left: 32px; width: 280px"></div>
+        </div>
+        <div class="lu-card" style="overflow-x: auto">
+          <div style="min-width: 640px">
+            <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 12px; line-height: 16px; font-weight: 500; color: var(--ink-muted)"><span>Name</span><span>Location</span><span>Opened</span><span>Pages</span><span></span></div>
+            <a href="02-viewer.html" style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none"><span style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--danger)"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Lumora PDF plan.pdf</span></span><span class="lu-row__meta" style="font-size: 13px">Documents › Lumora</span><span class="lu-row__meta" style="font-size: 13px">Today, 00:46</span><span class="lu-row__meta" style="font-size: 13px">6</span><span class="lu-iconbtn lu-iconbtn--sm" aria-hidden="true"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></span></a>
+            <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line)"><span style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--danger)"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Lease agreement.pdf</span><span class="lu-badge lu-badge--success">Signed</span></span><span class="lu-row__meta" style="font-size: 13px">Downloads</span><span class="lu-row__meta" style="font-size: 13px">Yesterday</span><span class="lu-row__meta" style="font-size: 13px">14</span><button class="lu-iconbtn lu-iconbtn--sm" aria-label="More actions"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line)"><span style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--danger)"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Research notes.pdf</span></span><span class="lu-row__meta" style="font-size: 13px">Documents › Study</span><span class="lu-row__meta" style="font-size: 13px">6 Oct</span><span class="lu-row__meta" style="font-size: 13px">32</span><button class="lu-iconbtn lu-iconbtn--sm" aria-label="More actions"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line)"><span style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--danger)"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Invoice 2026-114.pdf</span><span class="lu-badge lu-badge--brand">Form</span></span><span class="lu-row__meta" style="font-size: 13px">Desktop</span><span class="lu-row__meta" style="font-size: 13px">2 Oct</span><span class="lu-row__meta" style="font-size: 13px">1</span><button class="lu-iconbtn lu-iconbtn--sm" aria-label="More actions"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 12px; align-items: center; padding: 10px 16px"><span style="display: flex; align-items: center; gap: 10px; min-width: 0"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--danger)"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Scanned receipts.pdf</span></span><span class="lu-row__meta" style="font-size: 13px">Downloads</span><span class="lu-row__meta" style="font-size: 13px">28 Sep</span><span class="lu-row__meta" style="font-size: 13px">9</span><button class="lu-iconbtn lu-iconbtn--sm" aria-label="More actions"><svg class="lu-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg></button></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

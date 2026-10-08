@@ -1,0 +1,651 @@
+# Lumora PDF — Master Build Plan
+
+> **For Claude Code:** This file is the single source of truth for building Lumora PDF.
+> Read it fully before writing code. Work **one phase at a time, one task at a time**, in order.
+> After finishing a task, tick its checkbox in this file (`- [ ]` → `- [x]`) and add a one-line note under
+> the phase's **Progress log**. Follow the **Working rules** (section 2) at all times.
+
+---
+
+## 0. Product summary
+
+| | |
+|---|---|
+| **Product** | Lumora PDF |
+| **Brand** | Lumora |
+| **What** | A fast, private, offline-first PDF reader and editor — an alternative to Adobe Acrobat Pro |
+| **Platforms (order)** | Windows 10/11 (x64, then ARM64) → Linux → macOS → iPadOS/iOS → Android (maybe) |
+| **Core promise** | Opens instantly, small install, no account, documents never leave the device unless the user asks |
+| **Pricing** | **Free for everyone, every feature.** No paid tier, no trial, no ads, no account, no feature locks, no license keys. Optional donations never unlock anything. |
+
+### Target users
+- Students and researchers who read, highlight and organize many PDFs
+- Freelancers and small businesses who fill, sign and send forms and invoices
+- Office teams who merge, split, compress, redact and convert documents
+- Privacy-conscious users
+
+### Non-goals (do NOT build unless this file is updated)
+- XFA forms
+- A PDF parser/renderer written from scratch
+- Real-time collaboration, cloud accounts, sync (later, separate "Lumora Cloud" project)
+- Perfect PDF → Word conversion
+
+---
+
+## 1. Tech stack (decided — do not change without asking)
+
+| Layer | Choice | Notes |
+|---|---|---|
+| App shell | **Tauri 2** | Windows first; same codebase for Linux/macOS/iOS/Android later |
+| UI | **React + TypeScript (strict) + Vite** | |
+| Styling | **Tailwind CSS** + **Radix UI** primitives | Lumora design tokens as CSS variables |
+| UI state | **Zustand** | One store per concern (documents, tabs, tools, settings) |
+| Icons | **lucide-react** | |
+| Core | **Rust** (Cargo workspace) | |
+| PDF engine | **PDFium** via the **`pdfium-render`** crate | Rendering, text, search, annotations, forms, page objects, page import |
+| Low-level PDF ops | **`lopdf`** (pure Rust) | Object-level edits PDFium can't do; **qpdf** only later if needed (encryption, linearization, repair) |
+| IPC types | **`tauri-specta`** + **`specta`** | Generate TypeScript bindings from Rust command signatures |
+| Errors | `thiserror` in library crates, `anyhow` only at app boundary | |
+| Logging | `tracing` + `tracing-subscriber` (+ file appender) | |
+| Local DB | **SQLite** via `rusqlite` (bundled feature) | Recent files, library, settings, annotation index |
+| Full-text search | **Tantivy** | Phase 3+ (library search) |
+| OCR | **Tesseract** | Phase 7 |
+| Signatures/crypto | RustCrypto crates (`rsa`, `p256`, `sha2`, `x509-cert`, `cms`) | Phase 6 |
+| Local AI | `llama.cpp` via Rust bindings | Post-1.0 |
+| Updates | Tauri updater plugin | Signed updates |
+| Crash reports | Sentry (opt-in only) | |
+| Tests | `cargo test`, **Vitest**, **Playwright**, `cargo-fuzz` | |
+| License policy | **`cargo-deny`** + `license-checker` (npm) in CI | |
+| CI/CD | **GitHub Actions** | |
+
+### Licensing rules (hard rules)
+- **Allowed licenses:** MIT, Apache-2.0, BSD-2/3, ISC, Zlib, MPL-2.0, Unicode, CC0.
+- **Forbidden in the shipped app:** GPL, LGPL (unless dynamically linked and approved), **AGPL**. This rules out **MuPDF, Poppler, Ghostscript, iText**.
+- PDFium is BSD-3/Apache-2.0 → allowed.
+- Keep `THIRD_PARTY_LICENSES.md` up to date whenever a dependency is added.
+
+---
+
+## 2. Working rules for Claude Code
+
+1. **Follow the phases in order.** Don't start a task whose dependencies aren't ticked.
+2. **Small steps.** Each task should end with code that builds, passes tests and lints.
+3. **Before adding any dependency:** check its license against section 1, prefer well-maintained crates/packages, and add it to `THIRD_PARTY_LICENSES.md`.
+4. **Ask the user before:** changing the tech stack, adding a dependency over ~1 MB to the bundle, changing the architecture in section 3, or deleting files you didn't create in this session.
+5. **Never call PDFium from the UI layer or from Tauri commands directly.** Everything goes through the `PdfEngine` trait (section 3.3).
+6. **Every document mutation is a `Command`** (section 3.4) so undo/redo works.
+7. **Treat every PDF as untrusted input.** No `unwrap()`/`expect()` on data derived from a PDF. Return errors.
+8. **Never block the UI thread.** Long work runs on the engine worker or a job thread, with progress events.
+9. **Run before declaring a task done:**
+   - `cargo fmt --all --check`
+   - `cargo clippy --workspace --all-targets -- -D warnings`
+   - `cargo test --workspace`
+   - `pnpm lint && pnpm typecheck && pnpm test`
+10. **Commit style:** Conventional Commits (`feat(viewer): continuous scroll`, `fix(engine): …`). One logical change per commit.
+11. **Update this file:** tick checkboxes, add to the phase's Progress log, and record any decision in section 11 (Decision log).
+12. Use the Lumora name consistently: app name `Lumora PDF`, identifier `com.lumora.pdf`, URL scheme `lumora`, crate prefix `lumora-`.
+13. **Lumora PDF is free with every feature.** Never build a paid tier, feature gating, license checks, trials, "Pro" badges, upsell screens or ads.
+
+---
+
+## 3. Architecture
+
+### 3.1 Layers
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ UI — React + TypeScript                                      │
+│ viewer, toolbars, side panels, tabs, dialogs, command palette│
+└───────────────▲──────────────────────────────▲───────────────┘
+                │ typed Tauri commands (JSON)  │ lumora:// tiles (binary images)
+┌───────────────┴──────────────────────────────┴───────────────┐
+│ Tauri 2 bridge (apps/desktop/src-tauri)                      │
+│ commands, events, custom protocol handler                    │
+└───────────────▲──────────────────────────────────────────────┘
+┌───────────────┴──────────────────────────────────────────────┐
+│ Rust core                                                    │
+│  lumora-core:   document sessions, commands, undo/redo       │
+│  lumora-render: tile renderer + LRU cache                    │
+│  lumora-jobs:   background jobs, progress, cancel            │
+│  lumora-store:  SQLite (recents, settings, library)          │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ lumora-engine: PdfEngine trait  ← the ONLY engine API  │  │
+│  └───────▲───────────────▲──────────────▲─────────────────┘  │
+└──────────┼───────────────┼──────────────┼────────────────────┘
+       PDFium (worker)   lopdf       (later) Tesseract, crypto
+```
+
+### 3.2 Threading model (important)
+- **PDFium is not thread-safe.** A single **engine worker thread** owns the `Pdfium` instance and all open `PdfDocument`s.
+- Other code talks to it through an **actor**: `EngineHandle` sends `EngineRequest` messages over a channel (`crossbeam-channel` or `tokio::sync::mpsc`) and awaits a `oneshot` reply.
+- The worker processes requests in priority order: **visible-tile renders > UI queries > background jobs**. Renders for pages no longer visible are cancelled (generation counter per document/view).
+- Later optimisation (not now): a pool of engine worker **processes** for parallel rendering and crash isolation.
+
+### 3.3 Engine trait (sketch — refine during Phase 0)
+
+```rust
+pub type DocId = u64;
+pub type PageIndex = u32;
+
+pub struct OpenOptions { pub password: Option<String> }
+
+pub struct DocInfo {
+    pub page_count: u32,
+    pub title: Option<String>,
+    pub author: Option<String>,
+    pub is_encrypted: bool,
+    pub has_forms: bool,
+    pub pdf_version: String,
+}
+
+pub struct PageSize { pub width_pt: f32, pub height_pt: f32, pub rotation: u16 }
+
+pub struct TileRequest {
+    pub doc: DocId,
+    pub page: PageIndex,
+    pub scale: f32,           // 1.0 = 72 dpi
+    pub tile_x: u32, pub tile_y: u32, pub tile_size: u32, // pixels at that scale
+    pub dark_mode: bool,
+}
+
+pub trait PdfEngine: Send + Sync {
+    fn open(&self, path: &Path, opts: OpenOptions) -> Result<(DocId, DocInfo), EngineError>;
+    fn close(&self, doc: DocId) -> Result<(), EngineError>;
+    fn page_sizes(&self, doc: DocId) -> Result<Vec<PageSize>, EngineError>;
+    fn render_tile(&self, req: TileRequest) -> Result<RgbaImage, EngineError>;
+    fn render_thumbnail(&self, doc: DocId, page: PageIndex, max_px: u32) -> Result<RgbaImage, EngineError>;
+    fn outline(&self, doc: DocId) -> Result<Vec<OutlineItem>, EngineError>;
+    fn page_text(&self, doc: DocId, page: PageIndex) -> Result<PageText, EngineError>; // chars + boxes
+    fn search(&self, doc: DocId, query: &SearchQuery) -> Result<Vec<SearchHit>, EngineError>;
+    fn annotations(&self, doc: DocId, page: PageIndex) -> Result<Vec<Annotation>, EngineError>;
+    fn apply(&self, doc: DocId, op: EngineOp) -> Result<EngineOpResult, EngineError>; // all mutations
+    fn save(&self, doc: DocId, target: SaveTarget) -> Result<(), EngineError>;      // incremental | full | copy
+}
+```
+
+- `EngineOp` is an enum of low-level mutations (AddAnnotation, UpdateAnnotation, DeleteAnnotation, InsertPages, DeletePages, MovePages, RotatePages, SetFormField, …). Each must be invertible or carry what's needed to undo.
+- Implementation: `PdfiumEngine` (+ `lopdf` helpers). The trait lets us swap in a commercial SDK later.
+
+### 3.4 Commands, undo/redo
+- `trait Command { fn apply(&mut self, s: &mut DocSession) -> Result<()>; fn undo(&mut self, s: &mut DocSession) -> Result<()>; fn label(&self) -> String; }`
+- `DocSession` keeps an `undo_stack`, `redo_stack`, `dirty` flag and a revision counter.
+- Commands can be merged (e.g. consecutive ink strokes within 500 ms) and grouped (batch actions).
+- Commands are serializable (serde) so they can be recorded into **Lumora Workflows** later.
+
+### 3.5 Rendering pipeline
+- Tile size: 512×512 px. Render at `scale = zoom × devicePixelRatio`.
+- The UI computes visible tiles and requests them as images:
+  - Rust registers an async URI scheme protocol **`lumora`** (`register_asynchronous_uri_scheme_protocol`).
+  - The UI builds URLs with `convertFileSrc(path, 'lumora')` semantics. Note: on Windows Tauri 2 serves custom schemes as `http://lumora.localhost/...`; always build URLs via a helper, never hard-code.
+  - Path format: `/tile/{docId}/{page}/{scaleMilli}/{tx}/{ty}?rev={docRevision}&dark={0|1}` → returns `image/webp` (or PNG at first).
+- **Cache:** in-memory LRU keyed by `(doc, page, scaleMilli, tx, ty, rev, dark)`, size-limited (~256 MB default). Disk cache for thumbnails later.
+- **Placeholders:** show a low-res (thumbnail-scale) page while full tiles load. Never show a blank white page during scroll.
+- **Invalidation:** any mutation of a page bumps the doc/page revision → new URLs → automatic cache miss.
+- Annotation editing overlays (selection handles, in-progress ink) are drawn in the UI on an SVG/canvas layer above the tiles; committed annotations are rendered by PDFium.
+
+### 3.6 Saving
+- **Save** = incremental update when possible (fast, keeps existing digital signatures valid). If `pdfium-render` doesn't expose the incremental flag, call `FPDF_SaveAsCopy` with `FPDF_INCREMENTAL` through `pdfium.bindings()`.
+- **Save As / Save optimized** = full rewrite.
+- **Atomic writes:** write to `file.pdf.lumora-tmp`, fsync, then rename over the original. Never truncate the original first.
+- **Autosave/recovery:** journal unsaved commands to `%APPDATA%/Lumora/recovery/` every 30 s; offer restore on next launch after a crash.
+
+### 3.7 Repository layout
+
+```
+lumora-pdf/
+├── apps/
+│   └── desktop/
+│       ├── src/                    # React app
+│       │   ├── app/                # shell, routing, layout
+│       │   ├── features/
+│       │   │   ├── viewer/         # virtualized page list, tiles, zoom
+│       │   │   ├── sidebar/        # thumbnails, outline, comments, search results
+│       │   │   ├── annotate/       # tools + overlays
+│       │   │   ├── organize/       # page grid, merge/split dialogs
+│       │   │   ├── forms/
+│       │   │   └── palette/        # command palette
+│       │   ├── components/ui/      # Radix-based primitives (Button, Dialog, Tooltip…)
+│       │   ├── stores/             # Zustand stores
+│       │   ├── lib/                # ipc bindings (generated), url helpers, utils
+│       │   ├── styles/             # tailwind + tokens.css
+│       │   └── main.tsx
+│       ├── src-tauri/
+│       │   ├── src/
+│       │   │   ├── main.rs
+│       │   │   ├── commands/       # thin Tauri commands → lumora-core
+│       │   │   ├── protocol.rs     # lumora:// handler
+│       │   │   └── state.rs
+│       │   ├── resources/pdfium/   # pdfium.dll / libpdfium.so / libpdfium.dylib
+│       │   └── tauri.conf.json
+│       └── package.json
+├── crates/
+│   ├── lumora-engine/              # PdfEngine trait, types, PdfiumEngine, worker actor
+│   ├── lumora-core/                # DocSession, Command, undo/redo, save logic
+│   ├── lumora-render/              # tiling, LRU cache, image encoding
+│   ├── lumora-jobs/                # background jobs with progress + cancel
+│   ├── lumora-store/               # SQLite: recents, settings, library
+│   └── lumora-cli/                 # (Phase 7+) CLI for Workflows
+├── tests/
+│   ├── corpus/                     # test PDFs (Git LFS), see tests/corpus/README.md
+│   ├── golden/                     # golden render PNGs
+│   └── e2e/                        # Playwright tests
+├── fuzz/                           # cargo-fuzz targets
+├── docs/
+│   └── LUMORA_PDF_PLAN.md          # this file
+├── .github/workflows/              # ci.yml, release.yml
+├── Cargo.toml                      # workspace
+├── deny.toml                       # cargo-deny license/advisory policy
+├── pnpm-workspace.yaml
+├── CLAUDE.md                       # short project rules for Claude Code (see section 12)
+├── THIRD_PARTY_LICENSES.md
+└── README.md
+```
+
+---
+
+## 4. UI / UX spec (desktop)
+
+### Layout
+- **Title bar:** custom (Tauri `decorations: false` later; native first), tabs for open documents, `+` to open.
+- **Top toolbar:** tool groups — View · Annotate · Organize · Fill & Sign · Edit · Protect · Convert. All groups are available to everyone (no paid tier). Selecting a group swaps a secondary toolbar.
+- **Left sidebar (toggle):** Thumbnails · Outline · Comments · Search results · Attachments.
+- **Main area:** virtualized vertical page list, centered, with page gaps; page number + zoom in a floating bottom bar.
+- **Right panel (contextual):** properties of the selected annotation/field (color, opacity, stroke, font, author).
+- **Home screen** (no doc open): recent files, drag-and-drop zone, quick tools (Merge, Compress, Sign).
+
+### Keyboard shortcuts (initial set)
+| Action | Shortcut |
+|---|---|
+| Open | Ctrl+O |
+| Save / Save As | Ctrl+S / Ctrl+Shift+S |
+| Close tab | Ctrl+W |
+| Find | Ctrl+F |
+| Command palette | Ctrl+K |
+| Zoom in/out/reset | Ctrl+= / Ctrl+- / Ctrl+0 |
+| Fit width / fit page | Ctrl+2 / Ctrl+1 |
+| Undo / Redo | Ctrl+Z / Ctrl+Y (and Ctrl+Shift+Z) |
+| Highlight / Note / Ink tools | H / N / P |
+| Next/prev page | PageDown / PageUp, → / ← in single-page mode |
+| Go to page | Ctrl+G |
+| Print | Ctrl+P |
+
+### Design tokens (starting point — refine with brand kit)
+```css
+:root {
+  --lumora-brand: #4F46E5;        /* indigo — placeholder until brand kit exists */
+  --lumora-brand-contrast: #FFFFFF;
+  --lumora-bg: #FFFFFF;
+  --lumora-surface: #F6F7F9;
+  --lumora-border: #E3E5E8;
+  --lumora-text: #111318;
+  --lumora-text-muted: #5B616E;
+  --lumora-canvas: #E9EBEF;       /* area behind pages */
+  --radius: 8px;
+}
+:root[data-theme="dark"] {
+  --lumora-bg: #15171C;
+  --lumora-surface: #1C1F26;
+  --lumora-border: #2A2E37;
+  --lumora-text: #ECEDEF;
+  --lumora-text-muted: #9AA0AB;
+  --lumora-canvas: #0F1115;
+}
+```
+- Themes: Light, Dark, System. Separate setting: **Page dark mode** (invert page colors but keep images natural — done in the renderer, not with CSS filters).
+- Accessibility: all controls keyboard reachable, visible focus rings, ARIA labels, respects reduced motion.
+
+---
+
+## 5. Phases and tasks
+
+Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance criteria** — the phase is done only when all pass.
+
+### Phase 0 — Foundations (target: month 1)
+
+**Goal:** A Windows build that opens a PDF and shows rendered pages through the `lumora://` protocol, with CI.
+
+- [ ] 0.1 Create repo structure (section 3.7): pnpm workspace, Cargo workspace, `apps/desktop` via `create-tauri-app` (React + TypeScript + Vite), crates scaffolded with `lib.rs` stubs.
+- [ ] 0.2 Tooling: rustfmt, clippy config, ESLint (typescript-eslint, react-hooks), Prettier, Vitest, `deny.toml` (license allow-list from section 1), EditorConfig, `.gitattributes` with Git LFS for `tests/corpus/**/*.pdf`.
+- [ ] 0.3 Tailwind + Radix + lucide-react set up; `tokens.css` from section 4; light/dark theme switch.
+- [ ] 0.4 PDFium binaries: script `scripts/fetch-pdfium.(ps1|sh)` that downloads prebuilt PDFium (e.g. from the `bblanchon/pdfium-binaries` GitHub releases) for the current platform into `src-tauri/resources/pdfium/`; bundle via `tauri.conf.json > bundle > resources`; resolve the path at runtime with Tauri's resource API and bind with `Pdfium::bind_to_library(...)`. Record the PDFium version in `THIRD_PARTY_LICENSES.md`.
+- [ ] 0.5 `lumora-engine`: types + `PdfEngine` trait + `PdfiumEngine` running on a dedicated worker thread (actor, section 3.2). Implement `open`, `close`, `page_sizes`, `render_tile`, `render_thumbnail`.
+- [ ] 0.6 `lumora-render`: tile math helpers, LRU cache, PNG/WebP encoding.
+- [ ] 0.7 Tauri: `open_document(path) -> DocSummary`, `close_document(docId)` commands via `tauri-specta`; generated TS bindings in `src/lib/ipc/`.
+- [ ] 0.8 Tauri: `lumora://` async protocol handler serving tiles (section 3.5) + a TS helper `tileUrl(...)` that works on Windows/macOS/Linux.
+- [ ] 0.9 UI: open file via dialog (Tauri dialog plugin) and drag-and-drop; show page 1 using tiles.
+- [ ] 0.10 Test corpus: `tests/corpus/README.md` describing categories (text, scanned, huge >200 pages, >100 MB, forms, encrypted, broken/malformed, CJK/Indic/Arabic fonts, rotated pages, annotations from Acrobat). Start with ≥ 30 files, target ≥ 500 over time. Only include files with redistributable licenses (or keep private files out of git).
+- [ ] 0.11 Golden render test: render page 1 of each corpus file at scale 1.0 and compare with `tests/golden/` within a pixel tolerance (`cargo test -p lumora-engine --features golden`).
+- [ ] 0.12 Logging (`tracing`) to file in the app data dir; a panic hook that logs and shows a friendly error.
+- [ ] 0.13 GitHub Actions `ci.yml`: Windows runner — fmt, clippy, tests, cargo-deny, pnpm lint/typecheck/test, `tauri build` artifact upload.
+- [ ] 0.14 `README.md`, `CLAUDE.md` (section 12), `THIRD_PARTY_LICENSES.md`.
+
+**Acceptance criteria**
+- `pnpm tauri dev` on Windows opens a PDF and shows page 1 sharply at 100% and 200% zoom.
+- Opening a malformed PDF shows an error message, never crashes.
+- CI is green and produces a Windows installer artifact.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 1 — Viewer (target: months 2–3)
+
+**Goal:** A daily-usable PDF viewer.
+
+- [ ] 1.1 Virtualized continuous scroll of all pages (only mount pages near the viewport); correct page gaps and scroll anchoring on zoom.
+- [ ] 1.2 Zoom: Ctrl+wheel, pinch on touchpads, presets (50–400%), fit width, fit page, actual size. Zoom around the cursor.
+- [ ] 1.3 Low-res placeholders + tile streaming; cancel stale tile requests on fast scroll.
+- [ ] 1.4 View modes: single page, continuous, two-page (with/without cover page); rotate view (doesn't modify file).
+- [ ] 1.5 Thumbnails sidebar (virtualized), click to navigate, current page highlighted.
+- [ ] 1.6 Outline/bookmarks panel from the PDF outline; click to navigate.
+- [ ] 1.7 Page navigation: page number input, Ctrl+G, PageUp/Down, Home/End.
+- [ ] 1.8 Text layer: `page_text` returns chars with boxes; selection by drag (line/word/paragraph with double/triple click); copy to clipboard preserving reading order.
+- [ ] 1.9 Find: Ctrl+F bar, match case / whole word, results list in sidebar, highlight hits on pages, next/prev.
+- [ ] 1.10 Links: internal links navigate; external links open in the browser **after a confirmation dialog**.
+- [ ] 1.11 Tabs: multiple documents, reorder tabs, middle-click close, confirm on unsaved changes.
+- [ ] 1.12 Recent files (SQLite via `lumora-store`), remember last page + zoom per file; home screen.
+- [ ] 1.13 Password-protected PDFs: password dialog, retry.
+- [ ] 1.14 Page dark mode (renderer-side) + UI themes.
+- [ ] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
+- [ ] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
+- [ ] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
+- [ ] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
+- [ ] 1.19 Playwright E2E: open file, scroll, zoom, search, select text.
+
+**Acceptance criteria**
+- 500-page text PDF: first page visible < 1 s, scrolling at ~60 fps on a mid-range laptop, memory < 600 MB.
+- 100 MB scanned PDF opens and scrolls without freezing the UI.
+- Search across 500 pages returns first results < 1 s.
+- No crash across the whole test corpus (automated "open + render all pages" test).
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 2 — Annotate (target: months 4–5)
+
+**Goal:** Full markup toolset saved as **standard PDF annotations** that look right in Acrobat, Edge and Chrome.
+
+- [ ] 2.1 Annotation model in `lumora-engine` (`Annotation` enum covering types below) + read existing annotations from files.
+- [ ] 2.2 Text markup: Highlight, Underline, StrikeOut, Squiggly (from text selection; quad points).
+- [ ] 2.3 Sticky note (Text annotation) with popup editor.
+- [ ] 2.4 FreeText (text box) with font, size, color, border.
+- [ ] 2.5 Ink (freehand) with smoothing, pressure ignored for now; eraser for ink strokes.
+- [ ] 2.6 Shapes: Square, Circle, Line, Arrow (Line with line endings), Polygon, PolyLine.
+- [ ] 2.7 Stamps: built-in set (Approved, Draft, Confidential…) + custom image stamps.
+- [ ] 2.8 Select/move/resize/delete annotations; properties panel (color, opacity, stroke width, author).
+- [ ] 2.9 Every create/update/delete is a `Command` (undo/redo works for all).
+- [ ] 2.10 Comments panel: list by page, author, type; replies (`IRT` replies); status (accepted/rejected); filter and search.
+- [ ] 2.11 Generate appearance streams for every annotation so other viewers render them identically.
+- [ ] 2.12 Save: incremental by default (section 3.6); atomic write; dirty indicator in tab.
+- [ ] 2.13 Autosave journal + crash recovery prompt.
+- [ ] 2.14 Export comments to Markdown and CSV; import/export XFDF.
+- [ ] 2.15 Round-trip test: create each annotation type, save, re-open in Lumora and verify; render the saved file with PDFium and compare to golden images.
+
+**Acceptance criteria**
+- Every annotation type created in Lumora displays correctly in Adobe Acrobat Reader and in Chrome/Edge's PDF viewer (manual checklist in `docs/qa/annotations.md`).
+- Annotations created in Acrobat are displayed and editable in Lumora (at least the types above).
+- Undo/redo works across 100 mixed operations without corruption.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 3 — Organize pages → **Lumora PDF 1.0** (target: month 6)
+
+**Goal:** Page tools; then ship 1.0 for Windows.
+
+- [ ] 3.1 Page grid view (organize mode) with multi-select (click, Shift, Ctrl, rubber band).
+- [ ] 3.2 Drag-and-drop reorder; rotate left/right; delete; duplicate.
+- [ ] 3.3 Insert: blank page (size options), pages from another PDF, images as pages (PNG/JPEG).
+- [ ] 3.4 Extract selected pages to a new PDF.
+- [ ] 3.5 Merge multiple PDFs (dialog with ordering + drag files from Explorer).
+- [ ] 3.6 Split: by every N pages, by page ranges, by bookmarks, by file size.
+- [ ] 3.7 Crop pages (visual crop box, apply to selected/all pages).
+- [ ] 3.8 Compress/optimize: image downsampling (presets: High quality / Balanced / Smallest), remove unused objects, subset fonts where possible, show before/after size. Use `lopdf` (+ image crate) for image recompression; full rewrite save.
+- [ ] 3.9 All page operations are undoable `Command`s; thumbnails and caches invalidate correctly.
+- [ ] 3.10 Library search (Tantivy): index text of recently opened files locally; search across files from the home screen. (Can slip to 1.1 if needed.)
+- [ ] 3.11 Command palette (Ctrl+K) listing all actions.
+- [ ] 3.12 **Release prep:** app icon + branding, installer (NSIS/MSI) with file association option, code signing (Azure Trusted Signing or OV certificate), auto-updater with signed update manifest, opt-in crash reporting, About dialog with licenses, privacy policy link.
+- [ ] 3.13 `release.yml`: tagged builds → signed installer → GitHub Release + update manifest.
+
+**Acceptance criteria**
+- Merge 20 files (1,000 pages total) in < 10 s; result opens correctly in Acrobat.
+- Reorder/rotate/delete then save → file validates (open in Acrobat and qpdf `--check` in CI as a dev-only tool).
+- Signed installer installs on a clean Windows 11 VM without SmartScreen "unknown publisher".
+- **Tag `v1.0.0`.**
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 4 — Forms (target: months 7–8)
+
+- [ ] 4.1 Detect AcroForms; render fields with PDFium's form-fill environment (FPDF_FORMHANDLE).
+- [ ] 4.2 Fill text fields, checkboxes, radio groups, combo boxes, list boxes; tab order navigation; field highlight toggle.
+- [ ] 4.3 Basic field formatting (number, date, percent) without running document JavaScript; show a notice when a form relies on JS.
+- [ ] 4.4 Save filled values (incremental); regenerate appearances.
+- [ ] 4.5 Form designer: add/move/resize/delete fields, field properties (name, default, required, read-only, options).
+- [ ] 4.6 Auto-detect fields on flat forms (lines/boxes → suggested text fields) — heuristic first.
+- [ ] 4.7 Flatten form (selected fields / all).
+- [ ] 4.8 Import/export form data: FDF, XFDF, JSON, CSV (one row → one filled PDF, for batch).
+- [ ] 4.9 Reset form; clear field.
+
+**Acceptance criteria:** Government-style and invoice forms from the corpus fill, save and re-open correctly in Acrobat.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 5 — Edit content (ongoing; months 11–18 in parallel with 7–8)
+
+Do these **in this order**; editing existing text is last because it is the hardest.
+
+- [ ] 5.1 Add text (new text objects with embedded fonts — bundle a set of open-license fonts like Noto/Inter; subset on save).
+- [ ] 5.2 Add/replace/move/resize/delete images.
+- [ ] 5.3 Add/edit links.
+- [ ] 5.4 Watermark (text/image, opacity, rotation, page range, behind/in front).
+- [ ] 5.5 Header/footer, page numbers, Bates numbering.
+- [ ] 5.6 **True redaction:** mark areas/text → apply → remove underlying text glyphs, image pixels and vector content in the area; remove matching metadata; option to search-and-redact (text and regex patterns). Verify by text extraction that redacted content is gone.
+- [ ] 5.7 Edit existing text — stage A: select a text run, edit in place when all needed glyphs exist in the embedded font.
+- [ ] 5.8 Stage B: font substitution when glyphs are missing (match family/weight from bundled fonts; warn user).
+- [ ] 5.9 Stage C: paragraph detection and reflow within a text box.
+- [ ] 5.10 Edit vector objects (move/delete paths) — basic.
+
+**Acceptance criteria:** Redaction passes an automated test: after applying, extracting text/images from the region returns nothing.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 6 — Security and signatures (target: months 9–10, with Phase 4 → **Lumora PDF 1.5**)
+
+- [ ] 6.1 Password-protect (AES-256), set permissions (print, copy, edit). Use qpdf or lopdf — record decision.
+- [ ] 6.2 Remove password (when the user knows it).
+- [ ] 6.3 Simple signatures: draw (mouse/pen), type (signature fonts), image; saved signature library (stored locally, encrypted with OS keychain via Tauri stronghold/keyring).
+- [ ] 6.4 "Fill & Sign" flow: place signature, initials, date, text, checkmarks.
+- [ ] 6.5 Digital signatures (PAdES B-B, then B-T with RFC 3161 timestamp): sign with a PKCS#12 (.pfx) file; Windows certificate store later. Signature field creation, byte-range, CMS SignedData.
+- [ ] 6.6 Validate existing signatures: integrity, certificate chain (trust store), modifications after signing (incremental updates), show a signature panel.
+- [ ] 6.7 Remove hidden data / metadata sanitizer.
+- [ ] 6.8 "Support Lumora" link in the About dialog (opens the donation page in the browser after confirmation). It never unlocks features; there is no license check anywhere in the app.
+
+**Acceptance criteria:** A document signed in Lumora shows as valid in Adobe Acrobat Reader (with the certificate trusted); a document signed in Acrobat validates in Lumora.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 7 — Convert and OCR (months 11–14)
+
+- [ ] 7.1 PDF → images (PNG/JPEG/WebP, DPI choice, page range).
+- [ ] 7.2 Images → PDF (multiple images, page size, margins, ordering).
+- [ ] 7.3 OCR with Tesseract: language packs downloaded on demand (eng, sin, tam, hin, ara, …); create an invisible text layer → searchable PDF; deskew/rotate detection; progress + cancel; runs as a background job.
+- [ ] 7.4 Office → PDF via LibreOffice headless **if installed** on the user's machine (don't bundle it); show guidance otherwise.
+- [ ] 7.5 PDF/A-2b export (embed fonts, color profiles, metadata); optional validation with veraPDF as an external tool.
+- [ ] 7.6 PDF → text/Markdown export (reading-order text).
+- [ ] 7.7 Table extraction → CSV/XLSX (heuristic on text positions + ruling lines).
+- [ ] 7.8 PDF → DOCX (best effort, last).
+- [ ] 7.9 **Lumora Workflows:** record a sequence of commands/jobs; run on a folder of files; `lumora-cli` for scripting.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+### Phase 8 — More platforms (months 11–18)
+
+- [ ] 8.1 Linux: build AppImage, .deb, Flatpak manifest; PDFium `.so` bundling; test on Ubuntu LTS + Fedora.
+- [ ] 8.2 macOS: universal build, `.dylib` bundling, notarization (Apple Developer account), macOS menu bar conventions (Cmd shortcuts).
+- [ ] 8.3 iPadOS/iOS via Tauri 2 mobile: touch-first UI layer (separate layout components, shared stores and IPC), Apple Pencil ink with pressure, Files app document picker, share sheet.
+- [ ] 8.4 Reader (reflow) mode for small screens.
+- [ ] 8.5 Platform-specific QA checklists in `docs/qa/`.
+
+**Progress log**
+- _(add entries here)_
+
+---
+
+## 6. Differentiating features (post-1.0 backlog — pick 1–2 per release)
+
+**Lumora AI (fully offline)**
+- [ ] Summarize document/section; explain or translate a selection
+- [ ] Chat with a PDF with answers that cite and link to pages
+- [ ] Semantic search across the library (local embeddings)
+- [ ] Smart redaction suggestions (emails, phone numbers, ID numbers, bank details)
+- [ ] Form auto-fill from a saved profile
+
+**Productivity**
+- [ ] Compare two PDFs (visual diff + text diff)
+- [ ] Version history timeline with restore
+- [ ] Split view (two docs or two parts of one doc)
+
+**Study and research**
+- [ ] Export highlights to Markdown / Notion / Obsidian
+- [ ] Flashcards from highlights
+- [ ] Citation/reference extraction
+- [ ] Read aloud (OS text-to-speech)
+
+**Trust and polish**
+- [ ] Strong support for Indic scripts, Sinhala, Tamil, Arabic in OCR and text editing
+- [ ] Accessibility checker + auto-tagging
+- [ ] Plugin system (later)
+
+**Lumora Cloud (separate project, later)**
+- [ ] Shared annotations in real time (Yjs CRDT)
+- [ ] Send for signature + tracking
+- [ ] Optional device sync
+
+---
+
+## 7. Security requirements
+
+- PDF JavaScript **disabled** by default (PDFium JS/XFA not compiled in or not enabled).
+- Confirm before opening external links, launching embedded files, or saving attachments.
+- No network access from the core except: update checks, opt-in crash reports, OCR language downloads — each user-visible and documented.
+- Tauri: strict CSP; capabilities/permissions limited to what each window needs; no `shell` open of arbitrary paths.
+- Fuzz targets (`fuzz/`): open + render page 0, text extraction, annotation parsing, save round-trip. Run nightly in CI for a fixed time.
+- Keep PDFium updated (track Chromium security releases); document the update procedure in `docs/maintenance.md`.
+- Later: run the engine worker in a separate low-privilege process.
+
+---
+
+## 8. Testing strategy
+
+| Level | Tool | What |
+|---|---|---|
+| Unit | `cargo test`, Vitest | Engine types, commands/undo, tile math, stores |
+| Golden render | `cargo test --features golden` | Corpus pages vs `tests/golden/*.png` with tolerance |
+| Corpus smoke | custom test runner | Open + render every page of every corpus file; no panic, time budget |
+| Round-trip | `cargo test` | Annotate/organize → save → reopen → compare |
+| E2E | Playwright (Tauri WebDriver on Windows) | Main user flows |
+| Fuzz | `cargo-fuzz` | Malformed PDFs |
+| Performance | criterion benches + CI budgets | Open time, first tile, search time, memory |
+| Manual QA | `docs/qa/*.md` checklists | Interop with Acrobat, Chrome, Edge |
+
+---
+
+## 9. Performance budgets (checked in CI on reference files)
+
+| Metric | Budget |
+|---|---|
+| App cold start to home screen | < 800 ms |
+| Open 50 MB PDF → first page visible | < 1 s |
+| Scroll | ~60 fps, no blank pages |
+| First search results (500 pages) | < 1 s |
+| Memory with one 500-page doc open | < 600 MB |
+| Installer size (Windows, without OCR data) | < 30 MB |
+
+---
+
+## 10. Release and distribution checklist
+
+- [ ] Name check: "Lumora" / "Lumora PDF" trademark search, domain, GitHub org, store names
+- [ ] Brand kit: logo, app icon (all sizes via `tauri icon`), colors, typography → update `tokens.css`
+- [ ] Windows code signing (Azure Trusted Signing or OV/EV certificate)
+- [ ] Installer: NSIS/MSI, per-user install default, file association opt-in
+- [ ] Auto-updater keys generated and stored as CI secrets (never in repo)
+- [ ] Microsoft Store (MSIX) submission; winget manifest
+- [ ] Website: downloads, features, changelog, "Support Lumora" donation page (e.g. GitHub Sponsors / Open Collective), privacy policy, terms, EULA
+- [ ] In-app: About, licenses (`THIRD_PARTY_LICENSES.md`), privacy settings, opt-in telemetry
+- [ ] Later: Apple Developer Program (macOS notarization + App Store), Flathub
+
+**Never** use the word "Acrobat" in product naming or Adobe-like iconography. "PDF" is generic and fine.
+
+---
+
+## 11. Decision log
+
+| Date | Decision | Reason |
+|---|---|---|
+| 2026-10-09 | Tauri 2 + React/TS + Rust | Small, fast, cross-platform incl. iOS; web UI skills |
+| 2026-10-09 | PDFium (`pdfium-render`) as core engine; `lopdf` for low-level ops | Permissive licenses; mature engine |
+| 2026-10-09 | No GPL/AGPL dependencies (no MuPDF/Poppler/Ghostscript/iText) | Keep Lumora closed-source and sellable |
+| 2026-10-09 | Single engine worker thread (actor) | PDFium is not thread-safe |
+| 2026-10-09 | Tiles via `lumora://` custom protocol | Avoid JSON-encoding bitmaps over IPC |
+| 2026-10-09 | Lumora PDF is fully free: every feature for everyone, no Pro tier | Product decision. Never add feature gating, license keys, trials, upsell UI or ads. Costs stay low because everything runs on-device. |
+| _(Claude Code: add new decisions here)_ | | |
+
+---
+
+## 12. `CLAUDE.md` to create at repo root (Phase 0, task 0.14)
+
+Keep `CLAUDE.md` short — it is loaded into every session. Suggested content:
+
+```markdown
+# Lumora PDF — rules for Claude Code
+
+- Full plan: docs/LUMORA_PDF_PLAN.md. Read the current phase before working; tick tasks when done.
+- Stack: Tauri 2, React + TypeScript (strict) + Vite, Tailwind + Radix, Zustand, Rust workspace, PDFium via pdfium-render, lopdf.
+- Never call PDFium outside crates/lumora-engine. All engine access goes through the PdfEngine trait and the engine worker.
+- Every document mutation is a Command (undo/redo).
+- No unwrap/expect on PDF-derived data. Never block the UI thread.
+- No GPL/AGPL dependencies. Check licenses; update THIRD_PARTY_LICENSES.md.
+- Lumora PDF is free with every feature: never add a paid tier, feature gating, license checks, trials, upsell UI or ads.
+- Before finishing: cargo fmt --check, cargo clippy -D warnings, cargo test, pnpm lint, pnpm typecheck, pnpm test.
+- Conventional Commits. Ask before changing stack/architecture or adding large deps.
+- Commands: `pnpm tauri dev` (run), `pnpm tauri build` (installer), `cargo test --workspace`.
+```
+
+---
+
+## 13. How to start (prompt for the first Claude Code session)
+
+> Read `docs/LUMORA_PDF_PLAN.md` fully. Then start **Phase 0**, task **0.1**. Before writing code, list the
+> commands you will run and the prerequisites I need installed on Windows (Rust via rustup, Node LTS + pnpm,
+> Microsoft C++ Build Tools, WebView2). Work through Phase 0 tasks in order, ticking each checkbox in the plan
+> and adding a Progress log line. Stop and ask me when you reach a decision the plan says to ask about.
+
+### Windows prerequisites (for the human)
+- Rust (rustup, stable, MSVC toolchain)
+- Node.js LTS + pnpm (`corepack enable`)
+- Visual Studio Build Tools with "Desktop development with C++"
+- WebView2 runtime (preinstalled on Windows 10/11)
+- Git + Git LFS
+- VS Code extensions: rust-analyzer, Tauri, ESLint, Prettier, Tailwind CSS IntelliSense, Claude Code

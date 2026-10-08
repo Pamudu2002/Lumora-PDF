@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Lumora PDF — Annotate</title>
+<link rel="stylesheet" href="../lumora.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0d6767}a:hover{color:#0a5656}
+</style>
+</head>
+<body>
+<div class="app" data-theme="light">
+
+  <header class="lu-titlebar">
+    <div class="lu-appmark">Lumora <span>PDF</span></div>
+    <div class="lu-tab is-active"><span class="lu-tab__name">Research notes.pdf</span><span class="lu-tab__dot" aria-label="Unsaved changes"></span><button class="lu-iconbtn" aria-label="Close tab"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <div class="lu-tab"><span class="lu-tab__name">Lumora PDF plan.pdf</span><button class="lu-iconbtn" aria-label="Close tab"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <button class="lu-iconbtn lu-iconbtn--sm" style="margin: 0 0 4px 2px" aria-label="Open file"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+    <div class="lu-winctl">
+      <button aria-label="Minimize"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 12h12"></path></svg></button>
+      <button aria-label="Maximize"><svg class="lu-icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg></button>
+      <button aria-label="Close window"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <nav class="lu-toolbar" aria-label="Tools">
+    <button class="lu-iconbtn is-active" aria-label="Toggle sidebar"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M9 4v16"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Find (Ctrl+F)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></button>
+    <div class="lu-groups" role="tablist">
+      <button class="lu-group" role="tab">View</button>
+      <button class="lu-group is-active" role="tab" aria-selected="true">Annotate</button>
+      <button class="lu-group" role="tab">Organize</button>
+      <button class="lu-group" role="tab">Fill &amp; sign</button>
+      <button class="lu-group" role="tab">Edit</button>
+      <button class="lu-group" role="tab">Protect</button>
+      <button class="lu-group" role="tab">Convert</button>
+    </div>
+    <button class="lu-iconbtn" aria-label="Undo (Ctrl+Z)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-4"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Redo (Ctrl+Y)" disabled="" style="opacity: .45"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"></path><path d="M20 9H9a5 5 0 0 0 0 10h4"></path></svg></button>
+    <button class="lu-btn lu-btn--primary lu-btn--sm" style="margin-left: 6px">Save</button>
+  </nav>
+
+  <div class="lu-subtoolbar" aria-label="Annotate tools">
+    <button class="lu-iconbtn" aria-label="Select (V)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M5 4l6 16 2.5-6.5L20 11z"></path></svg></button>
+    <span class="lu-sep"></span>
+    <button class="lu-iconbtn is-active" aria-label="Highlight (H)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 20h8"></path><path d="M14 4l6 6-8 8H8v-4z"></path></svg><span class="lu-colorbar" style="background: var(--hl-yellow)"></span></button>
+    <button class="lu-iconbtn" aria-label="Underline (U)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20h14"></path></svg><span class="lu-colorbar" style="background: var(--pen-red)"></span></button>
+    <button class="lu-iconbtn" aria-label="Strike-out"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M16 7.5C16 5.6 14.2 4 12 4s-4 1.4-4 3.2c0 1.4 1 2.3 2.4 2.8"></path><path d="M8 16.5C8 18.4 9.8 20 12 20s4-1.4 4-3.2"></path></svg></button>
+    <span class="lu-sep"></span>
+    <button class="lu-iconbtn" aria-label="Note (N)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Text box (T)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M5 7V4h14v3M12 4v16M9 20h6"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Draw (P)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg><span class="lu-colorbar" style="background: var(--pen-red)"></span></button>
+    <button class="lu-iconbtn" aria-label="Shapes"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"></rect></svg></button>
+    <button class="lu-iconbtn" aria-label="Arrow"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M5 19L19 5M10 5h9v9"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Stamp"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M9 4h6l-1 7h4l1 4H5l1-4h4z"></path><path d="M5 19h14"></path></svg></button>
+    <button class="lu-iconbtn" aria-label="Eraser (E)"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M15 4l5 5-10 10H6l-3-3z"></path><path d="M9 19h11"></path></svg></button>
+    <span class="lu-tool-label">Select text to highlight · <span class="lu-kbd">H</span></span>
+  </div>
+
+  <div class="workspace">
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="sidebar__tabs" role="tablist">
+        <button class="lu-iconbtn" role="tab" aria-label="Thumbnails"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><rect x="13" y="13" width="7" height="7" rx="1"></rect></svg></button>
+        <button class="lu-iconbtn" role="tab" aria-label="Outline"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.5M4 12h.5M4 18h.5"></path></svg></button>
+        <button class="lu-iconbtn is-active" role="tab" aria-selected="true" aria-label="Comments"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg></button>
+        <button class="lu-iconbtn" role="tab" aria-label="Find results"><svg class="lu-icon lu-icon--md" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></button>
+      </div>
+      <div class="sidebar__head"><h2 class="sidebar__title">Comments</h2><button class="lu-iconbtn lu-iconbtn--sm" aria-label="Filter comments"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"></path></svg></button></div>
+      <div style="display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px; overflow: hidden">
+        <div class="lu-row__meta" style="padding: 4px 4px 0">Page 1</div>
+        <div class="lu-comment is-selected">
+          <div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 2px; background: var(--hl-yellow); border: 1px solid var(--line-strong)"></span><span style="font-weight: 600; font-size: 12px">Highlight</span><span class="lu-row__meta" style="margin-left: auto">00:52</span></div>
+          <div style="font-size: 12px; line-height: 18px; color: var(--ink-muted)">“records what happened and keeps it”</div>
+          <div style="font-size: 13px; line-height: 20px">Quote this in the intro of my report.</div>
+        </div>
+        <div class="lu-comment">
+          <div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 2px; background: var(--hl-green); border: 1px solid var(--line-strong)"></span><span style="font-weight: 600; font-size: 12px">Highlight</span><span class="lu-row__meta" style="margin-left: auto">00:50</span></div>
+          <div style="font-size: 12px; line-height: 18px; color: var(--ink-muted)">“undo works for every change”</div>
+        </div>
+        <div class="lu-comment">
+          <div style="display: flex; align-items: center; gap: 8px"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--lumen-ink)"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path></svg><span style="font-weight: 600; font-size: 12px">Note</span><span class="lu-row__meta" style="margin-left: auto">00:49</span></div>
+          <div style="font-size: 13px; line-height: 20px">Check the figure numbers before printing.</div>
+          <div style="display: flex; gap: 6px"><button class="lu-btn lu-btn--sm lu-btn--ghost" style="padding: 0 6px">Reply</button><button class="lu-btn lu-btn--sm lu-btn--ghost" style="padding: 0 6px">Resolve</button></div>
+        </div>
+        <div class="lu-comment">
+          <div style="display: flex; align-items: center; gap: 8px"><svg class="lu-icon" viewBox="0 0 24 24" style="color: var(--pen-red)"><path d="M4 20l4-1 11-11-3-3L5 16z"></path></svg><span style="font-weight: 600; font-size: 12px">Drawing</span><span class="lu-row__meta" style="margin-left: auto">00:47</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="stage" aria-label="Document">
+      <article class="page" style="width: 620px; height: 828px; margin-top: 24px; padding: 56px 64px">
+        <div class="meta" style="margin-bottom: 8px">Chapter 2</div>
+        <h1>Why documents need versions</h1>
+        <div class="meta">Notes from the reading list</div>
+        <p>A document is a promise that the words will stay put. A good editor <span class="mark mark--yellow">records what happened and keeps it</span>, so that anyone who opens the file later can see the same thing the author saw.</p>
+        <p>That promise is easy to break. Saving over a file replaces the old version, and a signature applied before an edit no longer matches the bytes on disk. An incremental save appends changes instead, which keeps earlier signatures valid.</p>
+        <h2>Three rules for safe editing</h2>
+        <p>First, treat every change as a step that can be reversed: <span class="mark mark--green">undo works for every change</span>, including page moves and form values. Second, never write over the original until the new file is complete. Third, keep a journal of unsaved changes so a crash costs nothing.</p>
+        <p><span class="uline">Annotations should be standard objects</span>, not pictures painted onto the page. Any viewer can then show, hide, reply to or remove them, and the text underneath stays searchable.</p>
+        <h2>Figure 2.1</h2>
+        <div style="height: 120px; background: #f1f4f3; border: 1px solid #dfe3e1; display: grid; place-items: center; font-family: var(--font-ui); font-size: 11px; color: #5a6466; margin-bottom: 10px">[Figure: save timeline]</div>
+        <p>The figure shows a file saved three times. Each save adds a section to the end of the file; the first section is never touched.</p>
+
+        <button aria-label="Note: Check the figure numbers before printing" style="position: absolute; right: 18px; top: 506px; width: 26px; height: 26px; border-radius: 4px; border: 1px solid #b9821f; background: #ffd77a; display: grid; place-items: center; padding: 0; cursor: pointer; color: #5a3a06"><svg class="lu-icon" viewBox="0 0 24 24" style="width: 14px; height: 14px"><path d="M5 4h14v11l-5 5H5z"></path><path d="M14 20v-5h5"></path></svg></button>
+        <svg viewBox="0 0 200 70" aria-label="Freehand circle drawn around the figure label" style="position: absolute; left: 46px; top: 458px; width: 200px; height: 70px; overflow: visible"><path d="M24 40c-6-22 40-32 86-30 40 2 70 12 64 30-6 16-60 22-100 18-28-3-46-8-50-18" fill="none" stroke="#d92d20" stroke-width="2.5" stroke-linecap="round"></path></svg>
+
+        <div style="position: absolute; left: 206px; top: 152px; display: flex; gap: 2px; padding: 4px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-popover); font-family: var(--font-ui)">
+          <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Highlight color"><span style="width: 14px; height: 14px; border-radius: 50%; background: var(--hl-yellow); border: 1px solid var(--line-strong)"></span></button>
+          <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Add comment"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"></path></svg></button>
+          <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Copy text"><svg class="lu-icon" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg></button>
+          <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Delete highlight"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+        </div>
+      </article>
+
+      <div class="lu-zoombar" style="position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%)">
+        <div class="lu-zoombar__page"><input class="lu-input" value="1" aria-label="Page number"><span>/ 32</span></div>
+        <span class="lu-sep"></span>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Zoom out"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M5 12h14"></path></svg></button>
+        <button class="lu-zoombar__zoom" aria-label="Zoom level">100%</button>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Zoom in"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg></button>
+      </div>
+    </main>
+
+    <aside class="panel" aria-label="Properties">
+      <div class="panel__section" style="flex-direction: row; align-items: center; justify-content: space-between">
+        <h2 class="sidebar__title">Highlight</h2>
+        <button class="lu-iconbtn lu-iconbtn--sm" aria-label="Close properties"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div class="panel__section">
+        <span class="panel__label">Color</span>
+        <div class="lu-swatches" role="radiogroup" aria-label="Highlight color">
+          <button class="lu-swatch is-selected" style="background: var(--hl-yellow)" role="radio" aria-checked="true" aria-label="Yellow"></button>
+          <button class="lu-swatch" style="background: var(--hl-green)" role="radio" aria-label="Green"></button>
+          <button class="lu-swatch" style="background: var(--hl-blue)" role="radio" aria-label="Blue"></button>
+          <button class="lu-swatch" style="background: var(--hl-pink)" role="radio" aria-label="Pink"></button>
+          <button class="lu-swatch" style="background: var(--hl-orange)" role="radio" aria-label="Orange"></button>
+          <button class="lu-swatch" style="background: var(--hl-purple)" role="radio" aria-label="Purple"></button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center"><label class="panel__label" for="op">Opacity</label><span class="lu-row__meta">100%</span></div>
+        <input class="lu-range" id="op" type="range" min="10" max="100" value="100">
+      </div>
+      <div class="panel__section">
+        <div class="lu-field"><label for="cm">Comment</label><textarea id="cm" class="lu-input" style="height: 76px; padding: 8px 12px; resize: none; line-height: 20px">Quote this in the intro of my report.</textarea></div>
+        <div class="lu-field"><label for="au">Author</label><input id="au" class="lu-input" value="[YOUR NAME]"></div>
+      </div>
+      <div class="panel__section" style="border-bottom: 0">
+        <div style="display: flex; gap: 8px">
+          <button class="lu-btn lu-btn--sm"><svg class="lu-icon" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path></svg>Copy text</button>
+          <button class="lu-btn lu-btn--sm lu-btn--danger"><svg class="lu-icon" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>Delete</button>
+        </div>
+        <div class="lu-row__meta">Saved as a standard PDF highlight. It shows in any PDF viewer.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>
