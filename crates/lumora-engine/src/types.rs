@@ -29,6 +29,7 @@ pub struct OpenOptions {
 }
 
 /// Facts about an open document.
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DocInfo {
@@ -47,6 +48,7 @@ pub struct DocInfo {
 }
 
 /// A page's display size in PDF points (1/72 inch), with the page's /Rotate already applied.
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PageSize {

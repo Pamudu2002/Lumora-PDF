@@ -18,6 +18,8 @@ ignore = [
   # proc-macro-error: unmaintained compile-time macro crate, pulled in by gtk-rs 0.18 (Tauri Linux
   # stack via muda/tao). No runtime code; no upgrade available until Tauri moves off gtk3-rs.
   { id = "RUSTSEC-2024-0370", reason = "build-time only, transitive via Tauri gtk3 stack, no fix upstream" },
+  # paste: archived compile-time macro crate, used by specta (required by tauri-specta).
+  { id = "RUSTSEC-2024-0436", reason = "build-time only, transitive via specta, no fix upstream" },
 ]
 
 [licenses]

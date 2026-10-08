@@ -18,7 +18,8 @@
     "test": "pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check-licenses": "node scripts/check-licenses.mjs"
+    "check-licenses": "node scripts/check-licenses.mjs",
+    "gen:ipc": "cargo test -p lumora-desktop --lib ipc::tests::export_bindings"
   },
   "devDependencies": {
     "prettier": "^3.9.9"

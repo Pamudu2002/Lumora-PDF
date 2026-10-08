@@ -11,12 +11,15 @@ publish.workspace = true
 [features]
 # Golden render tests against tests/corpus (needs PDFium; see tests/golden.rs).
 golden = []
+# Derive `specta::Type` on IPC-facing types (used by the desktop app's TypeScript bindings).
+specta = ["dep:specta"]
 
 [dependencies]
 crossbeam-channel = "0.5"
 # The PDFium API version must match the binary from `pnpm fetch-pdfium` (scripts/fetch-pdfium.mjs).
 pdfium-render = { version = "0.9.4", default-features = false, features = ["pdfium_7881", "thread_safe"] }
 serde = { version = "1", features = ["derive"] }
+specta = { version = "=2.0.0-rc.25", features = ["derive"], optional = true }
 thiserror = "2"
 tracing = "0.1"
 

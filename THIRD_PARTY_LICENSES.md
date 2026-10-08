@@ -34,6 +34,7 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `png` | PNG tile encoding | MIT OR Apache-2.0 |
 | `image-webp` | WebP tile encoding | MIT OR Apache-2.0 |
 | `lru` | Tile cache | MIT |
+| `tauri-specta`, `specta`, `specta-typescript` | Typed IPC and generated TypeScript bindings | MIT |
 
 ## JavaScript packages (direct dependencies)
 

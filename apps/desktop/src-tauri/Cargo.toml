@@ -17,9 +17,17 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+lumora-core = { workspace = true, features = ["specta"] }
+lumora-engine = { workspace = true, features = ["specta"] }
+lumora-render.workspace = true
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# tauri-specta v2 is in RC: keep `=` pins on specta crates (see tauri-specta docs).
+specta = { version = "=2.0.0-rc.25", features = ["derive"] }
+specta-typescript = "0.0.12"
+tauri = { version = "2", features = [] }
+tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
+tracing = "0.1"
 
 [lints]
 workspace = true

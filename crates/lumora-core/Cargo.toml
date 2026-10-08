@@ -8,7 +8,15 @@ authors.workspace = true
 repository.workspace = true
 publish.workspace = true
 
+[features]
+# Derive `specta::Type` on IPC-facing types (used by the desktop app's TypeScript bindings).
+specta = ["dep:specta", "lumora-engine/specta"]
+
 [dependencies]
+lumora-engine.workspace = true
+serde = { version = "1", features = ["derive"] }
+specta = { version = "=2.0.0-rc.25", features = ["derive"], optional = true }
+tracing = "0.1"
 
 [lints]
 workspace = true

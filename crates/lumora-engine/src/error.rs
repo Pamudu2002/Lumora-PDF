@@ -68,6 +68,7 @@ pub enum EngineError {
 }
 
 /// A stable, serializable error code for the UI (which picks the user-facing message).
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum EngineErrorKind {
