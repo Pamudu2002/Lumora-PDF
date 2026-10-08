@@ -1,5 +1,7 @@
 //! Integration tests for `PdfiumEngine` against the real PDFium library.
 
+#![allow(clippy::unwrap_used)]
+
 mod common;
 
 use std::sync::Arc;

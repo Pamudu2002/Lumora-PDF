@@ -1,6 +1,6 @@
 //! Helpers shared by the engine's integration tests.
 
-#![allow(dead_code)]
+#![allow(dead_code, clippy::unwrap_used, clippy::expect_used)]
 
 use std::path::{Path, PathBuf};
 
