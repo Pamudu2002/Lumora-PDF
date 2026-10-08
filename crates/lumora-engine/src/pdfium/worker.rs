@@ -281,21 +281,19 @@ fn render_region(
     // to the bitmap. This keeps form fields rendering (a transform matrix would disable them).
     let config = PdfRenderConfig::new()
         .set_fixed_size(to_i32(page_px.0)?, to_i32(page_px.1)?)
-        .set_origin(-to_i32(x)?, -to_i32(y)?);
+        .set_origin(-to_i32(x)?, -to_i32(y)?)
+        // FPDF_REVERSE_BYTE_ORDER: PDFium writes RGBA instead of its native BGRA.
+        .set_reverse_byte_order(true);
     page.render_into_bitmap_with_config(&mut bitmap, &config)
         .map_err(|e| EngineError::Render(format!("{e:?}")))?;
 
-    let mut pixels = bitmap.as_raw_bytes();
+    let pixels = bitmap.as_raw_bytes();
     let expected = (w as usize) * (h as usize) * 4;
     if pixels.len() != expected {
         return Err(EngineError::Render(format!(
             "unexpected bitmap size {} (expected {expected})",
             pixels.len()
         )));
-    }
-    // BGRA → RGBA.
-    for px in pixels.as_chunks_mut::<4>().0 {
-        px.swap(0, 2);
     }
     Ok(RgbaImage {
         width: w,

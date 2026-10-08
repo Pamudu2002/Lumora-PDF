@@ -117,6 +117,33 @@ fn renders_tiles_at_the_right_place() {
 }
 
 #[test]
+fn renders_colors_in_rgba_order() {
+    // Regression: red and blue were swapped (pdfium-render already returns RGBA).
+    let engine = engine();
+    let dir = temp_dir("colors");
+    let path = dir.join("colors.pdf");
+    write_pdf(
+        &path,
+        "Colors",
+        &[TestPage {
+            width: 300.0,
+            height: 100.0,
+            rotate: 0,
+            content:
+                "1 0 0 rg 0 0 100 100 re f 0 1 0 rg 100 0 100 100 re f 0 0 1 rg 200 0 100 100 re f"
+                    .into(),
+        }],
+    );
+    let (doc, _) = engine.open(&path, OpenOptions::default()).unwrap();
+    let img = engine.render_tile(tile(doc, 0, 1.0, 0, 0)).unwrap();
+    assert_eq!(pixel(&img, 50, 50), [255, 0, 0, 255]);
+    assert_eq!(pixel(&img, 150, 50), [0, 255, 0, 255]);
+    assert_eq!(pixel(&img, 250, 50), [0, 0, 255, 255]);
+    let thumb = engine.render_thumbnail(doc, 0, 60).unwrap();
+    assert_eq!(pixel(&thumb, 5, 10), [255, 0, 0, 255]);
+}
+
+#[test]
 fn renders_thumbnails() {
     let engine = engine();
     let doc = open_square_doc(&engine, "thumbs");
