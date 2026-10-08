@@ -12,8 +12,9 @@ pub type DocId = u32;
 /// Zero-based page index.
 pub type PageIndex = u32;
 
-/// Smallest render scale accepted (1.0 = 72 dpi).
-pub const MIN_SCALE: f32 = 0.01;
+/// Smallest render scale accepted (1.0 = 72 dpi). Small enough for a 14 px thumbnail of the largest
+/// legal page (14,400 pt).
+pub const MIN_SCALE: f32 = 0.001;
 
 /// Largest render scale accepted (6400% zoom on a 2× display, with headroom).
 pub const MAX_SCALE: f32 = 128.0;
