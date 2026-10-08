@@ -30,3 +30,7 @@ coverage/
 Thumbs.db
 *.local
 *.sw?
+
+# Test corpus files that must not be committed
+tests/corpus/private/
+tests/corpus/large/

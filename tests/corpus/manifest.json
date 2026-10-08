@@ -1,0 +1,444 @@
+{
+  "$comment": "Test corpus index. See tests/corpus/README.md. `expect` is \"open\" or an EngineErrorKind for opening without a password.",
+  "files": [
+    {
+      "file": "pdfium/hello_world.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/hello_world_2_pages.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 2
+    },
+    {
+      "file": "pdfium/hello_world_compressed_stream.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/text_font.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/text_color.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/text_render_mode.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/font_weight.pdf",
+      "category": "text",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/vertical_text.pdf",
+      "category": "text-layout",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Vertical writing mode."
+    },
+    {
+      "file": "pdfium/hebrew_mirrored.pdf",
+      "category": "text-layout",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Right-to-left text."
+    },
+    {
+      "file": "pdfium/rotated_text.pdf",
+      "category": "rotated",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/rotated_text_90.pdf",
+      "category": "rotated",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/rotated_image.pdf",
+      "category": "rotated",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/embedded_images.pdf",
+      "category": "images",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/text_form.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/text_form_multiple.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/combobox_form.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/listbox_form.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/multiple_form_types.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/click_form.pdf",
+      "category": "forms",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/encrypted.pdf",
+      "category": "encrypted",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "passwordRequired",
+      "password": "1234",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/encrypted_hello_world_r2.pdf",
+      "category": "encrypted",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "passwordRequired",
+      "password": "âge",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/encrypted_hello_world_r3.pdf",
+      "category": "encrypted",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "passwordRequired",
+      "password": "âge",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/encrypted_hello_world_r5.pdf",
+      "category": "encrypted",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "passwordRequired",
+      "password": "âge",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/encrypted_hello_world_r6.pdf",
+      "category": "encrypted",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "passwordRequired",
+      "password": "âge",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/annots.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 2
+    },
+    {
+      "file": "pdfium/annotation_highlight_long_content.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/annotation_ink_multiple.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/annotation_stamp_with_ap.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/links_highlights_annots.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/polygon_annot.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/line_annot.pdf",
+      "category": "annotations",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/weblinks.pdf",
+      "category": "links",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/bookmarks.pdf",
+      "category": "outline",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 2
+    },
+    {
+      "file": "pdfium/two_signatures.pdf",
+      "category": "signatures",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/embedded_attachments.pdf",
+      "category": "attachments",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/tagged_table.pdf",
+      "category": "tagged",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/linearized_bug_1055.pdf",
+      "category": "linearized",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 3
+    },
+    {
+      "file": "pdfium/annot_javascript.pdf",
+      "category": "javascript",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Contains JavaScript actions; must never run (PDFium build has no V8)."
+    },
+    {
+      "file": "pdfium/bad_page_type.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 2
+    },
+    {
+      "file": "pdfium/bad_dict_keys.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1
+    },
+    {
+      "file": "pdfium/trailer_unterminated.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "malformed"
+    },
+    {
+      "file": "pdfium/parser_rebuildxref_error_notrailer.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "malformed"
+    },
+    {
+      "file": "pdfium/bug_xrefv4_loop.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Cross-reference stream loop; PDFium repairs it."
+    },
+    {
+      "file": "pdfium/empty_xref.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Empty xref table; PDFium rebuilds it."
+    },
+    {
+      "file": "pdfium/bug_325_a.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "malformed"
+    },
+    {
+      "file": "pdfium/bug_782596.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 1,
+      "notes": "Fuzzer-found crash case."
+    },
+    {
+      "file": "pdfium/bookmarks_circular.pdf",
+      "category": "malformed",
+      "source": "pdfium",
+      "license": "BSD-3-Clause",
+      "expect": "open",
+      "pages": 2,
+      "notes": "Outline with a cycle."
+    },
+    {
+      "file": "generated/long-250-pages.pdf",
+      "category": "huge-page-count",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 250,
+      "notes": "250 text pages (the >200-page category)."
+    },
+    {
+      "file": "generated/rotations.pdf",
+      "category": "rotated",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 4,
+      "notes": "/Rotate 0, 90, 180 and 270."
+    },
+    {
+      "file": "generated/mixed-page-sizes.pdf",
+      "category": "page-sizes",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 5,
+      "notes": "Letter, A4, A3 landscape, 1 inch, 2000×200 banner."
+    },
+    {
+      "file": "generated/scanned-image-only.pdf",
+      "category": "scanned",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 3,
+      "notes": "Image-only pages with no text layer (OCR input)."
+    },
+    {
+      "file": "generated/huge-mediabox.pdf",
+      "category": "malformed",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 1,
+      "notes": "MediaBox 10,000,000 pt; Lumora clamps to 14,400 pt."
+    },
+    {
+      "file": "generated/zero-pages.pdf",
+      "category": "malformed",
+      "source": "generated",
+      "license": "CC0-1.0",
+      "expect": "open",
+      "pages": 0,
+      "notes": "Valid file with no pages."
+    }
+  ]
+}

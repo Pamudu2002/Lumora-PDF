@@ -1866,6 +1866,7 @@ dependencies = [
  "pdfium-render",
  "png 0.18.1",
  "serde",
+ "serde_json",
  "specta",
  "thiserror 2.0.21",
  "tracing",
