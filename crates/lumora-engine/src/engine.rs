@@ -52,6 +52,20 @@ pub trait PdfEngine: Send + Sync {
         max_px: u32,
     ) -> Result<RgbaImage, EngineError>;
 
+    /// Renders a whole page at `scale` (1.0 = 72 dpi) in one image, for printing. Each edge may be
+    /// up to [`crate::MAX_PAGE_IMAGE_PX`]. Engines that can't do this report `InvalidRequest`.
+    fn render_page(
+        &self,
+        doc: DocId,
+        page: PageIndex,
+        scale: f32,
+    ) -> Result<RgbaImage, EngineError> {
+        let _ = (doc, page, scale);
+        Err(EngineError::InvalidRequest(
+            "whole-page rendering is not supported".into(),
+        ))
+    }
+
     /// The text of a page, as positioned runs in reading order.
     fn page_text(&self, doc: DocId, page: PageIndex) -> Result<PageText, EngineError>;
 

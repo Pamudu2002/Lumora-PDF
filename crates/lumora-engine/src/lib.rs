@@ -19,6 +19,6 @@ pub use engine::{PdfEngine, StillNeeded};
 pub use error::{EngineError, EngineErrorKind};
 pub use pdfium::{PdfiumEngine, PdfiumLibrary};
 pub use types::{
-    DocId, DocInfo, MAX_SCALE, MAX_TILE_SIZE, MIN_SCALE, OpenOptions, PageIndex, PageSize,
-    RgbaImage, TileRequest,
+    DocId, DocInfo, MAX_PAGE_IMAGE_PX, MAX_SCALE, MAX_TILE_SIZE, MIN_SCALE, OpenOptions, PageIndex,
+    PageSize, RgbaImage, TileRequest,
 };

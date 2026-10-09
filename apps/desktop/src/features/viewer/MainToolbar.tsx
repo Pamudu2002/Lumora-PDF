@@ -1,8 +1,9 @@
-import { PanelLeft, Search, X } from "lucide-react";
+import { PanelLeft, Printer, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
+import { usePrintStore } from "@/stores/print";
 import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
 
@@ -21,6 +22,7 @@ export function MainToolbar({ doc }: MainToolbarProps) {
   const findOpen = useSearchStore((s) => s.findOpen);
   const openFind = useSearchStore((s) => s.openFind);
   const closeFind = useSearchStore((s) => s.closeFind);
+  const showPrint = usePrintStore((s) => s.show);
   const title = doc.info.title ?? doc.fileName;
 
   return (
@@ -61,6 +63,12 @@ export function MainToolbar({ doc }: MainToolbarProps) {
         </button>
       </div>
       <div className="flex items-center justify-end gap-1">
+        <IconButton
+          label={t("print.open")}
+          shortcut="Ctrl+P"
+          icon={<Printer {...ICON} />}
+          onClick={showPrint}
+        />
         <IconButton
           label={t("viewer.closeFile")}
           shortcut="Ctrl+W"

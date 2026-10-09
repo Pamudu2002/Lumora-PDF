@@ -17,8 +17,8 @@ use crate::content::{
 };
 use crate::error::EngineError;
 use crate::types::{
-    DocId, DocInfo, MAX_TILE_SIZE, OpenOptions, PageIndex, PageSize, RgbaImage, TileRequest,
-    check_scale,
+    DocId, DocInfo, MAX_PAGE_IMAGE_PX, MAX_TILE_SIZE, OpenOptions, PageIndex, PageSize, RgbaImage,
+    TileRequest, check_scale,
 };
 
 /// A unit of work sent to the worker.
@@ -358,6 +358,26 @@ impl<'p> Worker<'p> {
         let scale = max_px as f32 / size.width_pt.max(size.height_pt);
         check_scale(scale)?;
         let (w, h) = size.pixel_size(scale);
+        let page = open.page(page)?;
+        render_region(page, (w, h), (0, 0, w, h))
+    }
+
+    /// A whole page at `scale` in one image (printing); see [`crate::PdfEngine::render_page`].
+    pub(super) fn render_page(
+        &mut self,
+        doc: DocId,
+        page: PageIndex,
+        scale: f32,
+    ) -> Result<RgbaImage, EngineError> {
+        check_scale(scale)?;
+        let open = self.doc_mut(doc)?;
+        let size = open.check_page(page)?;
+        let (w, h) = size.pixel_size(scale);
+        if w == 0 || h == 0 || w > MAX_PAGE_IMAGE_PX || h > MAX_PAGE_IMAGE_PX {
+            return Err(EngineError::InvalidRequest(format!(
+                "page image {w}×{h} px is outside 1..={MAX_PAGE_IMAGE_PX} per edge"
+            )));
+        }
         let page = open.page(page)?;
         render_region(page, (w, h), (0, 0, w, h))
     }

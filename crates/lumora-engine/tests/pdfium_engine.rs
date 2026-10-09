@@ -155,6 +155,29 @@ fn renders_thumbnails() {
 }
 
 #[test]
+fn renders_whole_pages_for_printing() {
+    let engine = engine();
+    let doc = open_square_doc(&engine, "print");
+    // 300 dpi: 612 × 792 pt becomes 2550 × 3300 px, larger than any tile.
+    let page = engine.render_page(doc, 0, 300.0 / 72.0).unwrap();
+    assert_eq!((page.width, page.height), (2550, 3300));
+    assert_eq!(page.pixels.len(), 2550 * 3300 * 4);
+    // Far past the size limit, or a broken scale: an error, not a huge allocation.
+    assert!(matches!(
+        engine.render_page(doc, 0, 40.0),
+        Err(EngineError::InvalidRequest(_))
+    ));
+    assert!(matches!(
+        engine.render_page(doc, 0, f32::INFINITY),
+        Err(EngineError::InvalidRequest(_))
+    ));
+    assert!(matches!(
+        engine.render_page(doc, 7, 1.0),
+        Err(EngineError::PageOutOfRange { .. })
+    ));
+}
+
+#[test]
 fn rejects_bad_requests_without_panicking() {
     let engine = engine();
     let doc = open_square_doc(&engine, "bad-requests");

@@ -22,6 +22,9 @@ pub const MAX_SCALE: f32 = 128.0;
 /// Largest tile edge in pixels.
 pub const MAX_TILE_SIZE: u32 = 2048;
 
+/// Largest edge, in pixels, of a whole-page render for printing (an A3 page at 300 dpi is 4961).
+pub const MAX_PAGE_IMAGE_PX: u32 = 8192;
+
 /// Options for opening a document.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct OpenOptions {

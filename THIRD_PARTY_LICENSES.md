@@ -46,7 +46,7 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `@tauri-apps/api`, `@tauri-apps/cli` | Tauri frontend API and CLI | MIT OR Apache-2.0 |
 | `@tauri-apps/plugin-dialog` | Native open-file dialog | MIT OR Apache-2.0 |
 | `react`, `react-dom` | UI | MIT |
-| `@radix-ui/react-slot`, `@radix-ui/react-tooltip`, `@radix-ui/react-toggle-group`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-alert-dialog` | Accessible UI primitives | MIT |
+| `@radix-ui/react-slot`, `@radix-ui/react-tooltip`, `@radix-ui/react-toggle-group`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-dialog` | Accessible UI primitives | MIT |
 | `lucide-react` | Icons | ISC |
 | `zustand` | UI state | MIT |
 | `i18next`, `react-i18next` | UI strings (i18n layer) | MIT |

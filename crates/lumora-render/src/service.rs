@@ -100,6 +100,23 @@ impl TileService {
         self.cached_or_render(key, || self.engine.render_thumbnail(doc, page, max_px))
     }
 
+    /// A whole page at `scale_milli / 1000` in one image, for printing. Not cached: print images
+    /// are large and used once.
+    pub fn print_page(
+        &self,
+        doc: DocId,
+        page: PageIndex,
+        scale_milli: u32,
+    ) -> Result<Arc<EncodedImage>, RenderError> {
+        let image = self
+            .engine
+            .render_page(doc, page, milli_to_scale(scale_milli))?;
+        Ok(Arc::new(EncodedImage {
+            bytes: encode(&image, ImageFormat::Png)?,
+            format: ImageFormat::Png,
+        }))
+    }
+
     /// Forgets every cached image of a document (call when it closes).
     pub fn forget_doc(&self, doc: DocId) {
         self.cache.remove_doc(doc);

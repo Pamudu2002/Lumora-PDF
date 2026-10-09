@@ -4,6 +4,7 @@
 //!
 //! - `/tile/{docId}/{page}/{scaleMilli}/{tileX}/{tileY}?rev={rev}&dark={0|1}`
 //! - `/thumb/{docId}/{page}/{maxPx}?rev={rev}`
+//! - `/print/{docId}/{page}/{scaleMilli}?rev={rev}` (a whole page in one PNG, not cached)
 //!
 //! On Windows the WebView reaches custom schemes as `http://lumora.localhost/…`; elsewhere as
 //! `lumora://localhost/…`. Only the path and query matter here.
@@ -52,6 +53,17 @@ pub enum ImageRequest {
         /// Document revision the UI expects.
         rev: u32,
     },
+    /// A whole page for printing.
+    Print {
+        /// Document.
+        doc: DocId,
+        /// Page.
+        page: PageIndex,
+        /// Scale × 1000.
+        scale_milli: u32,
+        /// Document revision the UI expects.
+        rev: u32,
+    },
 }
 
 impl ImageRequest {
@@ -83,6 +95,15 @@ impl ImageRequest {
                     rev: query_param(query, "rev")?,
                 }
             }
+            "print" => {
+                let (doc, page, scale_milli) = (num()?, num()?, num()?);
+                Self::Print {
+                    doc,
+                    page,
+                    scale_milli,
+                    rev: query_param(query, "rev")?,
+                }
+            }
             _ => return None,
         };
         if parts.next().is_some() {
@@ -93,7 +114,7 @@ impl ImageRequest {
 
     fn doc(&self) -> DocId {
         match *self {
-            Self::Tile { doc, .. } | Self::Thumbnail { doc, .. } => doc,
+            Self::Tile { doc, .. } | Self::Thumbnail { doc, .. } | Self::Print { doc, .. } => doc,
         }
     }
 
@@ -115,6 +136,12 @@ impl ImageRequest {
                 max_px,
                 rev,
             } => tiles.thumbnail(doc, page, max_px, u64::from(rev)),
+            Self::Print {
+                doc,
+                page,
+                scale_milli,
+                ..
+            } => tiles.print_page(doc, page, scale_milli),
         }
     }
 }
@@ -163,8 +190,16 @@ fn respond<R: Runtime>(app: &tauri::AppHandle<R>, req: ImageRequest) -> Response
         Ok(image) => Response::builder()
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, image.format.content_type())
-            // URLs include the document revision, so a URL's image never changes.
-            .header(header::CACHE_CONTROL, "public, max-age=31536000, immutable")
+            // URLs include the document revision, so a URL's image never changes. Print images are
+            // big and used once, so the WebView shouldn't keep them.
+            .header(
+                header::CACHE_CONTROL,
+                if matches!(req, ImageRequest::Print { .. }) {
+                    "no-store"
+                } else {
+                    "public, max-age=31536000, immutable"
+                },
+            )
             .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
             .body(image.bytes.clone())
             .unwrap_or_else(|_| text_response(StatusCode::INTERNAL_SERVER_ERROR, "response")),
@@ -231,6 +266,21 @@ mod tests {
                 dark: false,
             })
         );
+    }
+
+    #[test]
+    fn parses_print_paths() {
+        assert_eq!(
+            ImageRequest::parse("/print/2/5/4167", Some("rev=3")),
+            Some(ImageRequest::Print {
+                doc: 2,
+                page: 5,
+                scale_milli: 4167,
+                rev: 3,
+            })
+        );
+        assert_eq!(ImageRequest::parse("/print/2/5", Some("rev=3")), None);
+        assert_eq!(ImageRequest::parse("/print/2/5/4167", None), None);
     }
 
     #[test]

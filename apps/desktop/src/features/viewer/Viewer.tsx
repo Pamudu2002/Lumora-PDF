@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { PrintDialog } from "@/features/print/PrintDialog";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { rememberView, useDocumentsStore } from "@/stores/documents";
@@ -44,6 +45,7 @@ export function Viewer({ doc }: ViewerProps) {
           <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
           {findOpen ? <FindBar docId={doc.id} /> : null}
           <ExternalLinkDialog />
+          <PrintDialog doc={doc} />
         </main>
       </div>
     </div>

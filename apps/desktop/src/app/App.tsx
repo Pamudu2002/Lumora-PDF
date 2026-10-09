@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Notice";
 import { Viewer } from "@/features/viewer/Viewer";
 import { useApplyTheme } from "@/lib/theme/useApplyTheme";
+import { usePrintShortcut } from "@/features/print/usePrintShortcut";
 import { TabStrip } from "@/features/tabs/TabStrip";
 import { UnsavedChangesDialog } from "@/features/tabs/UnsavedChangesDialog";
 import { selectActiveDoc, useDocumentsStore } from "@/stores/documents";
@@ -27,6 +28,7 @@ export function App() {
   const dragging = useFileDrop();
   const [internalError, dismissInternalError] = useAppErrors();
   useSearchEvents();
+  usePrintShortcut();
 
   return (
     <TooltipProvider delayDuration={400}>

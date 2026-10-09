@@ -361,7 +361,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.12 Recent files (SQLite via `lumora-store`), remember last page + zoom per file; home screen.
 - [x] 1.13 Password-protected PDFs: password dialog, retry.
 - [x] 1.14 Page dark mode (renderer-side) + UI themes.
-- [ ] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
+- [x] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
 - [ ] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
 - [ ] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
 - [ ] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
@@ -389,6 +389,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.12: `lumora-store` (rusqlite, bundled) with `user_version` migrations; `open_document` records the file and returns its saved view (page, zoom, zoom mode), which the viewer restores; the view is saved 1 s after it changes and on close; home screen lists up to 50 recent files (name, folder, opened, pages; missing files marked; remove from list).
 - 2026-10-09 — 1.13: `open_document` takes an optional password (never logged or stored); a protected file opens a password dialog instead of an error notice, a wrong password shows an inline error and clears the field, Cancel abandons the open. Checked with `encrypted.pdf` in the app.
 - 2026-10-09 — 1.14: Page dark mode toggle (moon, View toolbar) stored in settings; tiles are requested with `dark=1` and recoloured in Rust with images left untouched; new `paper-dark` token for the page background while tiles load. UI themes (light/dark/system) from Phase 0 verified with the viewer: pages stay white in the dark theme.
+- 2026-10-09 — 1.15: Print dialog (Ctrl+P, toolbar): all / current / page range; pages are rendered whole at 300 dpi (`render_page`, `lumora://…/print/…`, capped at 8192 px per edge), placed in a print-only container and printed through the system dialog; progress with Cancel, failure message per page. Release build: ~90 ms per Letter page (render + PNG). Ctrl+P never prints the app UI.
 
 ---
 
@@ -664,6 +665,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | Only the active tab's viewer is mounted; switching tabs saves and restores the page point at the viewport centre | Keeps memory and tile work proportional to one document; a page anchor survives zoom and window size changes, unlike a raw scroll offset |
 | 2026-10-09 | The database lives at `<app local data>/lumora.db` (WAL); if it can't be opened the app runs without recents instead of failing | Remembering files is a convenience; it must never stop a PDF from opening |
 | 2026-10-09 | Page dark mode is one app-wide setting (not per document), and thumbnails keep the original page colours | Readers switch it for their environment, not per file; thumbnails stay recognisable as the printed page |
+| 2026-10-09 | Print by rendering each page at 300 dpi in Rust and printing the images through the WebView's print dialog | Native printing (PDFium into a printer DC, or WebView2's COM print API) needs raw FFI, which the workspace forbids (`unsafe_code = deny`); this keeps 300 dpi quality and the OS dialog. Limits: text is printed as images, and very long jobs hold all page images in memory (~1 MB per page) — revisit with a native path later |
 | 2026-10-09 | PageUp/PageDown move a whole page (or spread) in every layout; Space and the arrow keys still scroll by screen/line in the continuous layout | The plan lists them as page navigation; it makes them predictable across layouts, and screen-wise scrolling stays one key away |
 | _(Claude Code: add new decisions here)_ | | |
 

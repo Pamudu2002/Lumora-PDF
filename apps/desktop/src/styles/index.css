@@ -127,6 +127,39 @@
   }
 }
 
+/* Printing (task 1.15): only the rendered page images in #lumora-print are printed. */
+@media screen {
+  #lumora-print {
+    display: none;
+  }
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+
+  body > :not(#lumora-print) {
+    display: none !important;
+  }
+
+  #lumora-print img {
+    display: block;
+    break-after: page;
+  }
+
+  #lumora-print img:last-child {
+    break-after: auto;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

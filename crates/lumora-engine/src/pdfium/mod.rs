@@ -125,6 +125,15 @@ impl PdfEngine for PdfiumEngine {
         self.call(Lane::Query, move |w| w.render_thumbnail(doc, page, max_px))
     }
 
+    fn render_page(
+        &self,
+        doc: DocId,
+        page: PageIndex,
+        scale: f32,
+    ) -> Result<RgbaImage, EngineError> {
+        self.call(Lane::Render, move |w| w.render_page(doc, page, scale))
+    }
+
     fn render_tile_if(
         &self,
         req: TileRequest,
