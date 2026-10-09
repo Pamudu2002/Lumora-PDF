@@ -363,7 +363,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.14 Page dark mode (renderer-side) + UI themes.
 - [x] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
 - [x] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
-- [ ] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
+- [x] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
 - [ ] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
 - [ ] 1.19 Playwright E2E: open file, scroll, zoom, search, select text.
 
@@ -391,6 +391,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.14: Page dark mode toggle (moon, View toolbar) stored in settings; tiles are requested with `dark=1` and recoloured in Rust with images left untouched; new `paper-dark` token for the page background while tiles load. UI themes (light/dark/system) from Phase 0 verified with the viewer: pages stay white in the dark theme.
 - 2026-10-09 — 1.15: Print dialog (Ctrl+P, toolbar): all / current / page range; pages are rendered whole at 300 dpi (`render_page`, `lumora://…/print/…`, capped at 8192 px per edge), placed in a print-only container and printed through the system dialog; progress with Cancel, failure message per page. Release build: ~90 ms per Letter page (render + PNG). Ctrl+P never prints the app UI.
 - 2026-10-09 — 1.16: `.pdf` file association in the NSIS bundle (Viewer role, so Lumora appears in Open with); `tauri-plugin-single-instance` forwards a second launch's PDF arguments to the running window (`OpenFilesEvent`) and focuses it; startup arguments are opened via `take_startup_files`. Verified a second launch with a relative path opens a tab and exits in ~150 ms. The installer itself was not run (it changes the registry).
+- 2026-10-09 — 1.17: `get_properties` command (engine properties + file size); Document properties dialog (Ctrl+D, info button) with file, metadata, dates in the user's locale, version, pages, current page size with paper name, encryption, forms and the font list (embedded or not; sampled pages noted). Shared `Dialog` component and one `useDialogStore` for app dialogs.
 
 ---
 

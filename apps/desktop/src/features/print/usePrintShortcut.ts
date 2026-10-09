@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useDocumentsStore } from "@/stores/documents";
-import { usePrintStore } from "@/stores/print";
+import { useDialogStore } from "@/stores/dialogs";
 
 /**
  * Ctrl+P opens Lumora's print dialog for the active document. It is always intercepted, so the
  * WebView never prints the app's own interface.
  */
 export function usePrintShortcut() {
-  const show = usePrintStore((s) => s.show);
+  const show = useDialogStore((s) => s.show);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -15,7 +15,7 @@ export function usePrintShortcut() {
         return;
       }
       e.preventDefault();
-      if (useDocumentsStore.getState().activeId !== null) show();
+      if (useDocumentsStore.getState().activeId !== null) show("print");
     };
     window.addEventListener("keydown", onKey);
     return () => {

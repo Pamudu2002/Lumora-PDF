@@ -5,6 +5,7 @@ import {
   events,
   type AppError,
   type DocInfo,
+  type DocumentProperties,
   type EngineErrorKind,
   type LinkTarget,
   type OutlineItem,
@@ -13,7 +14,15 @@ import {
   type SearchOptions,
 } from "./bindings";
 
-export type { DocInfo, EngineErrorKind, LinkTarget, OutlineItem, SavedView, SearchOptions };
+export type {
+  DocInfo,
+  DocumentProperties,
+  EngineErrorKind,
+  LinkTarget,
+  OutlineItem,
+  SavedView,
+  SearchOptions,
+};
 
 /** A rectangle in display points (top-left origin). */
 export interface Rect {
@@ -254,4 +263,9 @@ export async function onOpenFiles(handler: (paths: string[]) => void): Promise<(
   return events.openFilesEvent.listen(({ payload }) => {
     handler(payload.paths);
   });
+}
+
+/** Facts for the Document properties dialog. Throws {@link IpcError} on failure. */
+export async function getProperties(docId: number): Promise<DocumentProperties> {
+  return unwrap(await commands.getProperties(docId));
 }

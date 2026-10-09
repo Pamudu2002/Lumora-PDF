@@ -3,6 +3,7 @@ import { PrintDialog } from "@/features/print/PrintDialog";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { rememberView, useDocumentsStore } from "@/stores/documents";
+import { useDialogStore } from "@/stores/dialogs";
 import { useSearchStore } from "@/stores/search";
 import { useSettingsStore } from "@/stores/settings";
 import { useUiStore } from "@/stores/ui";
@@ -10,6 +11,7 @@ import { DEFAULT_VIEW, useDocView, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
 import { ExternalLinkDialog } from "./ExternalLinkDialog";
 import { FindBar } from "./FindBar";
+import { PropertiesDialog } from "./PropertiesDialog";
 import { isWidgetKeyTarget } from "./focus";
 import { stepPage } from "./layout";
 import { MainToolbar } from "./MainToolbar";
@@ -46,6 +48,7 @@ export function Viewer({ doc }: ViewerProps) {
           {findOpen ? <FindBar docId={doc.id} /> : null}
           <ExternalLinkDialog />
           <PrintDialog doc={doc} />
+          <PropertiesDialog doc={doc} />
         </main>
       </div>
     </div>
@@ -53,7 +56,7 @@ export function Viewer({ doc }: ViewerProps) {
 }
 
 /** Ctrl+= / Ctrl++ zoom in, Ctrl+- zoom out, Ctrl+0 actual size, Ctrl+1 fit page, Ctrl+2 fit
- * width, Ctrl+Shift+= / Ctrl+Shift+- rotate the view, Ctrl+W close, F4 sidebar. */
+ * width, Ctrl+Shift+= / Ctrl+Shift+- rotate the view, Ctrl+W close, Ctrl+D document properties, F4 sidebar. */
 function useViewerShortcuts(docId: number) {
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
@@ -96,6 +99,9 @@ function useViewerShortcuts(docId: number) {
           setZoomMode(docId, "fitWidth");
         },
         w: () => void close(docId),
+        d: () => {
+          useDialogStore.getState().show("properties");
+        },
       };
       const action = actions[e.key.toLowerCase()];
       if (action) {

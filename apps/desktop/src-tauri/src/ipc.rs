@@ -17,6 +17,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::content::get_outline,
             commands::content::get_page_text,
             commands::content::get_page_links,
+            commands::content::get_properties,
             commands::links::open_external_link,
             commands::recent::list_recent_files,
             commands::recent::remove_recent_file,

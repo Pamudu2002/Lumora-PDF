@@ -25,6 +25,8 @@ export const commands = {
 	getPageText: (docId: number, page: number) => typedError<PageText, AppError>(__TAURI_INVOKE("get_page_text", { docId, page })),
 	/**  The links on one page: areas that go to another page or to a URL. */
 	getPageLinks: (docId: number, page: number) => typedError<PageLink[], AppError>(__TAURI_INVOKE("get_page_links", { docId, page })),
+	/**  Facts about a document for the Document properties dialog. */
+	getProperties: (docId: number) => typedError<DocumentProperties, AppError>(__TAURI_INVOKE("get_properties", { docId })),
 	/**  Opens a link from a document in the default browser or mail app. The UI asks the user first. */
 	openExternalLink: (url: string) => typedError<null, AppError>(__TAURI_INVOKE("open_external_link", { url })),
 	/**  Recently opened files, newest first. Empty when the database is unavailable. */
@@ -85,6 +87,38 @@ export type DocInfo = {
 	pdfVersion: string,
 };
 
+/**  Facts for the Document properties dialog. */
+export type DocProperties = {
+	/**  Title. */
+	title: string | null,
+	/**  Author. */
+	author: string | null,
+	/**  Subject. */
+	subject: string | null,
+	/**  Keywords. */
+	keywords: string | null,
+	/**  The application that created the original document. */
+	creator: string | null,
+	/**  The application that produced the PDF. */
+	producer: string | null,
+	/**  Creation date, `YYYY-MM-DD HH:MM` when it could be parsed. */
+	created: string | null,
+	/**  Modification date, `YYYY-MM-DD HH:MM` when it could be parsed. */
+	modified: string | null,
+	/**  PDF version, e.g. "1.7". */
+	pdfVersion: string,
+	/**  Number of pages. */
+	pageCount: number,
+	/**  True when the file is encrypted. */
+	isEncrypted: boolean,
+	/**  True when the document has form fields. */
+	hasForms: boolean,
+	/**  Fonts used on the scanned pages, sorted by name. */
+	fonts: FontInfo[],
+	/**  How many pages were scanned for fonts (large documents are sampled). */
+	fontsScannedPages: number,
+};
+
 /**  An open document as the UI sees it. */
 export type DocSummary = {
 	/**  Engine document id; used in commands and tile URLs. */
@@ -99,6 +133,14 @@ export type DocSummary = {
 	pageSizes: PageSize[],
 	/**  Current revision (part of every tile URL). */
 	revision: number,
+};
+
+/**  Everything the Document properties dialog shows. */
+export type DocumentProperties = {
+	/**  Metadata, version, encryption and fonts from the engine. */
+	properties: DocProperties,
+	/**  Size of the file on disk in bytes, if it could be read. */
+	fileSizeBytes: number | null,
 };
 
 /**  A stable, serializable error code for the UI (which picks the user-facing message). */
@@ -131,6 +173,14 @@ export type EngineErrorKind =
 "workerStopped" | 
 /**  See [`EngineError::Internal`]. */
 "internal";
+
+/**  A font used by the document. */
+export type FontInfo = {
+	/**  Font name as stored in the file. */
+	name: string,
+	/**  True when the font is embedded in the file. */
+	embedded: boolean,
+};
 
 /**  Where a link goes. */
 export type LinkTarget = 

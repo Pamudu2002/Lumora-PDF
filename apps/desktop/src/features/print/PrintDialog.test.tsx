@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "@/app/App";
 import { useDocumentsStore } from "@/stores/documents";
-import { usePrintStore } from "@/stores/print";
+import { useDialogStore } from "@/stores/dialogs";
 import { installTauriMocks } from "@/test/tauri";
 
 function mockDoc() {
@@ -33,7 +33,7 @@ function mockDoc() {
 const printImages = () => [...document.querySelectorAll<HTMLImageElement>("#lumora-print img")];
 
 afterEach(() => {
-  usePrintStore.setState({ open: false });
+  useDialogStore.setState({ open: null });
   useDocumentsStore.setState({ docs: [], activeId: null });
   vi.restoreAllMocks();
 });
@@ -82,7 +82,7 @@ describe("PrintDialog", () => {
     render(<App />);
     await act(() => useDocumentsStore.getState().open("C:\\docs\\print.pdf"));
     act(() => {
-      usePrintStore.getState().show();
+      useDialogStore.getState().show("print");
     });
     fireEvent.click(screen.getByRole("radio", { name: "Current page (1)" }));
     fireEvent.click(screen.getByRole("button", { name: "Print" }));

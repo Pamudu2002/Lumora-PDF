@@ -1,7 +1,8 @@
-import { BookOpen, Maximize, Moon, MoveHorizontal, RotateCcw, RotateCw } from "lucide-react";
+import { BookOpen, Info, Maximize, Moon, MoveHorizontal, RotateCcw, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { useDialogStore } from "@/stores/dialogs";
 import { useSettingsStore } from "@/stores/settings";
 import { useDocView, useViewerStore } from "@/stores/viewer";
 import type { LayoutMode } from "./layout";
@@ -21,6 +22,7 @@ export function ViewToolbar({ docId }: ViewToolbarProps) {
   const setCoverPage = useViewerStore((s) => s.setCoverPage);
   const rotate = useViewerStore((s) => s.rotate);
   const pageDarkMode = useSettingsStore((s) => s.pageDarkMode);
+  const showDialog = useDialogStore((s) => s.show);
   const setPageDarkMode = useSettingsStore((s) => s.setPageDarkMode);
 
   const layouts: { value: LayoutMode; label: string }[] = [
@@ -96,6 +98,15 @@ export function ViewToolbar({ docId }: ViewToolbarProps) {
         active={pageDarkMode}
         onClick={() => {
           setPageDarkMode(!pageDarkMode);
+        }}
+      />
+      <IconButton
+        className="ml-auto"
+        label={t("properties.title")}
+        shortcut="Ctrl+D"
+        icon={<Info {...ICON} />}
+        onClick={() => {
+          showDialog("properties");
         }}
       />
     </div>

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
-import { usePrintStore } from "@/stores/print";
+import { useDialogStore } from "@/stores/dialogs";
 import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
 
@@ -22,7 +22,7 @@ export function MainToolbar({ doc }: MainToolbarProps) {
   const findOpen = useSearchStore((s) => s.findOpen);
   const openFind = useSearchStore((s) => s.openFind);
   const closeFind = useSearchStore((s) => s.closeFind);
-  const showPrint = usePrintStore((s) => s.show);
+  const showDialog = useDialogStore((s) => s.show);
   const title = doc.info.title ?? doc.fileName;
 
   return (
@@ -67,7 +67,9 @@ export function MainToolbar({ doc }: MainToolbarProps) {
           label={t("print.open")}
           shortcut="Ctrl+P"
           icon={<Printer {...ICON} />}
-          onClick={showPrint}
+          onClick={() => {
+            showDialog("print");
+          }}
         />
         <IconButton
           label={t("viewer.closeFile")}

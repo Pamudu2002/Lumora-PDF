@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import type { OpenDocument } from "@/lib/ipc";
-import { usePrintStore } from "@/stores/print";
+import { useDialogStore } from "@/stores/dialogs";
 import { useDocView } from "@/stores/viewer";
 import { parsePageRange, PRINT_DPI } from "./printImages";
 import { PrintPages } from "./PrintPages";
@@ -27,8 +27,8 @@ export interface PrintDialogProps {
  */
 export function PrintDialog({ doc }: PrintDialogProps) {
   const { t } = useTranslation();
-  const open = usePrintStore((s) => s.open);
-  const hide = usePrintStore((s) => s.hide);
+  const open = useDialogStore((s) => s.open === "print");
+  const hide = useDialogStore((s) => s.hide);
   const { currentPage } = useDocView(doc.id);
   const [choice, setChoice] = useState<Choice>("all");
   const [rangeText, setRangeText] = useState("");
