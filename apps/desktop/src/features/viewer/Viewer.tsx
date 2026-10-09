@@ -6,6 +6,7 @@ import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
 import { useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
+import { ViewToolbar } from "./ViewToolbar";
 import { ZoomBar } from "./ZoomBar";
 
 export interface ViewerProps {
@@ -37,6 +38,7 @@ export function Viewer({ doc }: ViewerProps) {
           onClick={() => void close()}
         />
       </header>
+      <ViewToolbar docId={doc.id} />
       <main className="relative min-h-0 flex-1">
         <DocumentView doc={doc} dark={false} />
         <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
@@ -45,10 +47,12 @@ export function Viewer({ doc }: ViewerProps) {
   );
 }
 
-/** Ctrl+= / Ctrl++ zoom in, Ctrl+- zoom out, Ctrl+0 actual size, Ctrl+W close. */
+/** Ctrl+= / Ctrl++ zoom in, Ctrl+- zoom out, Ctrl+0 actual size, Ctrl+1 fit page, Ctrl+2 fit
+ * width, Ctrl+W close. */
 function useViewerShortcuts(docId: number) {
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
+  const setZoomMode = useViewerStore((s) => s.setZoomMode);
   const close = useDocumentsStore((s) => s.close);
 
   useEffect(() => {
@@ -67,6 +71,12 @@ function useViewerShortcuts(docId: number) {
         "0": () => {
           setZoom(docId, 1);
         },
+        "1": () => {
+          setZoomMode(docId, "fitPage");
+        },
+        "2": () => {
+          setZoomMode(docId, "fitWidth");
+        },
         w: () => void close(),
       };
       const action = actions[e.key.toLowerCase()];
@@ -79,5 +89,5 @@ function useViewerShortcuts(docId: number) {
     return () => {
       window.removeEventListener("keydown", onKey);
     };
-  }, [docId, zoomStep, setZoom, close]);
+  }, [docId, zoomStep, setZoom, setZoomMode, close]);
 }

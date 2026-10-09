@@ -44,7 +44,13 @@ export const en = {
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
     actualSize: "Actual size",
-    level: "Zoom level {{percent}}%. Reset to 100%",
+    level: "Zoom level {{percent}}%. Choose a zoom",
+    fitWidth: "Fit width",
+    fitPage: "Fit page",
+    percent: "{{percent}}%",
+  },
+  viewTools: {
+    label: "View tools",
   },
 } as const;
 

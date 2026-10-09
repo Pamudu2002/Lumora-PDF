@@ -348,7 +348,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 **Goal:** A daily-usable PDF viewer.
 
 - [x] 1.1 Virtualized continuous scroll of all pages (only mount pages near the viewport); correct page gaps and scroll anchoring on zoom.
-- [ ] 1.2 Zoom: Ctrl+wheel, pinch on touchpads, presets (50–400%), fit width, fit page, actual size. Zoom around the cursor.
+- [x] 1.2 Zoom: Ctrl+wheel, pinch on touchpads, presets (50–400%), fit width, fit page, actual size. Zoom around the cursor.
 - [ ] 1.3 Low-res placeholders + tile streaming; cancel stale tile requests on fast scroll.
 - [ ] 1.4 View modes: single page, continuous, two-page (with/without cover page); rotate view (doesn't modify file).
 - [ ] 1.5 Thumbnails sidebar (virtualized), click to navigate, current page highlighted.
@@ -376,6 +376,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 **Progress log**
 - 2026-10-09 — Groundwork: engine gained text runs, per-page search, outline (cycle-safe), links, properties, Page dark mode and cancellable tiles (`render_tile_if`); `lumora-jobs` job runner; `lumora-core` whole-document search; i18next set up first so all new UI strings go through it (task 1.18).
 - 2026-10-09 — 1.1: pure `layout.ts` (rows, spreads, rotation, binary-search visibility, fit zooms, zoom anchors); `DocumentView` mounts only pages within one screen of the viewport, keeps the centre/cursor point fixed across zoom/layout changes, and handles go-to-page requests; `PageView` draws only visible tiles (+384 px prefetch) and stretches old tiles during zoom gestures. Measured on the 250-page corpus file (debug build): first page 0.6 s, 2–3 pages mounted.
+- 2026-10-09 — 1.2: Ctrl+wheel / touchpad pinch (WebView2 reports it as Ctrl+wheel) zoom around the cursor, preset menu (50–400%, fit width, fit page), fit buttons in the View toolbar, Ctrl+0/1/2. Verified in the app: point under the cursor stays put (exact vertically; horizontally while the page is wider than the window).
 
 ---
 

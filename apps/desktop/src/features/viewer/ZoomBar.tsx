@@ -1,8 +1,10 @@
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { MoveHorizontal, ZoomIn, ZoomOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
-import { Tooltip } from "@/components/ui/Tooltip";
-import { MAX_ZOOM, MIN_ZOOM, useDocView, useViewerStore } from "@/stores/viewer";
+import { Menu, MenuItem, MenuSeparator } from "@/components/ui/Menu";
+import { MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS, useDocView, useViewerStore } from "@/stores/viewer";
+
+const ICON = { size: 16, strokeWidth: 1.75 } as const;
 
 export interface ZoomBarProps {
   docId: number;
@@ -12,9 +14,10 @@ export interface ZoomBarProps {
 /** The floating bar centered above the bottom of the canvas: page and zoom controls. */
 export function ZoomBar({ docId, pageCount }: ZoomBarProps) {
   const { t } = useTranslation();
-  const { zoom, currentPage } = useDocView(docId);
+  const { zoom, zoomMode, currentPage } = useDocView(docId);
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
+  const setZoomMode = useViewerStore((s) => s.setZoomMode);
   const percent = Math.round(zoom * 100);
 
   return (
@@ -28,33 +31,78 @@ export function ZoomBar({ docId, pageCount }: ZoomBarProps) {
         className="rounded-pill"
         label={t("zoom.zoomOut")}
         shortcut="Ctrl+-"
-        icon={<ZoomOut size={16} strokeWidth={1.75} />}
+        icon={<ZoomOut {...ICON} />}
         disabled={zoom <= MIN_ZOOM + 1e-6}
         onClick={() => {
           zoomStep(docId, -1);
         }}
       />
-      <Tooltip label={t("zoom.actualSize")} shortcut="Ctrl+0">
-        <button
-          type="button"
-          aria-label={t("zoom.level", { percent })}
-          className="h-control-sm min-w-13 cursor-pointer rounded-pill border-0 bg-transparent px-2 text-label text-ink tabular-nums hover:bg-surface-sunken"
-          onClick={() => {
-            setZoom(docId, 1);
+      <Menu
+        side="top"
+        align="center"
+        trigger={
+          <button
+            type="button"
+            aria-label={t("zoom.level", { percent })}
+            className="h-control-sm min-w-13 cursor-pointer rounded-pill border-0 bg-transparent px-2 text-label text-ink tabular-nums hover:bg-surface-sunken"
+          >
+            {t("zoom.percent", { percent })}
+          </button>
+        }
+      >
+        {ZOOM_PRESETS.map((preset) => (
+          <MenuItem
+            key={preset}
+            checked={zoomMode === "custom" && Math.abs(zoom - preset) < 1e-6}
+            shortcut={preset === 1 ? "Ctrl+0" : undefined}
+            onSelect={() => {
+              setZoom(docId, preset);
+            }}
+          >
+            {t("zoom.percent", { percent: Math.round(preset * 100) })}
+          </MenuItem>
+        ))}
+        <MenuSeparator />
+        <MenuItem
+          checked={zoomMode === "fitWidth"}
+          shortcut="Ctrl+2"
+          onSelect={() => {
+            setZoomMode(docId, "fitWidth");
           }}
         >
-          {percent}%
-        </button>
-      </Tooltip>
+          {t("zoom.fitWidth")}
+        </MenuItem>
+        <MenuItem
+          checked={zoomMode === "fitPage"}
+          shortcut="Ctrl+1"
+          onSelect={() => {
+            setZoomMode(docId, "fitPage");
+          }}
+        >
+          {t("zoom.fitPage")}
+        </MenuItem>
+      </Menu>
       <IconButton
         size="sm"
         className="rounded-pill"
         label={t("zoom.zoomIn")}
         shortcut="Ctrl+="
-        icon={<ZoomIn size={16} strokeWidth={1.75} />}
+        icon={<ZoomIn {...ICON} />}
         disabled={zoom >= MAX_ZOOM - 1e-6}
         onClick={() => {
           zoomStep(docId, 1);
+        }}
+      />
+      <span aria-hidden className="mx-1.5 h-5 w-px flex-none bg-line" />
+      <IconButton
+        size="sm"
+        className="rounded-pill"
+        label={t("zoom.fitWidth")}
+        shortcut="Ctrl+2"
+        icon={<MoveHorizontal {...ICON} />}
+        active={zoomMode === "fitWidth"}
+        onClick={() => {
+          setZoomMode(docId, "fitWidth");
         }}
       />
     </div>

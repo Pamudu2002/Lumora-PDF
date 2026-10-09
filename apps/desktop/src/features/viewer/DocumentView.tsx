@@ -18,6 +18,9 @@ import {
 import { PageView } from "./PageView";
 import { contentToBox } from "./rotation";
 
+/** Zoom change per pixel of Ctrl+wheel / pinch movement. */
+const WHEEL_ZOOM_SPEED = 0.0025;
+
 /** After a zoom change this quiet, the next one re-renders tiles straight away. */
 const ZOOM_SETTLE_MS = 160;
 
@@ -45,6 +48,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const setFitZoom = useViewerStore((s) => s.setFitZoom);
   const setCurrentPage = useViewerStore((s) => s.setCurrentPage);
   const consumeZoomAnchor = useViewerStore((s) => s.consumeZoomAnchor);
+  const zoomBy = useViewerStore((s) => s.zoomBy);
   const scrollRequest = useViewerStore((s) => s.scrollRequest);
 
   const sizes = doc.pageSizes;
@@ -120,6 +124,26 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       cancelAnimationFrame(frame);
     };
   }, []);
+
+  // Ctrl+wheel and touchpad pinch (which WebView2 reports as Ctrl+wheel) zoom around the cursor.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return undefined;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      const pixels =
+        e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
+      zoomBy(doc.id, Math.exp(-pixels * WHEEL_ZOOM_SPEED), {
+        clientX: e.clientX,
+        clientY: e.clientY,
+      });
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, [doc.id, zoomBy]);
 
   // Keep the point under the cursor (or the viewport centre) fixed when the geometry changes.
   const previous = useRef<{ layout: DocLayout; key: string; measured: boolean } | null>(null);
