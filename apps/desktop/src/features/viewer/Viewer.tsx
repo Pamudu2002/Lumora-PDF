@@ -48,16 +48,23 @@ export function Viewer({ doc }: ViewerProps) {
 }
 
 /** Ctrl+= / Ctrl++ zoom in, Ctrl+- zoom out, Ctrl+0 actual size, Ctrl+1 fit page, Ctrl+2 fit
- * width, Ctrl+W close. */
+ * width, Ctrl+Shift+= / Ctrl+Shift+- rotate the view, Ctrl+W close. */
 function useViewerShortcuts(docId: number) {
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
   const setZoomMode = useViewerStore((s) => s.setZoomMode);
+  const rotate = useViewerStore((s) => s.rotate);
   const close = useDocumentsStore((s) => s.close);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      // Ctrl+Shift+= / Ctrl+Shift+- rotate the view (as in other PDF readers).
+      if (e.shiftKey && (e.code === "Equal" || e.code === "Minus")) {
+        e.preventDefault();
+        rotate(docId, e.code === "Equal" ? 1 : -1);
+        return;
+      }
       const actions: Record<string, () => void> = {
         "=": () => {
           zoomStep(docId, 1);
@@ -89,5 +96,5 @@ function useViewerShortcuts(docId: number) {
     return () => {
       window.removeEventListener("keydown", onKey);
     };
-  }, [docId, zoomStep, setZoom, setZoomMode, close]);
+  }, [docId, zoomStep, setZoom, setZoomMode, rotate, close]);
 }

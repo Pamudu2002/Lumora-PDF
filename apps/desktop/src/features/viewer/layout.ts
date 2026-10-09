@@ -223,3 +223,27 @@ export function fitPageZoom(
   const byHeight = (viewportHeight - PAGE_GAP * 2) / Math.max(1, row.height);
   return Math.max(0.05, Math.min(byWidth, byHeight));
 }
+
+/**
+ * Single-page mode: only `page` is laid out, at the top of the view. Other entries of `pages` stay
+ * empty; `rowOfPage` maps every page to the one row.
+ */
+export function singlePageLayout(
+  sizes: readonly PagePoints[],
+  page: number,
+  opts: Omit<LayoutOptions, "mode" | "coverPage">,
+): DocLayout {
+  const size = sizes[page];
+  if (!size) return { pages: [], rows: [], rowOfPage: [], width: opts.viewportWidth, height: 0 };
+  const { width: w, height: h } = pageCssSize(size, opts.zoom, opts.rotation);
+  const width = Math.max(opts.viewportWidth, w + PAGE_GAP * 2);
+  const pages: PageBox[] = [];
+  pages[page] = { index: page, x: (width - w) / 2, y: PAGE_GAP, width: w, height: h };
+  return {
+    pages,
+    rows: [{ top: PAGE_GAP, height: h, pages: [page] }],
+    rowOfPage: sizes.map(() => 0),
+    width,
+    height: h + PAGE_GAP + BOTTOM_PADDING,
+  };
+}

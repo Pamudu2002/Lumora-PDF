@@ -13,6 +13,7 @@ import {
   fitWidthZoom,
   layoutPages,
   pagesInRange,
+  singlePageLayout,
   type DocLayout,
 } from "./layout";
 import { PageView } from "./PageView";
@@ -20,6 +21,9 @@ import { contentToBox } from "./rotation";
 
 /** Zoom change per pixel of Ctrl+wheel / pinch movement. */
 const WHEEL_ZOOM_SPEED = 0.0025;
+
+/** Single-page mode: after turning the page with the wheel, ignore further wheel turns this long. */
+const PAGE_TURN_COOLDOWN_MS = 350;
 
 /** After a zoom change this quiet, the next one re-renders tiles straight away. */
 const ZOOM_SETTLE_MS = 160;
@@ -49,6 +53,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const setCurrentPage = useViewerStore((s) => s.setCurrentPage);
   const consumeZoomAnchor = useViewerStore((s) => s.consumeZoomAnchor);
   const zoomBy = useViewerStore((s) => s.zoomBy);
+  const goToPage = useViewerStore((s) => s.goToPage);
   const scrollRequest = useViewerStore((s) => s.scrollRequest);
 
   const sizes = doc.pageSizes;
@@ -70,9 +75,14 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     if (zoomMode !== "custom") setFitZoom(doc.id, zoom);
   }, [zoomMode, zoom, doc.id, setFitZoom]);
 
+  // Single-page mode lays out only the current page; other modes don't depend on it.
+  const singlePage = mode === "single" ? currentPage : -1;
   const layout = useMemo(
-    () => layoutPages(sizes, { zoom, mode, coverPage, rotation, viewportWidth: vw }),
-    [sizes, zoom, mode, coverPage, rotation, vw],
+    () =>
+      singlePage >= 0
+        ? singlePageLayout(sizes, singlePage, { zoom, rotation, viewportWidth: vw })
+        : layoutPages(sizes, { zoom, mode, coverPage, rotation, viewportWidth: vw }),
+    [sizes, singlePage, zoom, mode, coverPage, rotation, vw],
   );
 
   // Tiles follow the zoom immediately after a pause, or once a gesture settles.
@@ -144,6 +154,31 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       el.removeEventListener("wheel", onWheel);
     };
   }, [doc.id, zoomBy]);
+
+  // Single-page mode: scrolling past the bottom (top) of the page turns to the next (previous) one.
+  const lastTurn = useRef(0);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || singlePage < 0) return undefined;
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.deltaY === 0) return;
+      const now = performance.now();
+      if (now - lastTurn.current < PAGE_TURN_COOLDOWN_MS) return;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+      const atTop = el.scrollTop <= 0;
+      if (e.deltaY > 0 && atBottom && singlePage < sizes.length - 1) {
+        lastTurn.current = now;
+        goToPage(doc.id, singlePage + 1);
+      } else if (e.deltaY < 0 && atTop && singlePage > 0) {
+        lastTurn.current = now;
+        goToPage(doc.id, singlePage - 1, { y: sizes[singlePage - 1]?.heightPt ?? 0 });
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: true });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
+  }, [doc.id, singlePage, sizes, goToPage]);
 
   // Keep the point under the cursor (or the viewport centre) fixed when the geometry changes.
   const previous = useRef<{ layout: DocLayout; key: string; measured: boolean } | null>(null);

@@ -350,7 +350,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.1 Virtualized continuous scroll of all pages (only mount pages near the viewport); correct page gaps and scroll anchoring on zoom.
 - [x] 1.2 Zoom: Ctrl+wheel, pinch on touchpads, presets (50–400%), fit width, fit page, actual size. Zoom around the cursor.
 - [x] 1.3 Low-res placeholders + tile streaming; cancel stale tile requests on fast scroll.
-- [ ] 1.4 View modes: single page, continuous, two-page (with/without cover page); rotate view (doesn't modify file).
+- [x] 1.4 View modes: single page, continuous, two-page (with/without cover page); rotate view (doesn't modify file).
 - [ ] 1.5 Thumbnails sidebar (virtualized), click to navigate, current page highlighted.
 - [ ] 1.6 Outline/bookmarks panel from the PDF outline; click to navigate.
 - [ ] 1.7 Page navigation: page number input, Ctrl+G, PageUp/Down, Home/End.
@@ -378,6 +378,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.1: pure `layout.ts` (rows, spreads, rotation, binary-search visibility, fit zooms, zoom anchors); `DocumentView` mounts only pages within one screen of the viewport, keeps the centre/cursor point fixed across zoom/layout changes, and handles go-to-page requests; `PageView` draws only visible tiles (+384 px prefetch) and stretches old tiles during zoom gestures. Measured on the 250-page corpus file (debug build): first page 0.6 s, 2–3 pages mounted.
 - 2026-10-09 — 1.2: Ctrl+wheel / touchpad pinch (WebView2 reports it as Ctrl+wheel) zoom around the cursor, preset menu (50–400%, fit width, fit page), fit buttons in the View toolbar, Ctrl+0/1/2. Verified in the app: point under the cursor stays put (exact vertically; horizontally while the page is wider than the window).
 - 2026-10-09 — 1.3: one-tile low-res placeholder under every page; UI reports mounted pages (`set_visible_pages`) and queued tiles of other pages are skipped (204, no-store) — only when a *newer* report leaves the page out, so pages that just scrolled in are never dropped; tiles retry if skipped while visible. Measured: a fling over ~90 pages skipped 600–770 queued tiles; jumps to far pages show sharp tiles in ~0.5 s (debug build).
+- 2026-10-09 — 1.4: Single / Continuous / Two-page (+ cover page on its own) in the View toolbar; single-page mode turns pages when the wheel passes the page edge; view rotation (Ctrl+Shift+= / Ctrl+Shift+-) rotates the page content with CSS in 90° steps (pixel-exact, tiles reused) without touching the file. Verified in the app incl. pages with /Rotate.
 
 ---
 
@@ -644,6 +645,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | Default zoom mode "auto" = fit width, capped at 125% | Fills small windows without giant pages on large screens (pdf.js behaviour) |
 | 2026-10-09 | Page dark mode recolours tiles in Rust (luma inversion, hue kept) except image areas, instead of PDFium's colour-scheme render | That PDFium call is only reachable through raw `unsafe` bindings, which the workspace forbids; post-processing keeps images natural as required |
 | 2026-10-09 | `page_text` returns PDFium text runs (segments with boxes) rather than per-character boxes | Far smaller IPC payloads; the DOM text layer needs runs, and character quads for Phase 2 markup can come from DOM ranges or a later per-char call |
+| 2026-10-09 | View rotation shortcuts are Ctrl+Shift+= / Ctrl+Shift+- | Matches Acrobat; Ctrl+R would reload the WebView |
 | _(Claude Code: add new decisions here)_ | | |
 
 ---

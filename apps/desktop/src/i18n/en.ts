@@ -51,6 +51,13 @@ export const en = {
   },
   viewTools: {
     label: "View tools",
+    layout: "Page layout",
+    single: "Single",
+    continuous: "Continuous",
+    twoPage: "Two-page",
+    coverPage: "Show the cover page on its own",
+    rotateClockwise: "Rotate view clockwise",
+    rotateCounterclockwise: "Rotate view counterclockwise",
   },
 } as const;
 

@@ -11,6 +11,7 @@ import {
   layoutPages,
   pagesInRange,
   rowAt,
+  singlePageLayout,
   type LayoutOptions,
 } from "./layout";
 
@@ -134,5 +135,19 @@ describe("fit zoom", () => {
     expect(612 * PT_TO_CSS * z).toBeCloseTo(1000 - PAGE_GAP * 2);
     const zp = fitPageZoom([letter], opts, 1000, 600, 0);
     expect(792 * PT_TO_CSS * zp).toBeCloseTo(600 - PAGE_GAP * 2);
+  });
+});
+
+describe("singlePageLayout", () => {
+  it("lays out only the current page at the top", () => {
+    const layout = singlePageLayout([letter, letter, letter], 1, {
+      zoom: 1,
+      rotation: 0,
+      viewportWidth: 1000,
+    });
+    expect(layout.pages[0]).toBeUndefined();
+    expect(layout.pages[1]?.y).toBe(PAGE_GAP);
+    expect(layout.rows).toEqual([{ top: PAGE_GAP, height: 792 * PT_TO_CSS, pages: [1] }]);
+    expect(currentPageAt(layout, 0, 800)).toBe(1);
   });
 });
