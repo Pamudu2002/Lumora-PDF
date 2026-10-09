@@ -59,6 +59,19 @@ export const en = {
     rotateClockwise: "Rotate view clockwise",
     rotateCounterclockwise: "Rotate view counterclockwise",
   },
+  sidebar: {
+    label: "Sidebar",
+    toggle: "Toggle sidebar",
+    thumbnails: "Thumbnails",
+    outline: "Outline",
+    findResults: "Find results",
+    pages: "Pages",
+  },
+  toolbar: {
+    label: "Tools",
+    groups: "Tool groups",
+    view: "View",
+  },
 } as const;
 
 export type Strings = typeof en;

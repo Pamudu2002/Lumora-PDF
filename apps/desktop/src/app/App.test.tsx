@@ -48,7 +48,11 @@ describe("App", () => {
     render(<App />);
     await act(() => useDocumentsStore.getState().open("C:\\docs\\report.pdf"));
 
-    expect(screen.getByRole("heading", { name: "report.pdf" })).toBeDefined();
+    expect(screen.getByText("report.pdf")).toBeDefined();
+    // The sidebar lists page thumbnails, with the first page current.
+    expect(screen.getByRole("button", { name: "Page 1" }).getAttribute("aria-current")).toBe(
+      "page",
+    );
     expect(screen.getByText("1 / 3")).toBeDefined();
     const page = screen.getByRole("img", { name: "Page 1" });
     const tiles = page.querySelectorAll("img");

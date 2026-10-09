@@ -1,11 +1,11 @@
-import { X } from "lucide-react";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { IconButton } from "@/components/ui/IconButton";
+import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
+import { useUiStore } from "@/stores/ui";
 import { useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
+import { MainToolbar } from "./MainToolbar";
 import { ViewToolbar } from "./ViewToolbar";
 import { ZoomBar } from "./ZoomBar";
 
@@ -13,51 +13,47 @@ export interface ViewerProps {
   doc: OpenDocument;
 }
 
-/** The document screen: toolbar, canvas with pages, and the floating zoom bar. */
+/** The document screen: toolbars, sidebar, canvas with pages and the floating zoom bar. */
 export function Viewer({ doc }: ViewerProps) {
-  const { t } = useTranslation();
-  const close = useDocumentsStore((s) => s.close);
   const init = useViewerStore((s) => s.init);
+  const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   useEffect(() => {
     init(doc.id);
   }, [doc.id, init]);
   useViewerShortcuts(doc.id);
 
-  const title = doc.info.title ?? doc.fileName;
-
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-toolbar flex-none items-center gap-2 border-b border-line bg-surface px-3">
-        <h1 className="m-0 min-w-0 flex-1 truncate text-body font-semibold" title={doc.path}>
-          {title}
-        </h1>
-        <IconButton
-          label={t("viewer.closeFile")}
-          shortcut="Ctrl+W"
-          icon={<X size={18} strokeWidth={1.75} />}
-          onClick={() => void close()}
-        />
-      </header>
+      <MainToolbar doc={doc} />
       <ViewToolbar docId={doc.id} />
-      <main className="relative min-h-0 flex-1">
-        <DocumentView doc={doc} dark={false} />
-        <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
-      </main>
+      <div className="flex min-h-0 flex-1">
+        {sidebarOpen ? <Sidebar doc={doc} /> : null}
+        <main className="relative min-w-0 flex-1">
+          <DocumentView doc={doc} dark={false} />
+          <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
+        </main>
+      </div>
     </div>
   );
 }
 
 /** Ctrl+= / Ctrl++ zoom in, Ctrl+- zoom out, Ctrl+0 actual size, Ctrl+1 fit page, Ctrl+2 fit
- * width, Ctrl+Shift+= / Ctrl+Shift+- rotate the view, Ctrl+W close. */
+ * width, Ctrl+Shift+= / Ctrl+Shift+- rotate the view, Ctrl+W close, F4 sidebar. */
 function useViewerShortcuts(docId: number) {
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
   const setZoomMode = useViewerStore((s) => s.setZoomMode);
   const rotate = useViewerStore((s) => s.rotate);
   const close = useDocumentsStore((s) => s.close);
+  const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "F4" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        toggleSidebar();
+        return;
+      }
       if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
       // Ctrl+Shift+= / Ctrl+Shift+- rotate the view (as in other PDF readers).
       if (e.shiftKey && (e.code === "Equal" || e.code === "Minus")) {
@@ -96,5 +92,5 @@ function useViewerShortcuts(docId: number) {
     return () => {
       window.removeEventListener("keydown", onKey);
     };
-  }, [docId, zoomStep, setZoom, setZoomMode, rotate, close]);
+  }, [docId, zoomStep, setZoom, setZoomMode, rotate, close, toggleSidebar]);
 }

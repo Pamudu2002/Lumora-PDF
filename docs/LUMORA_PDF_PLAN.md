@@ -351,7 +351,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.2 Zoom: Ctrl+wheel, pinch on touchpads, presets (50–400%), fit width, fit page, actual size. Zoom around the cursor.
 - [x] 1.3 Low-res placeholders + tile streaming; cancel stale tile requests on fast scroll.
 - [x] 1.4 View modes: single page, continuous, two-page (with/without cover page); rotate view (doesn't modify file).
-- [ ] 1.5 Thumbnails sidebar (virtualized), click to navigate, current page highlighted.
+- [x] 1.5 Thumbnails sidebar (virtualized), click to navigate, current page highlighted.
 - [ ] 1.6 Outline/bookmarks panel from the PDF outline; click to navigate.
 - [ ] 1.7 Page navigation: page number input, Ctrl+G, PageUp/Down, Home/End.
 - [ ] 1.8 Text layer: `page_text` returns chars with boxes; selection by drag (line/word/paragraph with double/triple click); copy to clipboard preserving reading order.
@@ -379,6 +379,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.2: Ctrl+wheel / touchpad pinch (WebView2 reports it as Ctrl+wheel) zoom around the cursor, preset menu (50–400%, fit width, fit page), fit buttons in the View toolbar, Ctrl+0/1/2. Verified in the app: point under the cursor stays put (exact vertically; horizontally while the page is wider than the window).
 - 2026-10-09 — 1.3: one-tile low-res placeholder under every page; UI reports mounted pages (`set_visible_pages`) and queued tiles of other pages are skipped (204, no-store) — only when a *newer* report leaves the page out, so pages that just scrolled in are never dropped; tiles retry if skipped while visible. Measured: a fling over ~90 pages skipped 600–770 queued tiles; jumps to far pages show sharp tiles in ~0.5 s (debug build).
 - 2026-10-09 — 1.4: Single / Continuous / Two-page (+ cover page on its own) in the View toolbar; single-page mode turns pages when the wheel passes the page edge; view rotation (Ctrl+Shift+= / Ctrl+Shift+-) rotates the page content with CSS in 90° steps (pixel-exact, tiles reused) without touching the file. Verified in the app incl. pages with /Rotate.
+- 2026-10-09 — 1.5: left sidebar (248 px, design tokens) with tab row and "Pages" header; virtualized thumbnail column (only visible ±1 screen mounted; `lumora://thumb` at device resolution); click navigates; current page outlined in brand and followed while scrolling; main toolbar with sidebar toggle (F4), document title and the View group tab.
 
 ---
 
