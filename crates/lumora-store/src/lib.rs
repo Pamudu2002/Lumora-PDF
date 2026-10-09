@@ -1,8 +1,9 @@
-//! Local SQLite storage for Lumora PDF: recent files and how each was last viewed. Settings and
-//! the library arrive in later tasks as further schema migrations.
+//! Local SQLite storage for Lumora PDF: recent files, how each was last viewed, and app settings.
+//! The library arrives in a later task as a further schema migration.
 
 mod recent;
 mod schema;
+mod settings;
 
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard};

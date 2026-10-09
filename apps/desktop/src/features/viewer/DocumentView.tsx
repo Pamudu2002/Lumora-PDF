@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useTranslation } from "react-i18next";
 import { setVisiblePages, type OpenDocument } from "@/lib/ipc";
 import { useDevicePixelRatio } from "@/lib/useDevicePixelRatio";
+import { useSettingsStore } from "@/stores/settings";
 import { AUTO_ZOOM_MAX, clampZoom, useDocView, useViewerStore } from "@/stores/viewer";
 import {
   PAGE_GAP,
@@ -65,6 +66,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const zoomBy = useViewerStore((s) => s.zoomBy);
   const goToPage = useViewerStore((s) => s.goToPage);
   const scrollRequest = useViewerStore((s) => s.scrollRequest);
+  const wheel = useSettingsStore((s) => s.wheel);
   const saveAnchor = useViewerStore((s) => s.saveAnchor);
   const finishScrollRequest = useViewerStore((s) => s.finishScrollRequest);
   const consumeSavedAnchor = useViewerStore((s) => s.consumeSavedAnchor);
@@ -162,24 +164,32 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   }, []);
 
   // Ctrl+wheel and touchpad pinch (which WebView2 reports as Ctrl+wheel) zoom around the cursor.
+  // With the "mouse wheel zooms" setting it is the other way round: the wheel zooms and
+  // Ctrl+wheel scrolls (as in Acrobat).
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return undefined;
     const onWheel = (e: WheelEvent) => {
-      if (!e.ctrlKey) return;
-      e.preventDefault();
+      const zooms = wheel === "zoom" ? !e.ctrlKey : e.ctrlKey;
       const pixels =
         e.deltaMode === 1 ? e.deltaY * 40 : e.deltaMode === 2 ? e.deltaY * 800 : e.deltaY;
-      zoomBy(doc.id, Math.exp(-pixels * WHEEL_ZOOM_SPEED), {
-        clientX: e.clientX,
-        clientY: e.clientY,
-      });
+      if (zooms) {
+        e.preventDefault();
+        zoomBy(doc.id, Math.exp(-pixels * WHEEL_ZOOM_SPEED), {
+          clientX: e.clientX,
+          clientY: e.clientY,
+        });
+      } else if (e.ctrlKey) {
+        // Ctrl+wheel would zoom the whole WebView; scroll the document instead.
+        e.preventDefault();
+        el.scrollTop += pixels;
+      }
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => {
       el.removeEventListener("wheel", onWheel);
     };
-  }, [doc.id, zoomBy]);
+  }, [doc.id, zoomBy, wheel]);
 
   // Single-page mode: scrolling past the bottom (top) of the page turns to the next (previous) one.
   const lastTurn = useRef(0);
@@ -187,7 +197,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     const el = scrollRef.current;
     if (!el || singlePage < 0) return undefined;
     const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.deltaY === 0) return;
+      if (e.ctrlKey || e.deltaY === 0 || wheel === "zoom") return;
       const now = performance.now();
       if (now - lastTurn.current < PAGE_TURN_COOLDOWN_MS) return;
       const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
@@ -204,7 +214,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     return () => {
       el.removeEventListener("wheel", onWheel);
     };
-  }, [doc.id, singlePage, sizes, goToPage]);
+  }, [doc.id, singlePage, sizes, goToPage, wheel]);
 
   // Keep the point under the cursor (or the viewport centre) fixed when the geometry changes.
   const previous = useRef<{ layout: DocLayout; key: string; measured: boolean } | null>(null);

@@ -23,6 +23,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::recent::remove_recent_file,
             commands::recent::save_view,
             commands::os_files::take_startup_files,
+            commands::settings::save_settings,
             commands::search::start_search,
             commands::search::cancel_search,
         ])

@@ -57,14 +57,6 @@ describe("App", () => {
     expect(screen.getByRole("button", { name: "Open file" })).toBeDefined();
   });
 
-  it("switches the theme on the root element", () => {
-    render(<App />);
-    fireEvent.click(screen.getByRole("radio", { name: "Dark" }));
-    expect(document.documentElement.dataset.theme).toBe("dark");
-    fireEvent.click(screen.getByRole("radio", { name: "Light" }));
-    expect(document.documentElement.dataset.theme).toBe("light");
-  });
-
   it("opens a document and shows page 1 as tiles", async () => {
     mockReport();
     render(<App />);

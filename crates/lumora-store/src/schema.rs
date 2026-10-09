@@ -18,6 +18,11 @@ const MIGRATIONS: &[&str] = &[
         zoom_mode    TEXT
     );
     CREATE INDEX recent_files_by_time ON recent_files (last_opened DESC);",
+    // 2: app settings.
+    "CREATE TABLE settings (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    );",
 ];
 
 /// Applies every migration newer than the database's version, in one transaction.

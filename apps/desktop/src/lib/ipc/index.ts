@@ -269,3 +269,8 @@ export async function onOpenFiles(handler: (paths: string[]) => void): Promise<(
 export async function getProperties(docId: number): Promise<DocumentProperties> {
   return unwrap(await commands.getProperties(docId));
 }
+
+/** Saves the UI settings (a JSON object) in the local database. */
+export async function saveSettings(json: string): Promise<void> {
+  unwrap(await commands.saveSettings(json));
+}

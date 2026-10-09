@@ -1,4 +1,4 @@
-import { FileUp, FolderOpen } from "lucide-react";
+import { FileUp, FolderOpen, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
@@ -6,7 +6,7 @@ import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/cn";
 import { listRecentFiles, removeRecentFile, type RecentFile } from "@/lib/ipc";
 import { RecentFiles } from "./RecentFiles";
-import { ThemeSwitcher } from "./ThemeSwitcher";
+import { useDialogStore } from "@/stores/dialogs";
 
 export interface HomeProps {
   onOpenFile: () => void;
@@ -21,6 +21,7 @@ export interface HomeProps {
 export function Home({ onOpenFile, onOpenPath, dragging, opening }: HomeProps) {
   const { t } = useTranslation();
   const [recent, setRecent] = useState<RecentFile[]>([]);
+  const showDialog = useDialogStore((s) => s.show);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,7 +46,14 @@ export function Home({ onOpenFile, onOpenPath, dragging, opening }: HomeProps) {
             <p className="m-0 text-body text-ink-muted">{t("home.promise")}</p>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeSwitcher />
+            <Button
+              onClick={() => {
+                showDialog("settings");
+              }}
+            >
+              <Settings size={16} strokeWidth={1.75} aria-hidden />
+              {t("settings.open")}
+            </Button>
             <Button variant="primary" onClick={onOpenFile} disabled={opening}>
               <FolderOpen size={16} strokeWidth={1.75} aria-hidden />
               {t("home.openFile")}

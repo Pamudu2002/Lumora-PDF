@@ -364,7 +364,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
 - [x] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
 - [x] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
-- [ ] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
+- [x] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
 - [ ] 1.19 Playwright E2E: open file, scroll, zoom, search, select text.
 
 **Acceptance criteria**
@@ -392,6 +392,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.15: Print dialog (Ctrl+P, toolbar): all / current / page range; pages are rendered whole at 300 dpi (`render_page`, `lumora://…/print/…`, capped at 8192 px per edge), placed in a print-only container and printed through the system dialog; progress with Cancel, failure message per page. Release build: ~90 ms per Letter page (render + PNG). Ctrl+P never prints the app UI.
 - 2026-10-09 — 1.16: `.pdf` file association in the NSIS bundle (Viewer role, so Lumora appears in Open with); `tauri-plugin-single-instance` forwards a second launch's PDF arguments to the running window (`OpenFilesEvent`) and focuses it; startup arguments are opened via `take_startup_files`. Verified a second launch with a relative path opens a tab and exits in ~150 ms. The installer itself was not run (it changes the registry).
 - 2026-10-09 — 1.17: `get_properties` command (engine properties + file size); Document properties dialog (Ctrl+D, info button) with file, metadata, dates in the user's locale, version, pages, current page size with paper name, encryption, forms and the font list (embedded or not; sampled pages noted). Shared `Dialog` component and one `useDialogStore` for app dialogs.
+- 2026-10-09 — 1.18: Settings dialog (Home button, toolbar gear, Ctrl+,): theme, page dark mode, zoom and page layout for new documents, mouse wheel (scroll, or zoom with Ctrl to scroll), language (English; strings already go through i18next). Settings are stored in SQLite (`settings` table, schema 2) and injected into the main window before it loads, so the first paint uses the saved theme; verified across an app restart with localStorage cleared.
 
 ---
 
@@ -669,6 +670,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | Page dark mode is one app-wide setting (not per document), and thumbnails keep the original page colours | Readers switch it for their environment, not per file; thumbnails stay recognisable as the printed page |
 | 2026-10-09 | Print by rendering each page at 300 dpi in Rust and printing the images through the WebView's print dialog | Native printing (PDFium into a printer DC, or WebView2's COM print API) needs raw FFI, which the workspace forbids (`unsafe_code = deny`); this keeps 300 dpi quality and the OS dialog. Limits: text is printed as images, and very long jobs hold all page images in memory (~1 MB per page) — revisit with a native path later |
 | 2026-10-09 | The installer registers Lumora as a PDF handler (Open with) but does not make itself the default | Windows 10/11 only lets the user choose the default app; registering as a handler is the supported way and needs no installer checkbox |
+| 2026-10-09 | UI settings are one JSON object in SQLite, injected as `window.__LUMORA_SETTINGS__` by an initialization script; the main window is created in code (`create: false`) to add it | Reading settings asynchronously would flash the wrong theme; injection keeps SQLite the single source of truth with synchronous reads. localStorage stays as a fallback if the database can't be opened |
 | 2026-10-09 | PageUp/PageDown move a whole page (or spread) in every layout; Space and the arrow keys still scroll by screen/line in the continuous layout | The plan lists them as page navigation; it makes them predictable across layouts, and screen-wise scrolling stays one key away |
 | _(Claude Code: add new decisions here)_ | | |
 

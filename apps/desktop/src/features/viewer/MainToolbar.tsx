@@ -1,4 +1,4 @@
-import { PanelLeft, Printer, Search, X } from "lucide-react";
+import { PanelLeft, Printer, Search, Settings, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import type { OpenDocument } from "@/lib/ipc";
@@ -69,6 +69,14 @@ export function MainToolbar({ doc }: MainToolbarProps) {
           icon={<Printer {...ICON} />}
           onClick={() => {
             showDialog("print");
+          }}
+        />
+        <IconButton
+          label={t("settings.open")}
+          shortcut="Ctrl+,"
+          icon={<Settings {...ICON} />}
+          onClick={() => {
+            showDialog("settings");
           }}
         />
         <IconButton

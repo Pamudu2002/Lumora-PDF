@@ -3,8 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Notice";
 import { Viewer } from "@/features/viewer/Viewer";
+import { useApplyLanguage } from "@/i18n/useApplyLanguage";
 import { useApplyTheme } from "@/lib/theme/useApplyTheme";
 import { usePrintShortcut } from "@/features/print/usePrintShortcut";
+import { SettingsDialog } from "@/features/settings/SettingsDialog";
+import { useSettingsShortcut } from "@/features/settings/useSettingsShortcut";
 import { TabStrip } from "@/features/tabs/TabStrip";
 import { UnsavedChangesDialog } from "@/features/tabs/UnsavedChangesDialog";
 import { selectActiveDoc, useDocumentsStore } from "@/stores/documents";
@@ -18,6 +21,7 @@ import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpenin
 export function App() {
   const { t } = useTranslation();
   useApplyTheme();
+  useApplyLanguage();
   const current = useDocumentsStore(selectActiveDoc);
   const hasDocs = useDocumentsStore((s) => s.docs.length > 0);
   const opening = useDocumentsStore((s) => s.opening);
@@ -31,6 +35,7 @@ export function App() {
   useSearchEvents();
   usePrintShortcut();
   useOsFileOpening();
+  useSettingsShortcut();
 
   return (
     <TooltipProvider delayDuration={400}>
@@ -77,6 +82,7 @@ export function App() {
       </div>
       <UnsavedChangesDialog />
       <PasswordDialog />
+      <SettingsDialog />
     </TooltipProvider>
   );
 }

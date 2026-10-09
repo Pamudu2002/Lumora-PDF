@@ -37,6 +37,8 @@ export const commands = {
 	saveView: (path: string, view: SavedView) => typedError<null, AppError>(__TAURI_INVOKE("save_view", { path, view })),
 	/**  The PDFs Lumora was started with. Returns them once; later calls return nothing. */
 	takeStartupFiles: () => __TAURI_INVOKE<string[]>("take_startup_files"),
+	/**  Saves the UI settings (a JSON object). */
+	saveSettings: (json: string) => typedError<null, AppError>(__TAURI_INVOKE("save_settings", { json })),
 	/**
 	 *  Starts searching a document for `query`, beginning at `start_page` and wrapping around.
 	 *  Cancels the document's previous search. Results arrive as [`SearchProgressEvent`]s.

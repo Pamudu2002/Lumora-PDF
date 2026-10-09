@@ -6,6 +6,7 @@ pub mod links;
 pub mod os_files;
 pub mod recent;
 pub mod search;
+pub mod settings;
 pub mod view;
 
 use crate::error::AppError;

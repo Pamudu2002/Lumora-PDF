@@ -9,6 +9,7 @@ import {
   type SavedView,
 } from "@/lib/ipc";
 import { useSearchStore } from "./search";
+import { useSettingsStore } from "./settings";
 import { clampZoom, useViewerStore, type DocView, type ZoomMode } from "./viewer";
 
 const ZOOM_MODES: readonly string[] = [
@@ -19,8 +20,21 @@ const ZOOM_MODES: readonly string[] = [
 ] satisfies ZoomMode[];
 
 /** The parts of a saved view that the viewer can use. */
+/** The view a document opens with before anything was saved for it: the default settings. */
+function defaultView(): Partial<DocView> {
+  const { defaultZoom, defaultLayout } = useSettingsStore.getState();
+  const view: Partial<DocView> = { layout: defaultLayout };
+  if (defaultZoom === "auto" || defaultZoom === "fitWidth" || defaultZoom === "fitPage") {
+    view.zoomMode = defaultZoom;
+  } else {
+    view.zoomMode = "custom";
+    view.zoom = clampZoom(Number(defaultZoom) / 100);
+  }
+  return view;
+}
+
 function restoredView(view: SavedView, pageCount: number): Partial<DocView> {
-  const restored: Partial<DocView> = {};
+  const restored: Partial<DocView> = defaultView();
   if (view.page > 0 && view.page < pageCount) restored.currentPage = view.page;
   if (view.zoomMode && ZOOM_MODES.includes(view.zoomMode)) {
     restored.zoomMode = view.zoomMode as ZoomMode;

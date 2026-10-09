@@ -35,8 +35,11 @@ pub fn run() {
             }
             logging::install_panic_hook(app.handle().clone());
             ipc.mount_events(app);
-            app.manage(AppState::new(app.handle()));
+            let state = AppState::new(app.handle());
+            let settings_script = commands::settings::init_script(state.store().as_ref());
+            app.manage(state);
             app.manage(startup_files);
+            create_main_window(app, &settings_script)?;
             Ok(())
         })
         .run(tauri::generate_context!());
@@ -45,4 +48,21 @@ pub fn run() {
         eprintln!("Lumora PDF failed to start: {err}");
         std::process::exit(1);
     }
+}
+
+/// Creates the main window from its config entry (`"create": false`) with the saved settings
+/// injected, so the UI starts in the right theme without a flash.
+fn create_main_window(app: &tauri::App, settings_script: &str) -> tauri::Result<()> {
+    let config = app
+        .config()
+        .app
+        .windows
+        .iter()
+        .find(|w| w.label == "main")
+        .cloned()
+        .unwrap_or_default();
+    tauri::WebviewWindowBuilder::from_config(app.handle(), &config)?
+        .initialization_script(settings_script)
+        .build()?;
+    Ok(())
 }
