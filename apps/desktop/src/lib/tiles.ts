@@ -106,3 +106,38 @@ export function tilesForPage(width: number, height: number, tileSize = TILE_SIZE
   }
   return tiles;
 }
+
+/**
+ * Tiles of a `width × height` page that intersect the rectangle `(x, y, w, h)` (all in device
+ * pixels at the render scale). Pass a rectangle larger than the viewport to prefetch a margin.
+ */
+export function tilesInRect(
+  width: number,
+  height: number,
+  rect: { x: number; y: number; w: number; h: number },
+  tileSize = TILE_SIZE,
+): TileRect[] {
+  if (rect.w <= 0 || rect.h <= 0) return [];
+  const cols = Math.ceil(width / tileSize);
+  const rows = Math.ceil(height / tileSize);
+  const x0 = Math.max(0, Math.floor(rect.x / tileSize));
+  const y0 = Math.max(0, Math.floor(rect.y / tileSize));
+  const x1 = Math.min(cols, Math.ceil((rect.x + rect.w) / tileSize));
+  const y1 = Math.min(rows, Math.ceil((rect.y + rect.h) / tileSize));
+  const tiles: TileRect[] = [];
+  for (let tileY = y0; tileY < y1; tileY++) {
+    for (let tileX = x0; tileX < x1; tileX++) {
+      const tx = tileX * tileSize;
+      const ty = tileY * tileSize;
+      tiles.push({
+        tileX,
+        tileY,
+        x: tx,
+        y: ty,
+        width: Math.min(tileSize, width - tx),
+        height: Math.min(tileSize, height - ty),
+      });
+    }
+  }
+  return tiles;
+}

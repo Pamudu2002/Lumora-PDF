@@ -5,6 +5,7 @@ import {
   scaleToMilli,
   thumbnailUrl,
   tilesForPage,
+  tilesInRect,
   tileUrl,
 } from "./tiles";
 
@@ -67,5 +68,20 @@ describe("tilesForPage", () => {
 
   it("matches the Rust grid at 2x", () => {
     expect(tilesForPage(1224, 1584)).toHaveLength(12);
+  });
+});
+
+describe("tilesInRect", () => {
+  it("returns only the tiles a rectangle touches", () => {
+    const tiles = tilesInRect(2000, 3000, { x: 600, y: 600, w: 100, h: 100 });
+    expect(tiles.map((t) => [t.tileX, t.tileY])).toEqual([[1, 1]]);
+    // Crossing a tile boundary (1024) needs both rows.
+    expect(tilesInRect(2000, 3000, { x: 600, y: 1000, w: 100, h: 100 })).toHaveLength(2);
+  });
+
+  it("clamps to the page and handles empty rectangles", () => {
+    expect(tilesInRect(1000, 1000, { x: -500, y: -500, w: 5000, h: 5000 })).toHaveLength(4);
+    expect(tilesInRect(1000, 1000, { x: 0, y: 0, w: 0, h: 10 })).toEqual([]);
+    expect(tilesInRect(1000, 1000, { x: 5000, y: 0, w: 10, h: 10 })).toEqual([]);
   });
 });

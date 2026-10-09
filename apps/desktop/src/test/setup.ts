@@ -3,6 +3,22 @@ import { afterEach, beforeEach } from "vitest";
 import { installTauriMocks } from "./tauri";
 import "@/i18n";
 
+// jsdom has no layout: give elements a desktop-sized viewport and a no-op ResizeObserver.
+class NoopResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+globalThis.ResizeObserver = NoopResizeObserver;
+Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+  configurable: true,
+  get: () => 1200,
+});
+Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+  configurable: true,
+  get: () => 800,
+});
+
 // Tests run outside Tauri. Mocks stay installed after each test (unmount handlers may still call
 // into Tauri asynchronously) and are reset before the next one.
 beforeEach(() => {

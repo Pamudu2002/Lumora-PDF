@@ -49,7 +49,7 @@ describe("App", () => {
     await act(() => useDocumentsStore.getState().open("C:\\docs\\report.pdf"));
 
     expect(screen.getByRole("heading", { name: "report.pdf" })).toBeDefined();
-    expect(screen.getByText("3 pages")).toBeDefined();
+    expect(screen.getByText("1 / 3")).toBeDefined();
     const page = screen.getByRole("img", { name: "Page 1" });
     const tiles = page.querySelectorAll("img");
     expect(tiles.length).toBeGreaterThan(0);

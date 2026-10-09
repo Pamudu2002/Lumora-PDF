@@ -1,52 +1,61 @@
 import { ZoomIn, ZoomOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { MAX_ZOOM, MIN_ZOOM, useViewerStore } from "@/stores/viewer";
+import { MAX_ZOOM, MIN_ZOOM, useDocView, useViewerStore } from "@/stores/viewer";
 
 export interface ZoomBarProps {
+  docId: number;
   pageCount: number;
 }
 
-/** The floating bar centered above the canvas bottom: page count and zoom. */
-export function ZoomBar({ pageCount }: ZoomBarProps) {
-  const zoom = useViewerStore((s) => s.zoom);
-  const zoomIn = useViewerStore((s) => s.zoomIn);
-  const zoomOut = useViewerStore((s) => s.zoomOut);
-  const resetZoom = useViewerStore((s) => s.resetZoom);
+/** The floating bar centered above the bottom of the canvas: page and zoom controls. */
+export function ZoomBar({ docId, pageCount }: ZoomBarProps) {
+  const { t } = useTranslation();
+  const { zoom, currentPage } = useDocView(docId);
+  const zoomStep = useViewerStore((s) => s.zoomStep);
+  const setZoom = useViewerStore((s) => s.setZoom);
+  const percent = Math.round(zoom * 100);
 
   return (
     <div className="absolute bottom-4 left-1/2 flex h-10 -translate-x-1/2 items-center gap-0.5 rounded-pill border border-line bg-surface-raised px-1 shadow-popover">
-      <span className="px-2 text-label text-ink-muted">
-        {pageCount === 1 ? "1 page" : `${pageCount} pages`}
+      <span className="px-2 text-label text-ink-muted tabular-nums">
+        {currentPage + 1} / {pageCount}
       </span>
       <span aria-hidden className="mx-1.5 h-5 w-px flex-none bg-line" />
       <IconButton
         size="sm"
         className="rounded-pill"
-        label="Zoom out"
+        label={t("zoom.zoomOut")}
         shortcut="Ctrl+-"
         icon={<ZoomOut size={16} strokeWidth={1.75} />}
-        disabled={zoom <= MIN_ZOOM}
-        onClick={zoomOut}
+        disabled={zoom <= MIN_ZOOM + 1e-6}
+        onClick={() => {
+          zoomStep(docId, -1);
+        }}
       />
-      <Tooltip label="Actual size" shortcut="Ctrl+0">
+      <Tooltip label={t("zoom.actualSize")} shortcut="Ctrl+0">
         <button
           type="button"
-          aria-label={`Zoom level ${Math.round(zoom * 100)}%. Reset to 100%`}
-          className="h-control-sm min-w-[52px] cursor-pointer rounded-pill border-0 bg-transparent px-2 text-label text-ink hover:bg-surface-sunken"
-          onClick={resetZoom}
+          aria-label={t("zoom.level", { percent })}
+          className="h-control-sm min-w-13 cursor-pointer rounded-pill border-0 bg-transparent px-2 text-label text-ink tabular-nums hover:bg-surface-sunken"
+          onClick={() => {
+            setZoom(docId, 1);
+          }}
         >
-          {Math.round(zoom * 100)}%
+          {percent}%
         </button>
       </Tooltip>
       <IconButton
         size="sm"
         className="rounded-pill"
-        label="Zoom in"
+        label={t("zoom.zoomIn")}
         shortcut="Ctrl+="
         icon={<ZoomIn size={16} strokeWidth={1.75} />}
-        disabled={zoom >= MAX_ZOOM}
-        onClick={zoomIn}
+        disabled={zoom >= MAX_ZOOM - 1e-6}
+        onClick={() => {
+          zoomStep(docId, 1);
+        }}
       />
     </div>
   );
