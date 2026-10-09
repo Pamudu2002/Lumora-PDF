@@ -33,6 +33,8 @@ export const commands = {
 	removeRecentFile: (path: string) => typedError<null, AppError>(__TAURI_INVOKE("remove_recent_file", { path })),
 	/**  Remembers the page and zoom of an open document, to restore them next time. */
 	saveView: (path: string, view: SavedView) => typedError<null, AppError>(__TAURI_INVOKE("save_view", { path, view })),
+	/**  The PDFs Lumora was started with. Returns them once; later calls return nothing. */
+	takeStartupFiles: () => __TAURI_INVOKE<string[]>("take_startup_files"),
 	/**
 	 *  Starts searching a document for `query`, beginning at `start_page` and wrapping around.
 	 *  Cancels the document's previous search. Results arrive as [`SearchProgressEvent`]s.
@@ -45,6 +47,7 @@ export const commands = {
 /** Events */
 export const events = {
 	appErrorEvent: makeEvent<AppErrorEvent>("app-error-event"),
+	openFilesEvent: makeEvent<OpenFilesEvent>("open-files-event"),
 	searchProgressEvent: makeEvent<SearchProgressEvent>("search-progress-event"),
 };
 
@@ -139,6 +142,12 @@ page: number } |
 { kind: "uri"; 
 /**  The address. */
 uri: string };
+
+/**  Sent when another launch of Lumora asks the running window to open files. */
+export type OpenFilesEvent = {
+	/**  Absolute paths of the PDFs to open. */
+	paths: string[],
+};
 
 /**  An opened document and how it was last viewed. */
 export type OpenedDocument = {

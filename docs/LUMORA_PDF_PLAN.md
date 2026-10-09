@@ -362,7 +362,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.13 Password-protected PDFs: password dialog, retry.
 - [x] 1.14 Page dark mode (renderer-side) + UI themes.
 - [x] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
-- [ ] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
+- [x] 1.16 Windows integration: file association for `.pdf` (installer option), "Open with Lumora PDF", single-instance (open new files as tabs in the running window) via Tauri single-instance plugin.
 - [ ] 1.17 Document properties dialog (title, author, producer, version, page size, file size, encryption, fonts list).
 - [ ] 1.18 Settings screen: theme, page dark mode, default zoom, default view mode, scroll behaviour, language (English only for now, but all strings go through an i18n layer, e.g. `i18next`).
 - [ ] 1.19 Playwright E2E: open file, scroll, zoom, search, select text.
@@ -390,6 +390,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.13: `open_document` takes an optional password (never logged or stored); a protected file opens a password dialog instead of an error notice, a wrong password shows an inline error and clears the field, Cancel abandons the open. Checked with `encrypted.pdf` in the app.
 - 2026-10-09 — 1.14: Page dark mode toggle (moon, View toolbar) stored in settings; tiles are requested with `dark=1` and recoloured in Rust with images left untouched; new `paper-dark` token for the page background while tiles load. UI themes (light/dark/system) from Phase 0 verified with the viewer: pages stay white in the dark theme.
 - 2026-10-09 — 1.15: Print dialog (Ctrl+P, toolbar): all / current / page range; pages are rendered whole at 300 dpi (`render_page`, `lumora://…/print/…`, capped at 8192 px per edge), placed in a print-only container and printed through the system dialog; progress with Cancel, failure message per page. Release build: ~90 ms per Letter page (render + PNG). Ctrl+P never prints the app UI.
+- 2026-10-09 — 1.16: `.pdf` file association in the NSIS bundle (Viewer role, so Lumora appears in Open with); `tauri-plugin-single-instance` forwards a second launch's PDF arguments to the running window (`OpenFilesEvent`) and focuses it; startup arguments are opened via `take_startup_files`. Verified a second launch with a relative path opens a tab and exits in ~150 ms. The installer itself was not run (it changes the registry).
 
 ---
 
@@ -666,6 +667,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | The database lives at `<app local data>/lumora.db` (WAL); if it can't be opened the app runs without recents instead of failing | Remembering files is a convenience; it must never stop a PDF from opening |
 | 2026-10-09 | Page dark mode is one app-wide setting (not per document), and thumbnails keep the original page colours | Readers switch it for their environment, not per file; thumbnails stay recognisable as the printed page |
 | 2026-10-09 | Print by rendering each page at 300 dpi in Rust and printing the images through the WebView's print dialog | Native printing (PDFium into a printer DC, or WebView2's COM print API) needs raw FFI, which the workspace forbids (`unsafe_code = deny`); this keeps 300 dpi quality and the OS dialog. Limits: text is printed as images, and very long jobs hold all page images in memory (~1 MB per page) — revisit with a native path later |
+| 2026-10-09 | The installer registers Lumora as a PDF handler (Open with) but does not make itself the default | Windows 10/11 only lets the user choose the default app; registering as a handler is the supported way and needs no installer checkbox |
 | 2026-10-09 | PageUp/PageDown move a whole page (or spread) in every layout; Space and the arrow keys still scroll by screen/line in the continuous layout | The plan lists them as page navigation; it makes them predictable across layouts, and screen-wise scrolling stays one key away |
 | _(Claude Code: add new decisions here)_ | | |
 

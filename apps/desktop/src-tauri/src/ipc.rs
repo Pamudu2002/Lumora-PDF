@@ -21,12 +21,14 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::recent::list_recent_files,
             commands::recent::remove_recent_file,
             commands::recent::save_view,
+            commands::os_files::take_startup_files,
             commands::search::start_search,
             commands::search::cancel_search,
         ])
         .events(collect_events![
             logging::AppErrorEvent,
-            commands::search::SearchProgressEvent
+            commands::search::SearchProgressEvent,
+            commands::os_files::OpenFilesEvent
         ])
 }
 

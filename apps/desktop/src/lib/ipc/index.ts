@@ -243,3 +243,15 @@ export async function removeRecentFile(path: string): Promise<void> {
 export async function saveView(path: string, view: SavedView): Promise<void> {
   unwrap(await commands.saveView(path, view));
 }
+
+/** The PDFs Lumora was started with (from "Open with" or the command line). Empty after the first call. */
+export async function takeStartupFiles(): Promise<string[]> {
+  return commands.takeStartupFiles();
+}
+
+/** Calls `handler` with the PDFs another launch of Lumora asks this window to open. */
+export async function onOpenFiles(handler: (paths: string[]) => void): Promise<() => void> {
+  return events.openFilesEvent.listen(({ payload }) => {
+    handler(payload.paths);
+  });
+}

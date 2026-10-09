@@ -3,6 +3,7 @@
 pub mod content;
 pub mod documents;
 pub mod links;
+pub mod os_files;
 pub mod recent;
 pub mod search;
 pub mod view;

@@ -11,6 +11,7 @@ import { selectActiveDoc, useDocumentsStore } from "@/stores/documents";
 import { Home } from "./Home";
 import { PasswordDialog } from "./PasswordDialog";
 import { useAppErrors } from "./useAppErrors";
+import { useOsFileOpening } from "./useOsFileOpening";
 import { useSearchEvents } from "./useSearchEvents";
 import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpening";
 
@@ -29,6 +30,7 @@ export function App() {
   const [internalError, dismissInternalError] = useAppErrors();
   useSearchEvents();
   usePrintShortcut();
+  useOsFileOpening();
 
   return (
     <TooltipProvider delayDuration={400}>
