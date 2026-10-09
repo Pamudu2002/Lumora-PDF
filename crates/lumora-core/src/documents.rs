@@ -129,6 +129,36 @@ mod tests {
         ) -> Result<RgbaImage, EngineError> {
             Err(EngineError::Internal("not used".into()))
         }
+
+        fn page_text(
+            &self,
+            _: DocId,
+            _: PageIndex,
+        ) -> Result<lumora_engine::PageText, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn search_page(
+            &self,
+            _: DocId,
+            _: PageIndex,
+            _: &str,
+            _: lumora_engine::SearchOptions,
+        ) -> Result<Vec<lumora_engine::SearchHit>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn outline(&self, _: DocId) -> Result<Vec<lumora_engine::OutlineItem>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn page_links(
+            &self,
+            _: DocId,
+            _: PageIndex,
+        ) -> Result<Vec<lumora_engine::PageLink>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn properties(&self, _: DocId) -> Result<lumora_engine::DocProperties, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
     }
 
     #[test]

@@ -1841,6 +1841,7 @@ name = "lumora-core"
 version = "0.1.0"
 dependencies = [
  "lumora-engine",
+ "lumora-jobs",
  "serde",
  "specta",
  "tracing",
@@ -1883,6 +1884,9 @@ dependencies = [
 [[package]]
 name = "lumora-jobs"
 version = "0.1.0"
+dependencies = [
+ "thiserror 2.0.21",
+]
 
 [[package]]
 name = "lumora-render"

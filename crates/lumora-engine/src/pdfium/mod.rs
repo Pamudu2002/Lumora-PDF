@@ -1,5 +1,6 @@
 //! [`PdfiumEngine`]: the PDFium-backed engine, running as an actor on one worker thread.
 
+mod extract;
 mod worker;
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
@@ -9,7 +10,8 @@ use std::thread::JoinHandle;
 
 use crossbeam_channel::Sender;
 
-use crate::engine::PdfEngine;
+use crate::content::{DocProperties, OutlineItem, PageLink, PageText, SearchHit, SearchOptions};
+use crate::engine::{PdfEngine, StillNeeded};
 use crate::error::EngineError;
 use crate::types::{DocId, DocInfo, OpenOptions, PageIndex, PageSize, RgbaImage, TileRequest};
 use worker::{Job, Worker};
@@ -121,6 +123,52 @@ impl PdfEngine for PdfiumEngine {
         max_px: u32,
     ) -> Result<RgbaImage, EngineError> {
         self.call(Lane::Query, move |w| w.render_thumbnail(doc, page, max_px))
+    }
+
+    fn render_tile_if(
+        &self,
+        req: TileRequest,
+        still_needed: StillNeeded,
+    ) -> Result<RgbaImage, EngineError> {
+        if !still_needed() {
+            return Err(EngineError::Cancelled);
+        }
+        // Checked again on the worker: the tile may have waited behind others while the user
+        // scrolled on.
+        self.call(Lane::Render, move |w| {
+            if still_needed() {
+                w.render_tile(req)
+            } else {
+                Err(EngineError::Cancelled)
+            }
+        })
+    }
+
+    fn page_text(&self, doc: DocId, page: PageIndex) -> Result<PageText, EngineError> {
+        self.call(Lane::Query, move |w| w.page_text(doc, page))
+    }
+
+    fn search_page(
+        &self,
+        doc: DocId,
+        page: PageIndex,
+        query: &str,
+        opts: SearchOptions,
+    ) -> Result<Vec<SearchHit>, EngineError> {
+        let query = query.to_string();
+        self.call(Lane::Query, move |w| w.search_page(doc, page, &query, opts))
+    }
+
+    fn outline(&self, doc: DocId) -> Result<Vec<OutlineItem>, EngineError> {
+        self.call(Lane::Query, move |w| w.outline(doc))
+    }
+
+    fn page_links(&self, doc: DocId, page: PageIndex) -> Result<Vec<PageLink>, EngineError> {
+        self.call(Lane::Query, move |w| w.page_links(doc, page))
+    }
+
+    fn properties(&self, doc: DocId) -> Result<DocProperties, EngineError> {
+        self.call(Lane::Query, move |w| w.properties(doc))
     }
 }
 

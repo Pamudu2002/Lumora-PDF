@@ -92,6 +92,8 @@ export type EngineErrorKind =
 "invalidRequest" | 
 /**  See [`EngineError::Render`]. */
 "render" | 
+/**  See [`EngineError::Cancelled`]. */
+"cancelled" | 
 /**  See [`EngineError::WorkerStopped`]. */
 "workerStopped" | 
 /**  See [`EngineError::Internal`]. */

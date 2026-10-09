@@ -58,6 +58,10 @@ pub enum EngineError {
     #[error("the page could not be rendered: {0}")]
     Render(String),
 
+    /// The request was dropped because its result is no longer needed (e.g. a tile scrolled away).
+    #[error("the request was cancelled")]
+    Cancelled,
+
     /// The engine worker has stopped (shut down or crashed).
     #[error("the PDF engine has stopped")]
     WorkerStopped,
@@ -94,6 +98,8 @@ pub enum EngineErrorKind {
     InvalidRequest,
     /// See [`EngineError::Render`].
     Render,
+    /// See [`EngineError::Cancelled`].
+    Cancelled,
     /// See [`EngineError::WorkerStopped`].
     WorkerStopped,
     /// See [`EngineError::Internal`].
@@ -115,6 +121,7 @@ impl EngineError {
             Self::PageOutOfRange { .. } => EngineErrorKind::PageOutOfRange,
             Self::InvalidRequest(_) => EngineErrorKind::InvalidRequest,
             Self::Render(_) => EngineErrorKind::Render,
+            Self::Cancelled => EngineErrorKind::Cancelled,
             Self::WorkerStopped => EngineErrorKind::WorkerStopped,
             Self::Internal(_) => EngineErrorKind::Internal,
         }

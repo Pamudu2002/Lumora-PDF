@@ -4,7 +4,9 @@
 //! (plan section 3.4) arrive with the first editing feature in Phase 2.
 
 mod documents;
+mod search;
 mod session;
 
 pub use documents::Documents;
+pub use search::{MAX_SEARCH_HITS, SearchProgress, SearchRequest, search_document};
 pub use session::{DocSession, DocSummary, Revision};

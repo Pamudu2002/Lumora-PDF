@@ -64,8 +64,8 @@ impl TestPage {
 /// Writes a minimal, valid PDF with the given pages and an Info dictionary with a title.
 pub fn write_pdf(path: &Path, title: &str, pages: &[TestPage]) {
     let mut objects: Vec<String> = Vec::new();
-    // 1: catalog, 2: pages, 3: info, then per page: page object + content stream.
-    let first_page_obj = 4;
+    // 1: catalog, 2: pages, 3: info, 4: Helvetica (as /F1), then per page: page + content stream.
+    let first_page_obj = 5;
     let kids: Vec<String> = (0..pages.len())
         .map(|i| format!("{} 0 R", first_page_obj + i * 2))
         .collect();
@@ -76,10 +76,11 @@ pub fn write_pdf(path: &Path, title: &str, pages: &[TestPage]) {
         pages.len()
     ));
     objects.push(format!("<< /Title ({title}) /Author (Lumora tests) >>"));
+    objects.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>".into());
     for (i, page) in pages.iter().enumerate() {
         let content_obj = first_page_obj + i * 2 + 1;
         objects.push(format!(
-            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {} {}] /Rotate {} /Contents {} 0 R /Resources << >> >>",
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {} {}] /Rotate {} /Contents {} 0 R /Resources << /Font << /F1 4 0 R >> >> >>",
             page.width, page.height, page.rotate, content_obj
         ));
         objects.push(format!(

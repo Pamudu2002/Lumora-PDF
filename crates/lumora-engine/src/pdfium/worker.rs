@@ -11,6 +11,10 @@ use pdfium_render::prelude::{
 };
 
 use super::PdfiumLibrary;
+use super::extract;
+use crate::content::{
+    DocProperties, OutlineItem, PageLink, PageText, Rect, SearchHit, SearchOptions,
+};
 use crate::error::EngineError;
 use crate::types::{
     DocId, DocInfo, MAX_TILE_SIZE, OpenOptions, PageIndex, PageSize, RgbaImage, TileRequest,
@@ -96,6 +100,9 @@ struct OpenDoc<'p> {
     /// Recently used pages, most recent first. Declared before `doc` so pages drop first.
     pages: Vec<(PageIndex, PdfPage<'p>)>,
     sizes: Vec<PageSize>,
+    /// Image areas per page (display points), computed on first use by Page dark mode.
+    image_rects: HashMap<PageIndex, Vec<Rect>>,
+    info: DocInfo,
     doc: PdfDocument<'p>,
 }
 
@@ -108,6 +115,17 @@ impl<'p> OpenDoc<'p> {
                 page,
                 page_count: self.sizes.len() as u32,
             })
+    }
+
+    /// Image areas of a page, cached.
+    fn image_rects(&mut self, index: PageIndex) -> Result<Vec<Rect>, EngineError> {
+        if let Some(rects) = self.image_rects.get(&index) {
+            return Ok(rects.clone());
+        }
+        let size = self.check_page(index)?;
+        let rects = extract::image_rects(self.page(index)?, size);
+        self.image_rects.insert(index, rects.clone());
+        Ok(rects)
     }
 
     /// Returns a loaded page, from the cache when possible.
@@ -207,6 +225,8 @@ impl<'p> Worker<'p> {
             OpenDoc {
                 pages: Vec::new(),
                 sizes,
+                image_rects: HashMap::new(),
+                info: info.clone(),
                 doc,
             },
         );
@@ -240,8 +260,86 @@ impl<'p> Worker<'p> {
         let size = open.check_page(req.page)?;
         let (x, y, w, h) = req.pixel_rect(size)?;
         let (page_w, page_h) = size.pixel_size(req.scale);
+        let keep = if req.dark_mode {
+            Some(open.image_rects(req.page)?)
+        } else {
+            None
+        };
         let page = open.page(req.page)?;
-        render_region(page, (page_w, page_h), (x, y, w, h))
+        let mut image = render_region(page, (page_w, page_h), (x, y, w, h))?;
+        if let Some(rects) = keep {
+            // Image rectangles in this tile's pixel space.
+            let scale = page_w as f32 / size.width_pt;
+            let to_px = |v: f32| (v * scale).round().max(0.0) as i64;
+            let local: Vec<(u32, u32, u32, u32)> = rects
+                .iter()
+                .filter_map(|r| {
+                    let x0 = (to_px(r.x) - i64::from(x)).clamp(0, i64::from(w));
+                    let y0 = (to_px(r.y) - i64::from(y)).clamp(0, i64::from(h));
+                    let x1 = (to_px(r.x + r.width) - i64::from(x)).clamp(0, i64::from(w));
+                    let y1 = (to_px(r.y + r.height) - i64::from(y)).clamp(0, i64::from(h));
+                    (x1 > x0 && y1 > y0).then_some((x0 as u32, y0 as u32, x1 as u32, y1 as u32))
+                })
+                .collect();
+            extract::darken(&mut image.pixels, w, h, &local);
+        }
+        Ok(image)
+    }
+
+    pub(super) fn page_text(
+        &mut self,
+        doc: DocId,
+        page: PageIndex,
+    ) -> Result<PageText, EngineError> {
+        let open = self.doc_mut(doc)?;
+        let size = open.check_page(page)?;
+        extract::page_text(open.page(page)?, size)
+    }
+
+    pub(super) fn search_page(
+        &mut self,
+        doc: DocId,
+        page: PageIndex,
+        query: &str,
+        opts: SearchOptions,
+    ) -> Result<Vec<SearchHit>, EngineError> {
+        let open = self.doc_mut(doc)?;
+        let size = open.check_page(page)?;
+        // Search visits every page once: load it directly so recently viewed pages stay cached.
+        let index = i32::try_from(page).map_err(|_| EngineError::PageOutOfRange {
+            page,
+            page_count: open.sizes.len() as u32,
+        })?;
+        let loaded = open
+            .doc
+            .pages()
+            .get(index)
+            .map_err(|e| EngineError::Render(format!("could not load page {page}: {e:?}")))?;
+        extract::search_page(&loaded, page, size, query, opts)
+    }
+
+    pub(super) fn outline(&mut self, doc: DocId) -> Result<Vec<OutlineItem>, EngineError> {
+        Ok(extract::outline(&self.doc_mut(doc)?.doc))
+    }
+
+    pub(super) fn page_links(
+        &mut self,
+        doc: DocId,
+        page: PageIndex,
+    ) -> Result<Vec<PageLink>, EngineError> {
+        let open = self.doc_mut(doc)?;
+        let size = open.check_page(page)?;
+        let page_count = open.sizes.len() as u32;
+        Ok(extract::page_links(open.page(page)?, size, page_count))
+    }
+
+    pub(super) fn properties(&mut self, doc: DocId) -> Result<DocProperties, EngineError> {
+        let open = self.doc_mut(doc)?;
+        Ok(extract::properties(
+            &open.doc,
+            open.info.pdf_version.clone(),
+            open.info.is_encrypted,
+        ))
     }
 
     pub(super) fn render_thumbnail(

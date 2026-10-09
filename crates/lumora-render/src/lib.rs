@@ -8,9 +8,11 @@ mod encode;
 mod error;
 mod service;
 mod tiles;
+mod visible;
 
 pub use cache::{CacheKey, EncodedImage, TileCache};
 pub use encode::{ImageFormat, encode};
 pub use error::RenderError;
 pub use service::TileService;
 pub use tiles::{DEFAULT_TILE_SIZE, TileGrid, milli_to_scale, scale_to_milli};
+pub use visible::VisiblePages;

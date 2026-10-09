@@ -8,6 +8,7 @@ use crate::cache::{CacheKey, EncodedImage, TileCache};
 use crate::encode::{ImageFormat, encode};
 use crate::error::RenderError;
 use crate::tiles::{DEFAULT_TILE_SIZE, milli_to_scale};
+use crate::visible::VisiblePages;
 
 /// Serves encoded tiles and thumbnails, rendering and caching on a miss.
 ///
@@ -16,6 +17,7 @@ pub struct TileService {
     engine: Arc<dyn PdfEngine>,
     cache: TileCache,
     format: ImageFormat,
+    visible: Arc<VisiblePages>,
 }
 
 impl TileService {
@@ -25,6 +27,7 @@ impl TileService {
             engine,
             cache,
             format,
+            visible: Arc::new(VisiblePages::default()),
         }
     }
 
@@ -33,7 +36,15 @@ impl TileService {
         &self.engine
     }
 
-    /// One 512 px tile of a page at `scale_milli / 1000`.
+    /// Records which pages of a document are on screen. Tiles already queued for other pages are
+    /// skipped when the engine reaches them, so fast scrolling doesn't build a backlog.
+    pub fn set_visible_pages(&self, doc: DocId, pages: impl IntoIterator<Item = PageIndex>) {
+        self.visible.set(doc, pages);
+    }
+
+    /// One 512 px tile of a page at `scale_milli / 1000`. Fails with
+    /// [`lumora_engine::EngineError::Cancelled`] if the page is no longer visible by the time the
+    /// engine gets to it.
     #[allow(clippy::too_many_arguments)]
     pub fn tile(
         &self,
@@ -54,16 +65,20 @@ impl TileService {
             rev,
             dark,
         };
+        let visible = Arc::clone(&self.visible);
         self.cached_or_render(key, || {
-            self.engine.render_tile(TileRequest {
-                doc,
-                page,
-                scale: milli_to_scale(scale_milli),
-                tile_x,
-                tile_y,
-                tile_size: DEFAULT_TILE_SIZE,
-                dark_mode: dark,
-            })
+            self.engine.render_tile_if(
+                TileRequest {
+                    doc,
+                    page,
+                    scale: milli_to_scale(scale_milli),
+                    tile_x,
+                    tile_y,
+                    tile_size: DEFAULT_TILE_SIZE,
+                    dark_mode: dark,
+                },
+                Arc::new(move || visible.contains(doc, page)),
+            )
         })
     }
 
@@ -87,6 +102,7 @@ impl TileService {
     /// Forgets every cached image of a document (call when it closes).
     pub fn forget_doc(&self, doc: DocId) {
         self.cache.remove_doc(doc);
+        self.visible.remove(doc);
     }
 
     fn cached_or_render(
@@ -156,6 +172,36 @@ mod tests {
                 pixels: vec![255; (max_px * max_px * 4) as usize],
             })
         }
+
+        fn page_text(
+            &self,
+            _: DocId,
+            _: PageIndex,
+        ) -> Result<lumora_engine::PageText, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn search_page(
+            &self,
+            _: DocId,
+            _: PageIndex,
+            _: &str,
+            _: lumora_engine::SearchOptions,
+        ) -> Result<Vec<lumora_engine::SearchHit>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn outline(&self, _: DocId) -> Result<Vec<lumora_engine::OutlineItem>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn page_links(
+            &self,
+            _: DocId,
+            _: PageIndex,
+        ) -> Result<Vec<lumora_engine::PageLink>, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
+        fn properties(&self, _: DocId) -> Result<lumora_engine::DocProperties, EngineError> {
+            Err(EngineError::Internal("not used".into()))
+        }
     }
 
     fn service() -> (Arc<FakeEngine>, TileService) {
@@ -176,6 +222,20 @@ mod tests {
         // A new revision misses the cache.
         service.tile(1, 0, 1000, 0, 0, 1, false).unwrap();
         assert_eq!(engine.renders.load(Ordering::SeqCst), 2);
+    }
+
+    #[test]
+    fn skips_tiles_of_pages_that_scrolled_away() {
+        let (engine, service) = service();
+        service.set_visible_pages(1, [5, 6]);
+        assert!(matches!(
+            service.tile(1, 0, 1000, 0, 0, 0, false),
+            Err(RenderError::Engine(EngineError::Cancelled))
+        ));
+        assert_eq!(engine.renders.load(Ordering::SeqCst), 0);
+        assert!(service.tile(1, 5, 1000, 0, 0, 0, false).is_ok());
+        // Thumbnails are never skipped.
+        assert!(service.thumbnail(1, 0, 16, 0).is_ok());
     }
 
     #[test]
