@@ -22,7 +22,7 @@ export function Home({ onOpenFile, dragging, opening }: HomeProps) {
               Every page, in good light
             </h1>
             <p className="m-0 text-body text-ink-muted">
-              Every feature is free. Your files open and stay on this device — no account needed.
+              Every feature is free. Your files open and stay on this device, no account needed.
             </p>
           </div>
           <div className="flex items-center gap-2">
