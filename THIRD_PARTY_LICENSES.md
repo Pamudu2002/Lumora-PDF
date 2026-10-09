@@ -47,6 +47,7 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `@radix-ui/react-slot`, `@radix-ui/react-tooltip`, `@radix-ui/react-toggle-group` | Accessible UI primitives | MIT |
 | `lucide-react` | Icons | ISC |
 | `zustand` | UI state | MIT |
+| `i18next`, `react-i18next` | UI strings (i18n layer) | MIT |
 | `@fontsource/newsreader` | Newsreader font files (bundled, brand moments only) | OFL-1.1 (approved for fonts) |
 | `vite`, `@vitejs/plugin-react` | Build tool | MIT |
 | `typescript` | Type checking | Apache-2.0 |

@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource/newsreader/latin-500.css";
 import "@/styles/index.css";
+import "@/i18n";
 import { App } from "@/app/App";
 import { applyTheme, resolveTheme, systemPrefersDark } from "@/lib/theme/theme";
 import { useSettingsStore } from "@/stores/settings";

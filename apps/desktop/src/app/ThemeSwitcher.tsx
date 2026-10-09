@@ -1,21 +1,22 @@
+import { useTranslation } from "react-i18next";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { useSettingsStore, type ThemePreference } from "@/stores/settings";
 
-const THEME_OPTIONS: readonly { value: ThemePreference; label: string }[] = [
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
-];
-
-/** Light / Dark / System theme picker. Moves into Settings in task 1.18. */
+/** Light / Dark / System theme picker. */
 export function ThemeSwitcher() {
+  const { t } = useTranslation();
   const theme = useSettingsStore((s) => s.theme);
   const setTheme = useSettingsStore((s) => s.setTheme);
+  const options: { value: ThemePreference; label: string }[] = [
+    { value: "light", label: t("theme.light") },
+    { value: "dark", label: t("theme.dark") },
+    { value: "system", label: t("theme.system") },
+  ];
   return (
     <SegmentedControl
-      label="Theme"
+      label={t("theme.label")}
       value={theme}
-      options={THEME_OPTIONS}
+      options={options}
       onValueChange={setTheme}
     />
   );

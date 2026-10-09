@@ -1,4 +1,5 @@
 import { FileUp, FolderOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/cn";
@@ -13,23 +14,22 @@ export interface HomeProps {
 
 /** The home screen shown when no document is open. Recent files arrive in task 1.12. */
 export function Home({ onOpenFile, dragging, opening }: HomeProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex h-full justify-center overflow-auto bg-surface px-8 pt-12 pb-8">
       <div className="flex w-full max-w-[1040px] flex-col gap-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 font-display text-display font-medium tracking-[-0.015em] text-ink">
-              Every page, in good light
+              {t("home.greeting")}
             </h1>
-            <p className="m-0 text-body text-ink-muted">
-              Every feature is free. Your files open and stay on this device, no account needed.
-            </p>
+            <p className="m-0 text-body text-ink-muted">{t("home.promise")}</p>
           </div>
           <div className="flex items-center gap-2">
             <ThemeSwitcher />
             <Button variant="primary" onClick={onOpenFile} disabled={opening}>
               <FolderOpen size={16} strokeWidth={1.75} aria-hidden />
-              Open file
+              {t("home.openFile")}
             </Button>
           </div>
         </div>
@@ -47,10 +47,10 @@ export function Home({ onOpenFile, dragging, opening }: HomeProps) {
             <FileUp size={18} strokeWidth={1.75} aria-hidden />
           </span>
           <span className="text-title font-semibold text-ink">
-            {opening ? "Opening…" : "Drop a PDF here"}
+            {opening ? t("home.opening") : t("home.dropTitle")}
           </span>
           <span className="text-label text-ink-muted">
-            Or press <Kbd>Ctrl+O</Kbd> to browse.
+            {t("home.dropHintBefore")} <Kbd>Ctrl+O</Kbd> {t("home.dropHintAfter")}
           </span>
         </button>
       </div>

@@ -1,4 +1,5 @@
 import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Notice";
 import { Viewer } from "@/features/viewer/Viewer";
@@ -9,6 +10,7 @@ import { useAppErrors } from "./useAppErrors";
 import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpening";
 
 export function App() {
+  const { t } = useTranslation();
   useApplyTheme();
   const current = useDocumentsStore((s) => s.current);
   const opening = useDocumentsStore((s) => s.opening);
@@ -28,12 +30,11 @@ export function App() {
             className="m-2 mb-0"
             action={
               <Button size="sm" variant="ghost" onClick={dismissInternalError}>
-                Dismiss
+                {t("app.dismiss")}
               </Button>
             }
           >
-            Something went wrong inside Lumora. Your files are safe; if this keeps happening,
-            restart Lumora PDF. Details were saved to the log.
+            {t("app.internalError")}
           </Notice>
         ) : null}
         {failure ? (
@@ -42,7 +43,7 @@ export function App() {
             className="m-2 mb-0"
             action={
               <Button size="sm" variant="ghost" onClick={dismissFailure}>
-                Dismiss
+                {t("app.dismiss")}
               </Button>
             }
           >
