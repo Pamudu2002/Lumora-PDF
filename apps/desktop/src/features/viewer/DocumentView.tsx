@@ -53,6 +53,9 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   /** Scroll position as of the last scroll event (read before a re-layout clamps it). */
   const lastScroll = useRef({ top: 0, left: 0 });
+  /** Viewport size as last measured, and the latest layout, for saving the position on unmount. */
+  const viewSize = useRef({ width: 0, height: 0 });
+  const latestLayout = useRef<DocLayout | null>(null);
   const [viewport, setViewport] = useState<Viewport>({ top: 0, left: 0, width: 0, height: 0 });
   const dpr = useDevicePixelRatio();
   const view = useDocView(doc.id);
@@ -62,6 +65,9 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const zoomBy = useViewerStore((s) => s.zoomBy);
   const goToPage = useViewerStore((s) => s.goToPage);
   const scrollRequest = useViewerStore((s) => s.scrollRequest);
+  const saveAnchor = useViewerStore((s) => s.saveAnchor);
+  const finishScrollRequest = useViewerStore((s) => s.finishScrollRequest);
+  const consumeSavedAnchor = useViewerStore((s) => s.consumeSavedAnchor);
 
   const sizes = doc.pageSizes;
   const { zoomMode, layout: mode, coverPage, rotation, currentPage } = view;
@@ -124,6 +130,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
         width: el.clientWidth,
         height: el.clientHeight,
       });
+      viewSize.current = { width: el.clientWidth, height: el.clientHeight };
     };
     const onScroll = () => {
       lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
@@ -194,8 +201,21 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     const key = `${zoom}|${mode}|${coverPage}|${rotation}`;
     const prev = previous.current;
     previous.current = { layout, key, measured: vw > 0 };
-    // The first measured layout (fit zoom applied on open) keeps the document at the top.
-    if (!el || !prev || !prev.measured || prev.key === key) return;
+    // Only a measured layout is worth saving (React may unmount once before the first measure).
+    if (vw > 0) latestLayout.current = layout;
+    // The first measured layout goes back to where the reader left this document (switching tabs)
+    // or stays at the top (just opened).
+    if (el && vw > 0 && !prev?.measured) {
+      const saved = consumeSavedAnchor(doc.id);
+      const pos = saved ? anchorPosition(layout, saved) : null;
+      if (pos) {
+        el.scrollLeft = pos.x - el.clientWidth / 2;
+        el.scrollTop = pos.y - el.clientHeight / 2;
+        lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
+      }
+      return;
+    }
+    if (!el || !prev || prev.key === key) return;
     const anchorClient = consumeZoomAnchor(doc.id);
     const bounds = el.getBoundingClientRect();
     const ax = anchorClient ? anchorClient.clientX - bounds.left : el.clientWidth / 2;
@@ -207,7 +227,24 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     el.scrollLeft = pos.x - ax;
     el.scrollTop = pos.y - ay;
     lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
-  }, [layout, zoom, mode, coverPage, rotation, vw, doc.id, consumeZoomAnchor]);
+  }, [layout, zoom, mode, coverPage, rotation, vw, doc.id, consumeZoomAnchor, consumeSavedAnchor]);
+
+  // Remember the position (the page point at the viewport centre) when the view goes away.
+  useEffect(() => {
+    const scroll = lastScroll;
+    const size = viewSize;
+    const latest = latestLayout;
+    return () => {
+      const { width, height } = size.current;
+      if (!latest.current || width === 0) return;
+      const anchor = anchorAt(
+        latest.current,
+        scroll.current.left + width / 2,
+        scroll.current.top + height / 2,
+      );
+      if (anchor) saveAnchor(doc.id, anchor);
+    };
+  }, [doc.id, saveAnchor]);
 
   // Go-to-page requests (page input, thumbnails, outline, links, search).
   const handledRequest = useRef(0);
@@ -216,6 +253,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     if (!el || !scrollRequest || scrollRequest.docId !== doc.id || vw === 0) return;
     if (handledRequest.current === scrollRequest.nonce) return;
     handledRequest.current = scrollRequest.nonce;
+    finishScrollRequest(scrollRequest.nonce);
     const box = layout.pages[scrollRequest.page];
     const size = sizes[scrollRequest.page];
     if (!box || !size) return;
@@ -245,7 +283,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       if (scrollRequest.x !== undefined) el.scrollLeft = tx - el.clientWidth / 2;
     }
     lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
-  }, [scrollRequest, layout, sizes, zoom, rotation, doc.id, vw]);
+  }, [scrollRequest, layout, sizes, zoom, rotation, doc.id, vw, finishScrollRequest]);
 
   // Report the page the reader is on.
   useEffect(() => {

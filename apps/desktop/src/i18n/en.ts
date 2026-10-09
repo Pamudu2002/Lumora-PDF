@@ -3,6 +3,8 @@
 export const en = {
   app: {
     name: "Lumora PDF",
+    wordmark: "Lumora",
+    wordmarkSuffix: "PDF",
     internalError:
       "Something went wrong inside Lumora. Your files are safe; if this keeps happening, restart Lumora PDF. Details were saved to the log.",
     dismiss: "Dismiss",
@@ -108,6 +110,15 @@ export const en = {
     blockedTitle: "Lumora can't open this link",
     blocked: "Only web and email links can be opened from a document.",
     ok: "OK",
+  },
+  tabs: {
+    label: "Open documents",
+    close: "Close {{name}}",
+    unsaved: "Unsaved changes",
+    confirmTitle: "Close {{name}} without saving?",
+    confirmBody: "The changes you made to this file will be lost.",
+    confirm: "Close without saving",
+    cancel: "Cancel",
   },
   toolbar: {
     label: "Tools",

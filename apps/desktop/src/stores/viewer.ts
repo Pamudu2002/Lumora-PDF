@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { LayoutMode, Rotation } from "@/features/viewer/layout";
+import type { LayoutMode, PageAnchor, Rotation } from "@/features/viewer/layout";
 
 /** Zoom presets (1 = 100%) for the zoom buttons and Ctrl+= / Ctrl+-. */
 export const ZOOM_PRESETS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4] as const;
@@ -60,6 +60,8 @@ interface ViewerState {
   views: Record<number, DocView>;
   zoomAnchor: { docId: number; anchor: ZoomAnchor } | null;
   scrollRequest: ScrollRequest | null;
+  /** Where each document was scrolled to when its view was last unmounted (tab switch). */
+  savedAnchors: Record<number, PageAnchor>;
   init: (docId: number, initial?: Partial<DocView>) => void;
   remove: (docId: number) => void;
   setZoom: (docId: number, zoom: number, anchor?: ZoomAnchor) => void;
@@ -78,6 +80,10 @@ interface ViewerState {
     at?: { x?: number; y?: number; ifHidden?: boolean },
   ) => void;
   consumeZoomAnchor: (docId: number) => ZoomAnchor | null;
+  /** Marks a scroll request as handled, so a view mounted later (tab switch) does not repeat it. */
+  finishScrollRequest: (nonce: number) => void;
+  saveAnchor: (docId: number, anchor: PageAnchor) => void;
+  consumeSavedAnchor: (docId: number) => PageAnchor | null;
 }
 
 export function clampZoom(zoom: number): number {
@@ -108,15 +114,16 @@ export const useViewerStore = create<ViewerState>()((set, get) => {
     views: {},
     zoomAnchor: null,
     scrollRequest: null,
+    savedAnchors: {},
 
     init: (docId, initial) => {
       if (get().views[docId]) return;
       update(docId, { ...DEFAULT_VIEW, ...initial });
     },
     remove: (docId) => {
-      set((s) => ({
-        views: Object.fromEntries(Object.entries(s.views).filter(([id]) => Number(id) !== docId)),
-      }));
+      const others = <T>(record: Record<number, T>) =>
+        Object.fromEntries(Object.entries(record).filter(([id]) => Number(id) !== docId));
+      set((s) => ({ views: others(s.views), savedAnchors: others(s.savedAnchors) }));
     },
     setZoom: (docId, zoom, anchor) => {
       if (anchor) set({ zoomAnchor: { docId, anchor } });
@@ -157,6 +164,22 @@ export const useViewerStore = create<ViewerState>()((set, get) => {
       if (!pending || pending.docId !== docId) return null;
       set({ zoomAnchor: null });
       return pending.anchor;
+    },
+    finishScrollRequest: (handled) => {
+      if (get().scrollRequest?.nonce === handled) set({ scrollRequest: null });
+    },
+    saveAnchor: (docId, anchor) => {
+      set((s) => ({ savedAnchors: { ...s.savedAnchors, [docId]: anchor } }));
+    },
+    consumeSavedAnchor: (docId) => {
+      const saved = get().savedAnchors[docId];
+      if (!saved) return null;
+      set((s) => ({
+        savedAnchors: Object.fromEntries(
+          Object.entries(s.savedAnchors).filter(([id]) => Number(id) !== docId),
+        ),
+      }));
+      return saved;
     },
   };
 });

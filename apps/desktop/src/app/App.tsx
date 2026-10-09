@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Notice";
 import { Viewer } from "@/features/viewer/Viewer";
 import { useApplyTheme } from "@/lib/theme/useApplyTheme";
-import { useDocumentsStore } from "@/stores/documents";
+import { TabStrip } from "@/features/tabs/TabStrip";
+import { UnsavedChangesDialog } from "@/features/tabs/UnsavedChangesDialog";
+import { selectActiveDoc, useDocumentsStore } from "@/stores/documents";
 import { Home } from "./Home";
 import { useAppErrors } from "./useAppErrors";
 import { useSearchEvents } from "./useSearchEvents";
@@ -13,7 +15,8 @@ import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpenin
 export function App() {
   const { t } = useTranslation();
   useApplyTheme();
-  const current = useDocumentsStore((s) => s.current);
+  const current = useDocumentsStore(selectActiveDoc);
+  const hasDocs = useDocumentsStore((s) => s.docs.length > 0);
   const opening = useDocumentsStore((s) => s.opening);
   const failure = useDocumentsStore((s) => s.failure);
   const dismissFailure = useDocumentsStore((s) => s.dismissFailure);
@@ -52,6 +55,7 @@ export function App() {
             <span className="font-semibold">{failure.fileName}</span> — {failure.message}
           </Notice>
         ) : null}
+        {hasDocs ? <TabStrip onOpenFile={() => void openFileDialog()} /> : null}
         <div className="min-h-0 flex-1">
           {current ? (
             <Viewer key={current.id} doc={current} />
@@ -60,6 +64,7 @@ export function App() {
           )}
         </div>
       </div>
+      <UnsavedChangesDialog />
     </TooltipProvider>
   );
 }

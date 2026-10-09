@@ -36,7 +36,14 @@ function mockReport(other: (cmd: string) => unknown = () => undefined) {
 }
 
 afterEach(() => {
-  useDocumentsStore.setState({ current: null, opening: false, failure: null });
+  useDocumentsStore.setState({
+    docs: [],
+    activeId: null,
+    dirty: {},
+    pendingClose: null,
+    opening: false,
+    failure: null,
+  });
 });
 
 describe("App", () => {
@@ -59,7 +66,7 @@ describe("App", () => {
     render(<App />);
     await act(() => useDocumentsStore.getState().open("C:\\docs\\report.pdf"));
 
-    expect(screen.getByText("report.pdf")).toBeDefined();
+    expect(screen.getByRole("tab", { name: "report.pdf", selected: true })).toBeDefined();
     // The sidebar lists page thumbnails, with the first page current.
     expect(screen.getByRole("button", { name: "Page 1" }).getAttribute("aria-current")).toBe(
       "page",

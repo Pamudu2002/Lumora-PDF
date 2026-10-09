@@ -90,7 +90,7 @@ function useViewerShortcuts(docId: number) {
         "2": () => {
           setZoomMode(docId, "fitWidth");
         },
-        w: () => void close(),
+        w: () => void close(docId),
       };
       const action = actions[e.key.toLowerCase()];
       if (action) {
@@ -147,7 +147,6 @@ function usePageKeys(docId: number, pageCount: number) {
 function useFind(docId: number) {
   const openFind = useSearchStore((s) => s.openFind);
   const step = useSearchStore((s) => s.step);
-  const clear = useSearchStore((s) => s.clear);
   const goToPage = useViewerStore((s) => s.goToPage);
   const activeNonce = useSearchStore((s) => s.searches[docId]?.activeNonce ?? 0);
 
@@ -179,11 +178,4 @@ function useFind(docId: number) {
       rect ? { x: rect.x + rect.width / 2, y: rect.y, ifHidden: true } : undefined,
     );
   }, [docId, activeNonce, goToPage]);
-
-  useEffect(
-    () => () => {
-      clear(docId);
-    },
-    [docId, clear],
-  );
 }
