@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use lumora_engine::{DocId, OutlineItem, PageIndex, PageText};
+use lumora_engine::{DocId, OutlineItem, PageIndex, PageLink, PageText};
 use tauri::State;
 
 use super::blocking;
@@ -30,4 +30,16 @@ pub async fn get_page_text(
 ) -> Result<PageText, AppError> {
     let engine = Arc::clone(state.core()?.tiles.engine());
     blocking(move || engine.page_text(doc_id, page).map_err(AppError::from)).await
+}
+
+/// The links on one page: areas that go to another page or to a URL.
+#[tauri::command]
+#[specta::specta]
+pub async fn get_page_links(
+    state: State<'_, AppState>,
+    doc_id: DocId,
+    page: PageIndex,
+) -> Result<Vec<PageLink>, AppError> {
+    let engine = Arc::clone(state.core()?.tiles.engine());
+    blocking(move || engine.page_links(doc_id, page).map_err(AppError::from)).await
 }

@@ -9,7 +9,7 @@ export function isWidgetKeyTarget(target: EventTarget | null): boolean {
   if (target.isContentEditable) return true;
   return (
     target.closest(
-      'input, textarea, select, [role="menu"], [role="menubar"], [role="listbox"], [role="dialog"], [role="tree"], [role="tablist"], [role="slider"], [role="radiogroup"]',
+      'input, textarea, select, [role="menu"], [role="menubar"], [role="listbox"], [role="dialog"], [role="alertdialog"], [role="tree"], [role="tablist"], [role="slider"], [role="radiogroup"]',
     ) !== null
   );
 }

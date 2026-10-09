@@ -97,6 +97,18 @@ export const en = {
     truncated: "Showing the first {{count}} results.",
     progress: "Searched {{searched}} of {{total}} pages",
   },
+  links: {
+    goToPage: "Go to page {{page}}",
+    open: "Open {{url}}",
+    confirmTitle: "Open this link?",
+    confirmWeb: "This document links to a website. It will open in your browser.",
+    confirmMail: "This document links to an email address. It will open in your email app.",
+    confirm: "Open link",
+    cancel: "Cancel",
+    blockedTitle: "Lumora can't open this link",
+    blocked: "Only web and email links can be opened from a document.",
+    ok: "OK",
+  },
   toolbar: {
     label: "Tools",
     groups: "Tool groups",

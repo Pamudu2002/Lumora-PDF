@@ -16,6 +16,7 @@ import {
   singlePageLayout,
   type DocLayout,
 } from "./layout";
+import { LinkLayer } from "./LinkLayer";
 import { PageView } from "./PageView";
 import { SearchHighlights } from "./SearchHighlights";
 import { textLayerSelection } from "./textCopy";
@@ -315,6 +316,12 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
               >
                 <SearchHighlights docId={doc.id} page={page} scale={zoom * PT_TO_CSS} dark={dark} />
                 <TextLayer
+                  docId={doc.id}
+                  page={page}
+                  revision={doc.revision}
+                  scale={zoom * PT_TO_CSS}
+                />
+                <LinkLayer
                   docId={doc.id}
                   page={page}
                   revision={doc.revision}

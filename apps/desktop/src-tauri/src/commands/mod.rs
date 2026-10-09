@@ -2,6 +2,7 @@
 
 pub mod content;
 pub mod documents;
+pub mod links;
 pub mod search;
 pub mod view;
 

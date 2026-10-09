@@ -6,12 +6,13 @@ import {
   type AppError,
   type DocInfo,
   type EngineErrorKind,
+  type LinkTarget,
   type OutlineItem,
   type Rect as RawRect,
   type SearchOptions,
 } from "./bindings";
 
-export type { DocInfo, EngineErrorKind, OutlineItem, SearchOptions };
+export type { DocInfo, EngineErrorKind, LinkTarget, OutlineItem, SearchOptions };
 
 /** A rectangle in display points (top-left origin). */
 export interface Rect {
@@ -179,4 +180,26 @@ export async function onSearchProgress(
       truncated: progress.truncated,
     });
   });
+}
+
+/** A clickable link area on a page. */
+export interface PageLink {
+  rect: Rect;
+  target: LinkTarget;
+}
+
+/** The links on one page. Throws {@link IpcError} on failure. */
+export async function getPageLinks(docId: number, page: number): Promise<PageLink[]> {
+  const raw = unwrap(await commands.getPageLinks(docId, page));
+  const links: PageLink[] = [];
+  for (const link of raw) {
+    const rect = finiteRect(link.rect);
+    if (rect) links.push({ rect, target: link.target });
+  }
+  return links;
+}
+
+/** Opens a web or email link in the system's default app. Ask the user before calling this. */
+export async function openExternalLink(url: string): Promise<void> {
+  unwrap(await commands.openExternalLink(url));
 }

@@ -6,6 +6,7 @@ import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_VIEW, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
+import { ExternalLinkDialog } from "./ExternalLinkDialog";
 import { FindBar } from "./FindBar";
 import { isWidgetKeyTarget } from "./focus";
 import { stepPage } from "./layout";
@@ -39,6 +40,7 @@ export function Viewer({ doc }: ViewerProps) {
           <DocumentView doc={doc} dark={false} />
           <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
           {findOpen ? <FindBar docId={doc.id} /> : null}
+          <ExternalLinkDialog />
         </main>
       </div>
     </div>

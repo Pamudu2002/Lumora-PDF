@@ -16,6 +16,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::view::set_visible_pages,
             commands::content::get_outline,
             commands::content::get_page_text,
+            commands::content::get_page_links,
+            commands::links::open_external_link,
             commands::search::start_search,
             commands::search::cancel_search,
         ])

@@ -1,7 +1,7 @@
 import { memo, useMemo, type MouseEvent } from "react";
 import { TEXT_LAYER_FONT, textWidthAt100px } from "@/lib/measureText";
 import { layoutText } from "./textLayout";
-import { usePageText } from "./usePageText";
+import { usePageText } from "./usePageData";
 
 export interface TextLayerProps {
   docId: number;

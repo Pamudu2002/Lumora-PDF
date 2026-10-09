@@ -20,6 +20,10 @@ export const commands = {
 	getOutline: (docId: number) => typedError<OutlineItem[], AppError>(__TAURI_INVOKE("get_outline", { docId })),
 	/**  The text runs of one page with their positions, for the selectable text layer. */
 	getPageText: (docId: number, page: number) => typedError<PageText, AppError>(__TAURI_INVOKE("get_page_text", { docId, page })),
+	/**  The links on one page: areas that go to another page or to a URL. */
+	getPageLinks: (docId: number, page: number) => typedError<PageLink[], AppError>(__TAURI_INVOKE("get_page_links", { docId, page })),
+	/**  Opens a link from a document in the default browser or mail app. The UI asks the user first. */
+	openExternalLink: (url: string) => typedError<null, AppError>(__TAURI_INVOKE("open_external_link", { url })),
 	/**
 	 *  Starts searching a document for `query`, beginning at `start_page` and wrapping around.
 	 *  Cancels the document's previous search. Results arrive as [`SearchProgressEvent`]s.
@@ -116,6 +120,17 @@ export type EngineErrorKind =
 /**  See [`EngineError::Internal`]. */
 "internal";
 
+/**  Where a link goes. */
+export type LinkTarget = 
+/**  A page in this document. */
+{ kind: "page"; 
+/**  Target page. */
+page: number } | 
+/**  A web or mail address. Opened only after the user confirms. */
+{ kind: "uri"; 
+/**  The address. */
+uri: string };
+
 /**  An outline (bookmark) entry. */
 export type OutlineItem = {
 	/**  Entry title. */
@@ -124,6 +139,14 @@ export type OutlineItem = {
 	page: number | null,
 	/**  Nested entries. */
 	children: OutlineItem[],
+};
+
+/**  A clickable link area on a page. */
+export type PageLink = {
+	/**  The clickable area. */
+	rect: Rect,
+	/**  Where it goes. */
+	target: LinkTarget,
 };
 
 /**  A page's display size in PDF points (1/72 inch), with the page's /Rotate already applied. */
