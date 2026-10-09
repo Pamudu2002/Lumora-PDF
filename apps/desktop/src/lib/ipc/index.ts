@@ -6,9 +6,37 @@ import {
   type DocInfo,
   type EngineErrorKind,
   type OutlineItem,
+  type Rect as RawRect,
 } from "./bindings";
 
 export type { DocInfo, EngineErrorKind, OutlineItem };
+
+/** A rectangle in display points (top-left origin). */
+export interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** A run of text on one line and where it's drawn. */
+export interface TextRun {
+  text: string;
+  rect: Rect;
+}
+
+/** The text of one page, in reading order. */
+export interface PageText {
+  runs: TextRun[];
+}
+
+/** A rect with every coordinate present, or null (floats that weren't finite arrive as null). */
+function finiteRect(r: RawRect): Rect | null {
+  const { x, y, width, height } = r;
+  return x === null || y === null || width === null || height === null
+    ? null
+    : { x, y, width, height };
+}
 
 /** A page's display size in points. */
 export interface PageSize {
@@ -72,4 +100,15 @@ export async function setVisiblePages(docId: number, pages: number[]): Promise<v
 /** The document outline (bookmarks). Throws {@link IpcError} on failure. */
 export async function getOutline(docId: number): Promise<OutlineItem[]> {
   return unwrap(await commands.getOutline(docId));
+}
+
+/** The text runs of one page, positioned in display points. Throws {@link IpcError} on failure. */
+export async function getPageText(docId: number, page: number): Promise<PageText> {
+  const raw = unwrap(await commands.getPageText(docId, page));
+  const runs: TextRun[] = [];
+  for (const run of raw.runs) {
+    const rect = finiteRect(run.rect);
+    if (rect) runs.push({ text: run.text, rect });
+  }
+  return { runs };
 }

@@ -64,7 +64,7 @@ describe("App", () => {
       "page",
     );
     expect(pageField().value).toBe("1");
-    const page = screen.getByRole("img", { name: "Page 1" });
+    const page = screen.getByRole("group", { name: "Page 1" });
     const tiles = page.querySelectorAll("img");
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles[0]?.getAttribute("src")).toContain("tile/7/0/");

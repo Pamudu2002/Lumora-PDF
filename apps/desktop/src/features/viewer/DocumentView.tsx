@@ -17,6 +17,8 @@ import {
   type DocLayout,
 } from "./layout";
 import { PageView } from "./PageView";
+import { textLayerSelection } from "./textCopy";
+import { TextLayer } from "./TextLayer";
 import { contentToBox } from "./rotation";
 
 /** Zoom change per pixel of Ctrl+wheel / pinch movement. */
@@ -259,6 +261,14 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       ref={scrollRef}
       tabIndex={0}
       data-document-view={doc.id}
+      onCopy={(e) => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const text = textLayerSelection(selection.getRangeAt(0), e.currentTarget);
+        if (text === null) return;
+        e.preventDefault();
+        e.clipboardData.setData("text/plain", text);
+      }}
       aria-label={t("viewer.document")}
       className="absolute inset-0 overflow-x-auto overflow-y-scroll bg-canvas outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
     >
@@ -289,7 +299,14 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
                   w: vw,
                   h: vh,
                 }}
-              />
+              >
+                <TextLayer
+                  docId={doc.id}
+                  page={page}
+                  revision={doc.revision}
+                  scale={zoom * PT_TO_CSS}
+                />
+              </PageView>
             );
           })}
         </div>

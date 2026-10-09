@@ -18,6 +18,8 @@ export const commands = {
 	setVisiblePages: (docId: number, pages: number[]) => typedError<null, AppError>(__TAURI_INVOKE("set_visible_pages", { docId, pages })),
 	/**  The document outline (bookmarks); empty when the document has none. */
 	getOutline: (docId: number) => typedError<OutlineItem[], AppError>(__TAURI_INVOKE("get_outline", { docId })),
+	/**  The text runs of one page with their positions, for the selectable text layer. */
+	getPageText: (docId: number, page: number) => typedError<PageText, AppError>(__TAURI_INVOKE("get_page_text", { docId, page })),
 };
 
 /** Events */
@@ -122,6 +124,32 @@ export type PageSize = {
 	widthPt: number | null,
 	/**  Height as displayed. */
 	heightPt: number | null,
+};
+
+/**  The text of one page, in reading order. */
+export type PageText = {
+	/**  Text runs; consecutive runs on different lines are separated by a line break when copied. */
+	runs: TextRun[],
+};
+
+/**  A rectangle in display points. */
+export type Rect = {
+	/**  Left edge. */
+	x: number | null,
+	/**  Top edge. */
+	y: number | null,
+	/**  Width. */
+	width: number | null,
+	/**  Height. */
+	height: number | null,
+};
+
+/**  A run of text on one line, as PDFium groups it. */
+export type TextRun = {
+	/**  The characters, in reading order. */
+	text: string,
+	/**  Where the run is drawn. */
+	rect: Rect,
 };
 
 /* Tauri Specta runtime */

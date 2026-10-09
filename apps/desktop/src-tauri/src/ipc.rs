@@ -15,6 +15,7 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::documents::close_document,
             commands::view::set_visible_pages,
             commands::content::get_outline,
+            commands::content::get_page_text,
         ])
         .events(collect_events![logging::AppErrorEvent])
 }

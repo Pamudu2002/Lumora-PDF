@@ -79,7 +79,7 @@ export const PageView = memo(function PageView({
 
   return (
     <div
-      role="img"
+      role="group"
       aria-label={t("viewer.pageLabel", { page: page + 1 })}
       data-page={page}
       className="absolute overflow-hidden bg-paper shadow-page"
