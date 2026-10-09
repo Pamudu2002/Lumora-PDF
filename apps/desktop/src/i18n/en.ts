@@ -67,6 +67,14 @@ export const en = {
     findResults: "Find results",
     pages: "Pages",
   },
+  outline: {
+    loading: "Loading the outline…",
+    empty: "This document has no outline.",
+    error: "Lumora couldn't read this document's outline.",
+    expand: "Expand {{title}}",
+    collapse: "Collapse {{title}}",
+    noTarget: "This entry doesn't point to a page.",
+  },
   toolbar: {
     label: "Tools",
     groups: "Tool groups",

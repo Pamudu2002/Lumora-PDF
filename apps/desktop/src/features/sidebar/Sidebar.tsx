@@ -1,9 +1,10 @@
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, ListTree } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import type { OpenDocument } from "@/lib/ipc";
 import { useUiStore, type SidebarTab } from "@/stores/ui";
+import { OutlinePanel } from "./OutlinePanel";
 import { ThumbnailsPanel } from "./ThumbnailsPanel";
 
 const ICON = { size: 18, strokeWidth: 1.75 } as const;
@@ -20,6 +21,7 @@ export function Sidebar({ doc }: SidebarProps) {
 
   const tabs: { id: SidebarTab; label: string; icon: ReactNode }[] = [
     { id: "thumbnails", label: t("sidebar.thumbnails"), icon: <LayoutGrid {...ICON} /> },
+    { id: "outline", label: t("sidebar.outline"), icon: <ListTree {...ICON} /> },
   ];
   const active = tabs.some((x) => x.id === tab) ? tab : "thumbnails";
 
@@ -52,6 +54,14 @@ export function Sidebar({ doc }: SidebarProps) {
             </span>
           </div>
           <ThumbnailsPanel doc={doc} />
+        </>
+      ) : null}
+      {active === "outline" ? (
+        <>
+          <div className="px-4 pt-3 pb-2">
+            <h2 className="m-0 text-title font-semibold">{t("sidebar.outline")}</h2>
+          </div>
+          <OutlinePanel docId={doc.id} />
         </>
       ) : null}
     </aside>

@@ -1,8 +1,14 @@
 // Typed wrappers over the generated tauri-specta bindings. UI code imports from here, not from
 // ./bindings directly, so results are unwrapped and IPC types are normalized in one place.
-import { commands, type AppError, type DocInfo, type EngineErrorKind } from "./bindings";
+import {
+  commands,
+  type AppError,
+  type DocInfo,
+  type EngineErrorKind,
+  type OutlineItem,
+} from "./bindings";
 
-export type { DocInfo, EngineErrorKind };
+export type { DocInfo, EngineErrorKind, OutlineItem };
 
 /** A page's display size in points. */
 export interface PageSize {
@@ -61,4 +67,9 @@ export async function closeDocument(docId: number): Promise<void> {
 /** Tells the renderer which pages are mounted, so queued tiles of other pages are skipped. */
 export async function setVisiblePages(docId: number, pages: number[]): Promise<void> {
   unwrap(await commands.setVisiblePages(docId, pages));
+}
+
+/** The document outline (bookmarks). Throws {@link IpcError} on failure. */
+export async function getOutline(docId: number): Promise<OutlineItem[]> {
+  return unwrap(await commands.getOutline(docId));
 }

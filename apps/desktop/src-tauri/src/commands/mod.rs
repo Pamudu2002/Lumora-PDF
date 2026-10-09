@@ -1,5 +1,6 @@
 //! Tauri commands. Keep them thin: validate input, then call `lumora-core` on a blocking thread.
 
+pub mod content;
 pub mod documents;
 pub mod view;
 

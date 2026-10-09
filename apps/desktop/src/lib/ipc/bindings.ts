@@ -16,6 +16,8 @@ export const commands = {
 	 *  so fast scrolling doesn't leave a backlog of renders nobody will see.
 	 */
 	setVisiblePages: (docId: number, pages: number[]) => typedError<null, AppError>(__TAURI_INVOKE("set_visible_pages", { docId, pages })),
+	/**  The document outline (bookmarks); empty when the document has none. */
+	getOutline: (docId: number) => typedError<OutlineItem[], AppError>(__TAURI_INVOKE("get_outline", { docId })),
 };
 
 /** Events */
@@ -103,6 +105,16 @@ export type EngineErrorKind =
 "workerStopped" | 
 /**  See [`EngineError::Internal`]. */
 "internal";
+
+/**  An outline (bookmark) entry. */
+export type OutlineItem = {
+	/**  Entry title. */
+	title: string,
+	/**  Target page, if the entry points at one in this document. */
+	page: number | null,
+	/**  Nested entries. */
+	children: OutlineItem[],
+};
 
 /**  A page's display size in PDF points (1/72 inch), with the page's /Rotate already applied. */
 export type PageSize = {
