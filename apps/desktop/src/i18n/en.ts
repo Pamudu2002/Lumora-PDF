@@ -125,6 +125,14 @@ export const en = {
     today: "Today, {{time}}",
     yesterday: "Yesterday",
   },
+  password: {
+    title: "Enter the password",
+    body: "{{name}} is protected. Enter its password to open it.",
+    label: "Password",
+    show: "Show password",
+    submit: "Open file",
+    cancel: "Cancel",
+  },
   tabs: {
     label: "Open documents",
     close: "Close {{name}}",

@@ -7,8 +7,11 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 
 /** Commands */
 export const commands = {
-	/**  Opens the PDF at `path`, adds it to the recent files and returns what the UI needs to show it. */
-	openDocument: (path: string) => typedError<OpenedDocument, AppError>(__TAURI_INVOKE("open_document", { path })),
+	/**
+	 *  Opens the PDF at `path` (with `password` for a protected file), adds it to the recent files
+	 *  and returns what the UI needs to show it. The password is never logged or stored.
+	 */
+	openDocument: (path: string, password: string | null) => typedError<OpenedDocument, AppError>(__TAURI_INVOKE("open_document", { path, password })),
 	/**  Closes a document and drops its cached tiles. */
 	closeDocument: (docId: number) => typedError<null, AppError>(__TAURI_INVOKE("close_document", { docId })),
 	/**

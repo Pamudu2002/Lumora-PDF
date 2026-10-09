@@ -78,9 +78,15 @@ function unwrap<T>(result: { status: "ok"; data: T } | { status: "error"; error:
   return result.data;
 }
 
-/** Opens a PDF (and adds it to the recent files). Throws {@link IpcError} on failure. */
-export async function openDocument(path: string): Promise<{ doc: OpenDocument; view: SavedView }> {
-  const { document, view } = unwrap(await commands.openDocument(path));
+/**
+ * Opens a PDF (and adds it to the recent files). Pass the password for a protected file. Throws
+ * {@link IpcError} on failure (kind `passwordRequired` or `wrongPassword` for protected files).
+ */
+export async function openDocument(
+  path: string,
+  password?: string,
+): Promise<{ doc: OpenDocument; view: SavedView }> {
+  const { document, view } = unwrap(await commands.openDocument(path, password ?? null));
   const doc = {
     ...document,
     // Rust guarantees finite sizes; specta types f32 as `number | null` because JSON can't hold NaN.

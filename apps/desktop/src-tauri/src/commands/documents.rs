@@ -23,17 +23,19 @@ pub struct OpenedDocument {
     pub view: SavedView,
 }
 
-/// Opens the PDF at `path`, adds it to the recent files and returns what the UI needs to show it.
+/// Opens the PDF at `path` (with `password` for a protected file), adds it to the recent files
+/// and returns what the UI needs to show it. The password is never logged or stored.
 #[tauri::command]
 #[specta::specta]
 pub async fn open_document(
     state: State<'_, AppState>,
     path: String,
+    password: Option<String>,
 ) -> Result<OpenedDocument, AppError> {
     let documents = Arc::clone(&state.core()?.documents);
     let store = state.store();
     blocking(move || {
-        let document = documents.open(&PathBuf::from(&path), None)?;
+        let document = documents.open(&PathBuf::from(&path), password)?;
         let view = store
             .and_then(|store| {
                 store

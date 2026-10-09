@@ -8,6 +8,7 @@ import { TabStrip } from "@/features/tabs/TabStrip";
 import { UnsavedChangesDialog } from "@/features/tabs/UnsavedChangesDialog";
 import { selectActiveDoc, useDocumentsStore } from "@/stores/documents";
 import { Home } from "./Home";
+import { PasswordDialog } from "./PasswordDialog";
 import { useAppErrors } from "./useAppErrors";
 import { useSearchEvents } from "./useSearchEvents";
 import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpening";
@@ -71,6 +72,7 @@ export function App() {
         </div>
       </div>
       <UnsavedChangesDialog />
+      <PasswordDialog />
     </TooltipProvider>
   );
 }

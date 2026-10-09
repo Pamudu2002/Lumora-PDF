@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { openErrorMessage } from "@/lib/errors";
 import {
+  IpcError,
   closeDocument,
   openDocument,
   saveView,
@@ -58,8 +59,13 @@ interface DocumentsState {
   opening: boolean;
   /** The last failure, shown until dismissed or the next open. */
   failure: OpenFailure | null;
+  /** A protected file waiting for its password; `wrong` after a password that didn't work. */
+  passwordPrompt: { path: string; fileName: string; wrong: boolean } | null;
   /** Opens a file in a new tab, or switches to its tab if it's already open. */
-  open: (path: string) => Promise<void>;
+  open: (path: string, password?: string) => Promise<void>;
+  /** Tries the password for the file in {@link passwordPrompt}. */
+  submitPassword: (password: string) => Promise<void>;
+  cancelPassword: () => void;
   activate: (docId: number) => void;
   /** Activates the next (`dir` 1) or previous tab, wrapping around. */
   activateNext: (dir: 1 | -1) => void;
@@ -116,8 +122,9 @@ export const useDocumentsStore = create<DocumentsState>()((set, get) => {
     pendingClose: null,
     opening: false,
     failure: null,
+    passwordPrompt: null,
 
-    open: async (path) => {
+    open: async (path, password) => {
       const existing = get().docs.find((d) => samePath(d.path, path));
       if (existing) {
         set({ activeId: existing.id, failure: null });
@@ -125,19 +132,48 @@ export const useDocumentsStore = create<DocumentsState>()((set, get) => {
       }
       set({ opening: true, failure: null });
       try {
-        const { doc, view } = await openDocument(path);
+        const { doc, view } = await openDocument(path, password);
         const restored = restoredView(view, doc.info.pageCount);
         useViewerStore.getState().init(doc.id, restored);
         if (restored.currentPage !== undefined) {
           useViewerStore.getState().goToPage(doc.id, restored.currentPage);
         }
-        set((s) => ({ docs: [...s.docs, doc], activeId: doc.id, opening: false }));
+        set((s) => ({
+          docs: [...s.docs, doc],
+          activeId: doc.id,
+          opening: false,
+          passwordPrompt: null,
+        }));
       } catch (error) {
+        if (
+          error instanceof IpcError &&
+          (error.kind === "passwordRequired" || error.kind === "wrongPassword")
+        ) {
+          set({
+            opening: false,
+            passwordPrompt: {
+              path,
+              fileName: fileNameOf(path),
+              wrong: error.kind === "wrongPassword",
+            },
+          });
+          return;
+        }
         set({
+          passwordPrompt: null,
           opening: false,
           failure: { fileName: fileNameOf(path), message: openErrorMessage(error) },
         });
       }
+    },
+
+    submitPassword: async (password) => {
+      const prompt = get().passwordPrompt;
+      if (prompt) await get().open(prompt.path, password);
+    },
+
+    cancelPassword: () => {
+      set({ passwordPrompt: null });
     },
 
     activate: (docId) => {
