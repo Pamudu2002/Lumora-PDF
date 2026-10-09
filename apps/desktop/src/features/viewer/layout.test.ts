@@ -12,6 +12,7 @@ import {
   pagesInRange,
   rowAt,
   singlePageLayout,
+  stepPage,
   type LayoutOptions,
 } from "./layout";
 
@@ -149,5 +150,28 @@ describe("singlePageLayout", () => {
     expect(layout.pages[1]?.y).toBe(PAGE_GAP);
     expect(layout.rows).toEqual([{ top: PAGE_GAP, height: 792 * PT_TO_CSS, pages: [1] }]);
     expect(currentPageAt(layout, 0, 800)).toBe(1);
+  });
+});
+
+describe("stepPage", () => {
+  it("moves one page at a time in single and continuous layouts", () => {
+    expect(stepPage(5, "continuous", false, 2, 1)).toBe(3);
+    expect(stepPage(5, "single", false, 2, -1)).toBe(1);
+    expect(stepPage(5, "continuous", false, 4, 1)).toBe(4);
+    expect(stepPage(5, "continuous", false, 0, -1)).toBe(0);
+  });
+
+  it("moves a spread at a time in two-page layouts", () => {
+    expect(stepPage(6, "twoPage", false, 1, 1)).toBe(2);
+    expect(stepPage(6, "twoPage", false, 3, -1)).toBe(0);
+    // With a cover page the spreads are [0] [1,2] [3,4] [5].
+    expect(stepPage(6, "twoPage", true, 0, 1)).toBe(1);
+    expect(stepPage(6, "twoPage", true, 4, 1)).toBe(5);
+    expect(stepPage(6, "twoPage", true, 2, -1)).toBe(0);
+  });
+
+  it("clamps pages outside the document", () => {
+    expect(stepPage(3, "continuous", false, 9, 1)).toBe(2);
+    expect(stepPage(0, "continuous", false, 0, 1)).toBe(0);
   });
 });

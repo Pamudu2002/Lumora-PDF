@@ -2,6 +2,7 @@ import { MoveHorizontal, ZoomIn, ZoomOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import { Menu, MenuItem, MenuSeparator } from "@/components/ui/Menu";
+import { PageInput } from "./PageInput";
 import { MAX_ZOOM, MIN_ZOOM, ZOOM_PRESETS, useDocView, useViewerStore } from "@/stores/viewer";
 
 const ICON = { size: 16, strokeWidth: 1.75 } as const;
@@ -14,7 +15,7 @@ export interface ZoomBarProps {
 /** The floating bar centered above the bottom of the canvas: page and zoom controls. */
 export function ZoomBar({ docId, pageCount }: ZoomBarProps) {
   const { t } = useTranslation();
-  const { zoom, zoomMode, currentPage } = useDocView(docId);
+  const { zoom, zoomMode } = useDocView(docId);
   const zoomStep = useViewerStore((s) => s.zoomStep);
   const setZoom = useViewerStore((s) => s.setZoom);
   const setZoomMode = useViewerStore((s) => s.setZoomMode);
@@ -22,9 +23,7 @@ export function ZoomBar({ docId, pageCount }: ZoomBarProps) {
 
   return (
     <div className="absolute bottom-4 left-1/2 flex h-10 -translate-x-1/2 items-center gap-0.5 rounded-pill border border-line bg-surface-raised px-1 shadow-popover">
-      <span className="px-2 text-label text-ink-muted tabular-nums">
-        {currentPage + 1} / {pageCount}
-      </span>
+      <PageInput docId={docId} pageCount={pageCount} />
       <span aria-hidden className="mx-1.5 h-5 w-px flex-none bg-line" />
       <IconButton
         size="sm"

@@ -258,6 +258,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     <div
       ref={scrollRef}
       tabIndex={0}
+      data-document-view={doc.id}
       aria-label={t("viewer.document")}
       className="absolute inset-0 overflow-x-auto overflow-y-scroll bg-canvas outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
     >

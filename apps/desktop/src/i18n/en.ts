@@ -39,6 +39,8 @@ export const en = {
     pageCount_one: "{{count}} page",
     pageCount_other: "{{count}} pages",
     closeFile: "Close file",
+    goToPage: "Go to page",
+    pageNumber: "Page number, 1 to {{count}}",
   },
   zoom: {
     zoomIn: "Zoom in",

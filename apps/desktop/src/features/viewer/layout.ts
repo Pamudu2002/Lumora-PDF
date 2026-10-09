@@ -74,6 +74,23 @@ export function groupRows(pageCount: number, mode: LayoutMode, coverPage: boolea
   return rows;
 }
 
+/**
+ * The first page of the row before (`dir` -1) or after (`dir` 1) the one holding `page`, so
+ * page-by-page navigation moves a whole spread in two-page mode. Stays put at either end.
+ */
+export function stepPage(
+  pageCount: number,
+  mode: LayoutMode,
+  coverPage: boolean,
+  page: number,
+  dir: 1 | -1,
+): number {
+  const rows = groupRows(pageCount, mode, coverPage);
+  const r = rows.findIndex((row) => row.includes(page));
+  if (r < 0) return Math.min(Math.max(page, 0), Math.max(pageCount - 1, 0));
+  return rows[r + dir]?.[0] ?? rows[r]?.[0] ?? page;
+}
+
 /** Lays out every page. Single-page mode uses the same layout; the view shows one row at a time. */
 export function layoutPages(sizes: readonly PagePoints[], opts: LayoutOptions): DocLayout {
   const rowsOfPages = groupRows(sizes.length, opts.mode, opts.coverPage);

@@ -3,8 +3,10 @@ import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
 import { useUiStore } from "@/stores/ui";
-import { useViewerStore } from "@/stores/viewer";
+import { DEFAULT_VIEW, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
+import { isWidgetKeyTarget } from "./focus";
+import { stepPage } from "./layout";
 import { MainToolbar } from "./MainToolbar";
 import { ViewToolbar } from "./ViewToolbar";
 import { ZoomBar } from "./ZoomBar";
@@ -21,6 +23,7 @@ export function Viewer({ doc }: ViewerProps) {
     init(doc.id);
   }, [doc.id, init]);
   useViewerShortcuts(doc.id);
+  usePageKeys(doc.id, doc.info.pageCount);
 
   return (
     <div className="flex h-full flex-col">
@@ -93,4 +96,39 @@ function useViewerShortcuts(docId: number) {
       window.removeEventListener("keydown", onKey);
     };
   }, [docId, zoomStep, setZoom, setZoomMode, rotate, close, toggleSidebar]);
+}
+
+/**
+ * Page navigation keys: PageUp / PageDown go to the previous / next page (a spread in two-page
+ * layouts), Home / End to the first / last page. In single-page and two-page layouts the left
+ * and right arrows turn pages too. Keys typed into fields, menus and lists are left alone.
+ */
+function usePageKeys(docId: number, pageCount: number) {
+  const goToPage = useViewerStore((s) => s.goToPage);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.altKey || e.shiftKey || e.metaKey || pageCount === 0) return;
+      if (e.defaultPrevented || isWidgetKeyTarget(e.target)) return;
+      const view = useViewerStore.getState().views[docId] ?? DEFAULT_VIEW;
+      const step = (dir: 1 | -1) =>
+        stepPage(pageCount, view.layout, view.coverPage, view.currentPage, dir);
+      const paged = view.layout !== "continuous";
+      let target: number | null = null;
+      if (e.key === "Home") target = 0;
+      else if (e.key === "End") target = pageCount - 1;
+      else if (e.ctrlKey) return;
+      else if (e.key === "PageDown" || (paged && e.key === "ArrowRight")) target = step(1);
+      else if (e.key === "PageUp" || (paged && e.key === "ArrowLeft")) target = step(-1);
+      if (target === null) return;
+      e.preventDefault();
+      if (target !== view.currentPage || e.key === "Home" || e.key === "End") {
+        goToPage(docId, target);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [docId, pageCount, goToPage]);
 }
