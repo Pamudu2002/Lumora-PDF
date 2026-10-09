@@ -11,6 +11,11 @@ export const commands = {
 	openDocument: (path: string) => typedError<DocSummary, AppError>(__TAURI_INVOKE("open_document", { path })),
 	/**  Closes a document and drops its cached tiles. */
 	closeDocument: (docId: number) => typedError<null, AppError>(__TAURI_INVOKE("close_document", { docId })),
+	/**
+	 *  Tells the renderer which pages are mounted. Tiles already queued for other pages are skipped,
+	 *  so fast scrolling doesn't leave a backlog of renders nobody will see.
+	 */
+	setVisiblePages: (docId: number, pages: number[]) => typedError<null, AppError>(__TAURI_INVOKE("set_visible_pages", { docId, pages })),
 };
 
 /** Events */

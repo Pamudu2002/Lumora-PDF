@@ -13,6 +13,7 @@ pub fn builder() -> Builder<tauri::Wry> {
         .commands(collect_commands![
             commands::documents::open_document,
             commands::documents::close_document,
+            commands::view::set_visible_pages,
         ])
         .events(collect_events![logging::AppErrorEvent])
 }

@@ -66,6 +66,7 @@ impl TileService {
             dark,
         };
         let visible = Arc::clone(&self.visible);
+        let since = visible.generation();
         self.cached_or_render(key, || {
             self.engine.render_tile_if(
                 TileRequest {
@@ -77,7 +78,7 @@ impl TileService {
                     tile_size: DEFAULT_TILE_SIZE,
                     dark_mode: dark,
                 },
-                Arc::new(move || visible.contains(doc, page)),
+                Arc::new(move || visible.still_wanted(doc, page, since)),
             )
         })
     }
@@ -225,17 +226,21 @@ mod tests {
     }
 
     #[test]
-    fn skips_tiles_of_pages_that_scrolled_away() {
+    fn skips_tiles_only_when_a_newer_report_leaves_the_page_out() {
         let (engine, service) = service();
         service.set_visible_pages(1, [5, 6]);
-        assert!(matches!(
-            service.tile(1, 0, 1000, 0, 0, 0, false),
-            Err(RenderError::Engine(EngineError::Cancelled))
-        ));
-        assert_eq!(engine.renders.load(Ordering::SeqCst), 0);
-        assert!(service.tile(1, 5, 1000, 0, 0, 0, false).is_ok());
+        // Requested now, page 0 renders even though it wasn't reported: it may have just
+        // scrolled into view, ahead of the UI's next report.
+        assert!(service.tile(1, 0, 1000, 0, 0, 0, false).is_ok());
+        // A request made before a newer report that leaves its page out is dropped when the
+        // engine gets to it (the engine side is covered by lumora-engine's tests).
+        let since = service.visible.generation();
+        service.set_visible_pages(1, [5, 6]);
+        assert!(!service.visible.still_wanted(1, 1, since));
+        assert!(service.visible.still_wanted(1, 5, since));
         // Thumbnails are never skipped.
         assert!(service.thumbnail(1, 0, 16, 0).is_ok());
+        assert_eq!(engine.renders.load(Ordering::SeqCst), 2);
     }
 
     #[test]

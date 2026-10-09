@@ -7,6 +7,7 @@ import {
   tilesForPage,
   tilesInRect,
   tileUrl,
+  placeholderMilli,
 } from "./tiles";
 
 const WINDOWS_BASE = "http://lumora.localhost/";
@@ -83,5 +84,18 @@ describe("tilesInRect", () => {
     expect(tilesInRect(1000, 1000, { x: -500, y: -500, w: 5000, h: 5000 })).toHaveLength(4);
     expect(tilesInRect(1000, 1000, { x: 0, y: 0, w: 0, h: 10 })).toEqual([]);
     expect(tilesInRect(1000, 1000, { x: 5000, y: 0, w: 10, h: 10 })).toEqual([]);
+  });
+});
+
+describe("placeholderMilli", () => {
+  it("fits the whole page in one tile", () => {
+    const milli = placeholderMilli({ widthPt: 612, heightPt: 792 }, 5000);
+    const { width, height } = pagePixelSize({ widthPt: 612, heightPt: 792 }, milliToScale(milli));
+    expect(Math.max(width, height)).toBeLessThanOrEqual(512);
+    expect(Math.max(width, height)).toBeGreaterThan(500);
+  });
+
+  it("never exceeds the full render scale", () => {
+    expect(placeholderMilli({ widthPt: 100, heightPt: 100 }, 1000)).toBe(1000);
   });
 });

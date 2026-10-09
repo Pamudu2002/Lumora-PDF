@@ -57,3 +57,8 @@ export async function openDocument(path: string): Promise<OpenDocument> {
 export async function closeDocument(docId: number): Promise<void> {
   unwrap(await commands.closeDocument(docId));
 }
+
+/** Tells the renderer which pages are mounted, so queued tiles of other pages are skipped. */
+export async function setVisiblePages(docId: number, pages: number[]): Promise<void> {
+  unwrap(await commands.setVisiblePages(docId, pages));
+}

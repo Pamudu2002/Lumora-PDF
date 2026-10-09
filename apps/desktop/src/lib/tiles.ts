@@ -141,3 +141,12 @@ export function tilesInRect(
   }
   return tiles;
 }
+
+/**
+ * Milli-scale at which a whole page fits in one tile: used for the low-resolution placeholder shown
+ * while full tiles load (never above `maxMilli`).
+ */
+export function placeholderMilli(page: PagePoints, maxMilli: number, tileSize = TILE_SIZE): number {
+  const longest = Math.max(page.widthPt, page.heightPt, 1);
+  return Math.max(1, Math.min(maxMilli, Math.floor((tileSize * 1000) / longest)));
+}

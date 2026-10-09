@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { OpenDocument } from "@/lib/ipc";
+import { setVisiblePages, type OpenDocument } from "@/lib/ipc";
 import { useDevicePixelRatio } from "@/lib/useDevicePixelRatio";
 import { AUTO_ZOOM_MAX, clampZoom, useDocView, useViewerStore } from "@/stores/viewer";
 import {
@@ -205,6 +205,19 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
   const overscan = vh;
   const mounted =
     vw === 0 ? [] : pagesInRange(layout, viewport.top - overscan, viewport.top + vh + overscan);
+
+  // Tell the renderer which pages are mounted (only when the set changes).
+  const mountedKey = mounted.join(",");
+  useEffect(() => {
+    if (mountedKey === "") return undefined;
+    const pages = mountedKey.split(",").map(Number);
+    const timer = setTimeout(() => {
+      void setVisiblePages(doc.id, pages).catch(() => undefined);
+    }, 30);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [doc.id, mountedKey]);
 
   return (
     <div

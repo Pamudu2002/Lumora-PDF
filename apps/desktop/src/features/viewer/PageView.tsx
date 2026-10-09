@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   milliToScale,
   pagePixelSize,
+  placeholderMilli,
   scaleToMilli,
   tilesInRect,
   tileUrl,
@@ -10,6 +11,7 @@ import {
 } from "@/lib/tiles";
 import { PT_TO_CSS, type PageBox, type Rotation } from "./layout";
 import { boxToContent, contentTransform, type RectLike } from "./rotation";
+import { TileImage } from "./TileImage";
 
 /** Extra device pixels around the viewport whose tiles are loaded ahead of scrolling. */
 const TILE_PREFETCH_PX = 384;
@@ -63,6 +65,10 @@ export const PageView = memo(function PageView({
   const fx = w0 / pw;
   const fy = h0 / ph;
 
+  // A low-resolution image of the whole page (one tile) sits under the full tiles, so the page is
+  // never blank while scrolling.
+  const lowMilli = placeholderMilli(size, scaleMilli);
+
   const content = boxToContent(visible, rotation, w0, h0);
   const tiles = tilesInRect(pw, ph, {
     x: content.x / fx - TILE_PREFETCH_PX,
@@ -88,8 +94,23 @@ export const PageView = memo(function PageView({
           transformOrigin: "0 0",
         }}
       >
+        {lowMilli < scaleMilli ? (
+          <TileImage
+            key={`low-${lowMilli}`}
+            src={tileUrl({
+              docId,
+              page,
+              scaleMilli: lowMilli,
+              tileX: 0,
+              tileY: 0,
+              rev: revision,
+              dark,
+            })}
+            className="pointer-events-none absolute inset-0 size-full select-none"
+          />
+        ) : null}
         {tiles.map((tile) => (
-          <img
+          <TileImage
             key={`${scaleMilli}-${tile.tileX}-${tile.tileY}`}
             src={tileUrl({
               docId,
@@ -100,9 +121,6 @@ export const PageView = memo(function PageView({
               rev: revision,
               dark,
             })}
-            alt=""
-            draggable={false}
-            decoding="async"
             className="pointer-events-none absolute select-none"
             style={{
               left: tile.x * fx,

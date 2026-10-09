@@ -1,6 +1,7 @@
 //! Tauri commands. Keep them thin: validate input, then call `lumora-core` on a blocking thread.
 
 pub mod documents;
+pub mod view;
 
 use crate::error::AppError;
 

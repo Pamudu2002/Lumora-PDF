@@ -168,6 +168,15 @@ fn respond<R: Runtime>(app: &tauri::AppHandle<R>, req: ImageRequest) -> Response
             .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
             .body(image.bytes.clone())
             .unwrap_or_else(|_| text_response(StatusCode::INTERNAL_SERVER_ERROR, "response")),
+        Err(RenderError::Engine(EngineError::Cancelled)) => {
+            // The page scrolled out of view before its turn. 204 (not an error status, so the
+            // WebView doesn't log it) and not cached, so asking again later renders it.
+            Response::builder()
+                .status(StatusCode::NO_CONTENT)
+                .header(header::CACHE_CONTROL, "no-store")
+                .body(Vec::new())
+                .unwrap_or_default()
+        }
         Err(err) => {
             let status = match &err {
                 RenderError::Engine(
