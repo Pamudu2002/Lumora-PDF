@@ -101,6 +101,23 @@ jobs:
       - name: JavaScript licenses
         run: pnpm check-licenses
 
+      # End-to-end: the real app (WebView2 + PDFium) driven by Playwright over DevTools.
+      - name: Build app for end-to-end tests
+        run: pnpm build:e2e
+
+      - name: End-to-end tests
+        run: pnpm test:e2e
+
+      - name: Upload end-to-end report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
+          if-no-files-found: ignore
+
       # Installer
       - name: Build Windows installer
         run: pnpm build

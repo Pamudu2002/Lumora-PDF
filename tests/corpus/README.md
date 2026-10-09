@@ -23,7 +23,7 @@ cloning, or `git lfs pull` after.
 |---|---|---|
 | `pdfium/` | PDFium's own test files, [`testing/resources`](https://pdfium.googlesource.com/pdfium/+/refs/heads/main/testing/resources/) at the commit in `pdfium/SOURCE_COMMIT.txt` | BSD-3-Clause (`pdfium/LICENSE.txt`) |
 | `generated/` | Made by `node scripts/generate-corpus.mjs` (deterministic) | CC0-1.0 |
-| `large/` | `node scripts/generate-corpus.mjs --large` (>100 MB; not committed) | CC0-1.0 |
+| `large/` | `node scripts/generate-corpus.mjs --large` (500 pages, >100 MB; not committed) | CC0-1.0 |
 
 ## Manifest fields
 

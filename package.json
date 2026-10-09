@@ -16,6 +16,8 @@
     "lint": "prettier --check . && pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "build:e2e": "pnpm --filter @lumora/e2e build:app",
+    "test:e2e": "pnpm --filter @lumora/e2e e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-licenses": "node scripts/check-licenses.mjs",

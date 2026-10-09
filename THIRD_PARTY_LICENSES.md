@@ -64,6 +64,7 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `eslint`, `@eslint/js`, `typescript-eslint`, `globals` | Linting | MIT |
 | `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` | React lint rules | MIT |
 | `prettier` | Formatting | MIT |
+| `@playwright/test` | End-to-end tests (`tests/e2e`) | Apache-2.0 |
 | `vitest`, `jsdom` | Unit tests | MIT |
 | `@testing-library/react`, `@testing-library/dom` | Component tests | MIT |
 | `cargo-deny` | License and advisory checks | MIT OR Apache-2.0 |
