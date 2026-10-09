@@ -1,5 +1,6 @@
 import { memo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/cn";
 import {
   milliToScale,
   pagePixelSize,
@@ -82,7 +83,7 @@ export const PageView = memo(function PageView({
       role="group"
       aria-label={t("viewer.pageLabel", { page: page + 1 })}
       data-page={page}
-      className="absolute overflow-hidden bg-paper shadow-page"
+      className={cn("absolute overflow-hidden shadow-page", dark ? "bg-paper-dark" : "bg-paper")}
       style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
     >
       <div

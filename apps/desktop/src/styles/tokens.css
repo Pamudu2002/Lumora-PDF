@@ -7,6 +7,7 @@
   --surface-sunken: #f4f5f2;
   --surface-raised: #ffffff;
   --paper: #ffffff;
+  --paper-dark: #161616;
   --line: #e0e3de;
   --line-strong: #868e89;
   --ink: #141b1c;
@@ -51,6 +52,7 @@
   --surface-sunken: #121718;
   --surface-raised: #1e2526;
   --paper: #ffffff;
+  --paper-dark: #161616;
   --line: #2a3233;
   --line-strong: #66726f;
   --ink: #e7eceb;

@@ -1,7 +1,8 @@
-import { BookOpen, Maximize, MoveHorizontal, RotateCcw, RotateCw } from "lucide-react";
+import { BookOpen, Maximize, Moon, MoveHorizontal, RotateCcw, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { useSettingsStore } from "@/stores/settings";
 import { useDocView, useViewerStore } from "@/stores/viewer";
 import type { LayoutMode } from "./layout";
 
@@ -19,6 +20,8 @@ export function ViewToolbar({ docId }: ViewToolbarProps) {
   const setLayout = useViewerStore((s) => s.setLayout);
   const setCoverPage = useViewerStore((s) => s.setCoverPage);
   const rotate = useViewerStore((s) => s.rotate);
+  const pageDarkMode = useSettingsStore((s) => s.pageDarkMode);
+  const setPageDarkMode = useSettingsStore((s) => s.setPageDarkMode);
 
   const layouts: { value: LayoutMode; label: string }[] = [
     { value: "single", label: t("viewTools.single") },
@@ -84,6 +87,15 @@ export function ViewToolbar({ docId }: ViewToolbarProps) {
         icon={<RotateCw {...ICON} />}
         onClick={() => {
           rotate(docId, 1);
+        }}
+      />
+      <span aria-hidden className="mx-1.5 h-5 w-px flex-none bg-line" />
+      <IconButton
+        label={t("viewTools.pageDarkMode")}
+        icon={<Moon {...ICON} />}
+        active={pageDarkMode}
+        onClick={() => {
+          setPageDarkMode(!pageDarkMode);
         }}
       />
     </div>

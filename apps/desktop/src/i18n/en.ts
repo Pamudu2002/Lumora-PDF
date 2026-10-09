@@ -63,6 +63,7 @@ export const en = {
     coverPage: "Show the cover page on its own",
     rotateClockwise: "Rotate view clockwise",
     rotateCounterclockwise: "Rotate view counterclockwise",
+    pageDarkMode: "Page dark mode",
   },
   sidebar: {
     label: "Sidebar",

@@ -3,6 +3,7 @@ import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { rememberView, useDocumentsStore } from "@/stores/documents";
 import { useSearchStore } from "@/stores/search";
+import { useSettingsStore } from "@/stores/settings";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_VIEW, useDocView, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
@@ -30,6 +31,7 @@ export function Viewer({ doc }: ViewerProps) {
   useFind(doc.id);
   useRememberView(doc);
   const findOpen = useSearchStore((s) => s.findOpen);
+  const pageDarkMode = useSettingsStore((s) => s.pageDarkMode);
 
   return (
     <div className="flex h-full flex-col">
@@ -38,7 +40,7 @@ export function Viewer({ doc }: ViewerProps) {
       <div className="flex min-h-0 flex-1">
         {sidebarOpen ? <Sidebar doc={doc} /> : null}
         <main className="relative min-w-0 flex-1">
-          <DocumentView doc={doc} dark={false} />
+          <DocumentView doc={doc} dark={pageDarkMode} />
           <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
           {findOpen ? <FindBar docId={doc.id} /> : null}
           <ExternalLinkDialog />

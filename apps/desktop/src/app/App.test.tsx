@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useDocumentsStore } from "@/stores/documents";
 import { useSearchStore } from "@/stores/search";
+import { useSettingsStore } from "@/stores/settings";
 import { useViewerStore } from "@/stores/viewer";
 import { installTauriMocks } from "@/test/tauri";
 import { App } from "./App";
@@ -79,6 +80,18 @@ describe("App", () => {
     const tiles = page.querySelectorAll("img");
     expect(tiles.length).toBeGreaterThan(0);
     expect(tiles[0]?.getAttribute("src")).toContain("tile/7/0/");
+    expect(tiles[0]?.getAttribute("src")).toContain("dark=0");
+
+    // Page dark mode: tiles are rendered dark and the page background matches.
+    fireEvent.click(screen.getByRole("button", { name: "Page dark mode" }));
+    const darkPage = screen.getByRole("group", { name: "Page 1" });
+    expect(darkPage.querySelector("img")?.getAttribute("src")).toContain("dark=1");
+    expect(darkPage.className).toContain("bg-paper-dark");
+    expect(
+      screen.getByRole("button", { name: "Page dark mode" }).getAttribute("aria-pressed"),
+    ).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "Page dark mode" }));
+    expect(useSettingsStore.getState().pageDarkMode).toBe(false);
   });
 
   it("goes to pages with the page field, Ctrl+G and the page keys", async () => {
