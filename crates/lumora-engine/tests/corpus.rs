@@ -1,5 +1,7 @@
 //! Corpus smoke test: every file in `tests/corpus/manifest.json` opens (or fails) as expected, has
-//! the expected page count, unlocks with its password, and renders page 1 without crashing.
+//! the expected page count and unlocks with its password. Then every page is rendered and its
+//! text and links are read, and the outline and properties too: page 1 must render, and nothing may
+//! crash (other pages may report an error; PDFs are hostile input).
 
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
@@ -111,6 +113,16 @@ fn every_corpus_file_behaves_as_listed() {
                     entry.file, entry.category
                 ));
             }
+            // The rest must not crash; errors are allowed.
+            for page in 1..info.page_count {
+                let _ = engine.render_thumbnail(doc, page, 128);
+            }
+            for page in 0..info.page_count {
+                let _ = engine.page_text(doc, page);
+                let _ = engine.page_links(doc, page);
+            }
+            let _ = engine.outline(doc);
+            let _ = engine.properties(doc);
             engine.close(doc).unwrap();
         }
     }

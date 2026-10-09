@@ -3,7 +3,7 @@
 // by Lumora and released under CC0-1.0.
 //
 //   node scripts/generate-corpus.mjs            # small files, committed (Git LFS)
-//   node scripts/generate-corpus.mjs --large    # also tests/corpus/large/ (>100 MB, not committed)
+//   node scripts/generate-corpus.mjs --large    # also tests/corpus/large/ (500 pages, >100 MB; not committed)
 //
 // Output is deterministic: re-running produces identical bytes.
 import { mkdirSync, writeFileSync, createWriteStream } from "node:fs";
@@ -229,6 +229,10 @@ write(outDir, "huge-mediabox.pdf", hugeMediaBox());
 write(outDir, "zero-pages.pdf", zeroPages());
 
 if (process.argv.includes("--large")) {
+  // 500 text pages, for the Phase 1 performance checks (first page, scrolling, search).
+  mkdirSync(largeDir, { recursive: true });
+  write(largeDir, "long-500-pages.pdf", long(500));
+
   // >100 MB: 120 pages of uncompressed-looking noise (incompressible), written page by page.
   const doc = new PdfBuilder();
   const cat = doc.ref();
