@@ -355,7 +355,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.6 Outline/bookmarks panel from the PDF outline; click to navigate.
 - [x] 1.7 Page navigation: page number input, Ctrl+G, PageUp/Down, Home/End.
 - [x] 1.8 Text layer: `page_text` returns chars with boxes; selection by drag (line/word/paragraph with double/triple click); copy to clipboard preserving reading order.
-- [ ] 1.9 Find: Ctrl+F bar, match case / whole word, results list in sidebar, highlight hits on pages, next/prev.
+- [x] 1.9 Find: Ctrl+F bar, match case / whole word, results list in sidebar, highlight hits on pages, next/prev.
 - [ ] 1.10 Links: internal links navigate; external links open in the browser **after a confirmation dialog**.
 - [ ] 1.11 Tabs: multiple documents, reorder tabs, middle-click close, confirm on unsaved changes.
 - [ ] 1.12 Recent files (SQLite via `lumora-store`), remember last page + zoom per file; home screen.
@@ -383,6 +383,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.6: `get_outline` command; Outline sidebar tab with a collapsible tree (role=tree, aria-level/expanded); entries go to their page, entries without a target are disabled; circular outlines are cut by the engine.
 - 2026-10-09 — 1.7: page number field in the zoom bar (Enter goes, Esc returns focus, Ctrl+G focuses it); PageUp/PageDown step a page (a spread in two-page), Home/End first/last, ←/→ turn pages in single and two-page layouts; keys typed into fields, menus and lists are ignored.
 - 2026-10-09 — 1.8: `get_page_text` command; transparent text layer per mounted page (runs stretched to PDFium's widths, fetched after 120 ms on screen, 200-page cache); lines and paragraphs grouped from run geometry; drag/double-click/triple-click (paragraph) selection; copy rebuilds spaces, line breaks and page breaks. Verified aligned at 0° and 90° view rotation.
+- 2026-10-09 — 1.9: `start_search`/`cancel_search` commands run `lumora-core::Searches` (one job per document, new search cancels the old) and stream `SearchProgressEvent` batches; find bar (Ctrl+F, Enter/Shift+Enter, F3, Esc, match case, whole words), page highlights with a stronger current match, virtualized results tab in the sidebar. 250-page document with 7,500 matches: all found ~0.66 s after typing stops.
 
 ---
 
@@ -652,6 +653,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | View rotation shortcuts are Ctrl+Shift+= / Ctrl+Shift+- | Matches Acrobat; Ctrl+R would reload the WebView |
 | 2026-10-09 | The text layer handles copy itself (spaces from run gaps, 
  per line, blank line per page) and triple-click selects a paragraph found from line gaps | Absolutely positioned spans make the browser run lines together and treat each run as its own paragraph |
+| 2026-10-09 | Search results stream to the UI as events tagged with a search id; the UI buffers events that arrive before `start_search` returns and drops other ids | The job starts emitting before the command reply, and a cancelled search can still send its last batch |
 | 2026-10-09 | PageUp/PageDown move a whole page (or spread) in every layout; Space and the arrow keys still scroll by screen/line in the continuous layout | The plan lists them as page navigation; it makes them predictable across layouts, and screen-wise scrolling stays one key away |
 | _(Claude Code: add new decisions here)_ | | |
 

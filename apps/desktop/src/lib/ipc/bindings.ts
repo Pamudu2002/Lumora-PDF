@@ -20,11 +20,19 @@ export const commands = {
 	getOutline: (docId: number) => typedError<OutlineItem[], AppError>(__TAURI_INVOKE("get_outline", { docId })),
 	/**  The text runs of one page with their positions, for the selectable text layer. */
 	getPageText: (docId: number, page: number) => typedError<PageText, AppError>(__TAURI_INVOKE("get_page_text", { docId, page })),
+	/**
+	 *  Starts searching a document for `query`, beginning at `start_page` and wrapping around.
+	 *  Cancels the document's previous search. Results arrive as [`SearchProgressEvent`]s.
+	 */
+	startSearch: (docId: number, query: string, options: SearchOptions, startPage: number) => typedError<number, AppError>(__TAURI_INVOKE("start_search", { docId, query, options, startPage })),
+	/**  Stops the document's running search, if any. */
+	cancelSearch: (docId: number) => typedError<null, AppError>(__TAURI_INVOKE("cancel_search", { docId })),
 };
 
 /** Events */
 export const events = {
 	appErrorEvent: makeEvent<AppErrorEvent>("app-error-event"),
+	searchProgressEvent: makeEvent<SearchProgressEvent>("search-progress-event"),
 };
 
 /* Types */
@@ -142,6 +150,52 @@ export type Rect = {
 	width: number | null,
 	/**  Height. */
 	height: number | null,
+};
+
+/**  One search match. */
+export type SearchHit = {
+	/**  The page the match is on. */
+	page: number,
+	/**  Highlight rectangles (one per line the match spans). */
+	rects: Rect[],
+	/**  Text around the match, for the results list. */
+	snippet: string,
+	/**  Where the match starts in `snippet`, in characters. */
+	matchStart: number,
+	/**  Length of the match in `snippet`, in characters. */
+	matchLen: number,
+};
+
+/**  How to match a search query. */
+export type SearchOptions = {
+	/**  Match upper/lower case exactly. */
+	matchCase: boolean,
+	/**  Only match whole words. */
+	wholeWord: boolean,
+};
+
+/**  A batch of search progress. */
+export type SearchProgress = {
+	/**  New matches since the previous report. */
+	hits: SearchHit[],
+	/**  Pages searched so far. */
+	pagesSearched: number,
+	/**  Pages in the document. */
+	pageCount: number,
+	/**  True on the last report (finished, cancelled, or the match limit was reached). */
+	done: boolean,
+	/**  True when the match limit cut the search short. */
+	truncated: boolean,
+};
+
+/**  Progress of a running search: new matches since the previous event. */
+export type SearchProgressEvent = {
+	/**  The document searched. */
+	docId: number,
+	/**  The search this belongs to; events of older searches can arrive after a new one starts. */
+	searchId: number,
+	/**  Matches and counters. */
+	progress: SearchProgress,
 };
 
 /**  A run of text on one line, as PDFium groups it. */

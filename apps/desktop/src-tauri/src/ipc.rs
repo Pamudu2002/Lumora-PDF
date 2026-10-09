@@ -16,8 +16,13 @@ pub fn builder() -> Builder<tauri::Wry> {
             commands::view::set_visible_pages,
             commands::content::get_outline,
             commands::content::get_page_text,
+            commands::search::start_search,
+            commands::search::cancel_search,
         ])
-        .events(collect_events![logging::AppErrorEvent])
+        .events(collect_events![
+            logging::AppErrorEvent,
+            commands::search::SearchProgressEvent
+        ])
 }
 
 #[cfg(test)]

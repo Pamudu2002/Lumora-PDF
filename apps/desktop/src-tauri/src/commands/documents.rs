@@ -28,6 +28,7 @@ pub async fn open_document(
 #[specta::specta]
 pub async fn close_document(state: State<'_, AppState>, doc_id: DocId) -> Result<(), AppError> {
     let core = state.core()?;
+    core.searches.cancel(doc_id);
     let documents = Arc::clone(&core.documents);
     let tiles = Arc::clone(&core.tiles);
     blocking(move || {

@@ -42,6 +42,8 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-scrim: var(--scrim);
+  --color-search-hit: var(--search-hit);
+  --color-search-hit-active: var(--search-hit-active);
 
   --font-*: initial;
   --font-ui: var(--font-ui);

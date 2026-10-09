@@ -2,6 +2,7 @@
 
 pub mod content;
 pub mod documents;
+pub mod search;
 pub mod view;
 
 use crate::error::AppError;

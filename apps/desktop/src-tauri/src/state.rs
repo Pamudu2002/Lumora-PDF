@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use lumora_core::Documents;
+use lumora_core::{Documents, Searches};
 use lumora_engine::{EngineErrorKind, PdfEngine, PdfiumEngine, PdfiumLibrary};
 use lumora_render::{ImageFormat, TileCache, TileService};
 use tauri::Manager;
@@ -17,6 +17,8 @@ pub struct Core {
     pub documents: Arc<Documents>,
     /// Cached, encoded tiles and thumbnails.
     pub tiles: Arc<TileService>,
+    /// Running find-in-document searches.
+    pub searches: Arc<Searches>,
 }
 
 /// Managed Tauri state. If PDFium failed to load, the app still starts and every document command
@@ -34,6 +36,7 @@ impl AppState {
                 let engine: Arc<dyn PdfEngine> = Arc::new(engine);
                 Core {
                     documents: Arc::new(Documents::new(Arc::clone(&engine))),
+                    searches: Arc::new(Searches::new(Arc::clone(&engine))),
                     tiles: Arc::new(TileService::new(
                         engine,
                         TileCache::default(),

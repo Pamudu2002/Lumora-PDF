@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
+import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
 import { DEFAULT_VIEW, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
+import { FindBar } from "./FindBar";
 import { isWidgetKeyTarget } from "./focus";
 import { stepPage } from "./layout";
 import { MainToolbar } from "./MainToolbar";
@@ -24,6 +26,8 @@ export function Viewer({ doc }: ViewerProps) {
   }, [doc.id, init]);
   useViewerShortcuts(doc.id);
   usePageKeys(doc.id, doc.info.pageCount);
+  useFind(doc.id);
+  const findOpen = useSearchStore((s) => s.findOpen);
 
   return (
     <div className="flex h-full flex-col">
@@ -34,6 +38,7 @@ export function Viewer({ doc }: ViewerProps) {
         <main className="relative min-w-0 flex-1">
           <DocumentView doc={doc} dark={false} />
           <ZoomBar docId={doc.id} pageCount={doc.info.pageCount} />
+          {findOpen ? <FindBar docId={doc.id} /> : null}
         </main>
       </div>
     </div>
@@ -131,4 +136,52 @@ function usePageKeys(docId: number, pageCount: number) {
       window.removeEventListener("keydown", onKey);
     };
   }, [docId, pageCount, goToPage]);
+}
+
+/**
+ * Find: Ctrl+F opens the find bar, F3 / Shift+F3 go to the next / previous match, and the view
+ * scrolls to each match as it becomes current. The search is cleared when the document closes.
+ */
+function useFind(docId: number) {
+  const openFind = useSearchStore((s) => s.openFind);
+  const step = useSearchStore((s) => s.step);
+  const clear = useSearchStore((s) => s.clear);
+  const goToPage = useViewerStore((s) => s.goToPage);
+  const activeNonce = useSearchStore((s) => s.searches[docId]?.activeNonce ?? 0);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        openFind();
+      } else if (e.key === "F3" && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        const page = useViewerStore.getState().views[docId]?.currentPage ?? 0;
+        if (useSearchStore.getState().searches[docId]) step(docId, e.shiftKey ? -1 : 1, page);
+        else openFind();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [docId, openFind, step]);
+
+  useEffect(() => {
+    const hit = useSearchStore.getState().searches[docId]?.active;
+    const rect = hit?.rects[0];
+    if (!hit || activeNonce === 0) return;
+    goToPage(
+      docId,
+      hit.page,
+      rect ? { x: rect.x + rect.width / 2, y: rect.y, ifHidden: true } : undefined,
+    );
+  }, [docId, activeNonce, goToPage]);
+
+  useEffect(
+    () => () => {
+      clear(docId);
+    },
+    [docId, clear],
+  );
 }

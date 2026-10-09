@@ -1,8 +1,9 @@
-import { PanelLeft, X } from "lucide-react";
+import { PanelLeft, Search, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/ui/IconButton";
 import type { OpenDocument } from "@/lib/ipc";
 import { useDocumentsStore } from "@/stores/documents";
+import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
 
 const ICON = { size: 18, strokeWidth: 1.75 } as const;
@@ -17,6 +18,9 @@ export function MainToolbar({ doc }: MainToolbarProps) {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const close = useDocumentsStore((s) => s.close);
+  const findOpen = useSearchStore((s) => s.findOpen);
+  const openFind = useSearchStore((s) => s.openFind);
+  const closeFind = useSearchStore((s) => s.closeFind);
   const title = doc.info.title ?? doc.fileName;
 
   return (
@@ -31,6 +35,16 @@ export function MainToolbar({ doc }: MainToolbarProps) {
           icon={<PanelLeft {...ICON} />}
           active={sidebarOpen}
           onClick={toggleSidebar}
+        />
+        <IconButton
+          label={t("find.label")}
+          shortcut="Ctrl+F"
+          icon={<Search {...ICON} />}
+          active={findOpen}
+          onClick={() => {
+            if (findOpen) closeFind(doc.id);
+            else openFind();
+          }}
         />
         <span className="min-w-0 truncate px-2 text-body font-semibold" title={doc.path}>
           {title}

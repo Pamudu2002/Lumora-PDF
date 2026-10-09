@@ -17,6 +17,7 @@ import {
   type DocLayout,
 } from "./layout";
 import { PageView } from "./PageView";
+import { SearchHighlights } from "./SearchHighlights";
 import { textLayerSelection } from "./textCopy";
 import { TextLayer } from "./TextLayer";
 import { contentToBox } from "./rotation";
@@ -26,6 +27,9 @@ const WHEEL_ZOOM_SPEED = 0.0025;
 
 /** Single-page mode: after turning the page with the wheel, ignore further wheel turns this long. */
 const PAGE_TURN_COOLDOWN_MS = 350;
+/** A point closer than this to the top or bottom edge counts as hidden (under the floating bars). */
+const REVEAL_MARGIN_TOP = 64;
+const REVEAL_MARGIN_BOTTOM = 80;
 
 /** After a zoom change this quiet, the next one re-renders tiles straight away. */
 const ZOOM_SETTLE_MS = 160;
@@ -227,8 +231,17 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
         w0,
         h0,
       );
-      el.scrollTop = box.y + p.y - el.clientHeight * 0.3;
-      if (scrollRequest.x !== undefined) el.scrollLeft = box.x + p.x - el.clientWidth / 2;
+      const tx = box.x + p.x;
+      const ty = box.y + p.y;
+      // Leave room for the find bar at the top and the zoom bar at the bottom.
+      const shown =
+        ty >= el.scrollTop + REVEAL_MARGIN_TOP &&
+        ty <= el.scrollTop + el.clientHeight - REVEAL_MARGIN_BOTTOM &&
+        tx >= el.scrollLeft &&
+        tx <= el.scrollLeft + el.clientWidth;
+      if (scrollRequest.ifHidden && shown) return;
+      el.scrollTop = ty - el.clientHeight * 0.3;
+      if (scrollRequest.x !== undefined) el.scrollLeft = tx - el.clientWidth / 2;
     }
     lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
   }, [scrollRequest, layout, sizes, zoom, rotation, doc.id, vw]);
@@ -300,6 +313,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
                   h: vh,
                 }}
               >
+                <SearchHighlights docId={doc.id} page={page} scale={zoom * PT_TO_CSS} dark={dark} />
                 <TextLayer
                   docId={doc.id}
                   page={page}

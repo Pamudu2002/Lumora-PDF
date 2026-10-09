@@ -2,14 +2,16 @@
 // ./bindings directly, so results are unwrapped and IPC types are normalized in one place.
 import {
   commands,
+  events,
   type AppError,
   type DocInfo,
   type EngineErrorKind,
   type OutlineItem,
   type Rect as RawRect,
+  type SearchOptions,
 } from "./bindings";
 
-export type { DocInfo, EngineErrorKind, OutlineItem };
+export type { DocInfo, EngineErrorKind, OutlineItem, SearchOptions };
 
 /** A rectangle in display points (top-left origin). */
 export interface Rect {
@@ -111,4 +113,70 @@ export async function getPageText(docId: number, page: number): Promise<PageText
     if (rect) runs.push({ text: run.text, rect });
   }
   return { runs };
+}
+
+/** One match of a search. */
+export interface SearchHit {
+  page: number;
+  /** The match's boxes on the page (one per line it spans), in display points. */
+  rects: Rect[];
+  /** Text around the match, for the results list. */
+  snippet: string;
+  /** Where the match sits in `snippet` (UTF-16 code units). */
+  matchStart: number;
+  matchLen: number;
+}
+
+/** A batch of search progress: new matches since the previous batch. */
+export interface SearchProgress {
+  docId: number;
+  searchId: number;
+  hits: SearchHit[];
+  pagesSearched: number;
+  pageCount: number;
+  /** The last batch of this search. */
+  done: boolean;
+  /** The match limit cut the search short. */
+  truncated: boolean;
+}
+
+/**
+ * Starts finding `query` in a document from `startPage`, wrapping around, and returns the search
+ * id. Results arrive through {@link onSearchProgress}. Cancels the document's previous search.
+ */
+export async function startSearch(
+  docId: number,
+  query: string,
+  options: SearchOptions,
+  startPage: number,
+): Promise<number> {
+  return unwrap(await commands.startSearch(docId, query, options, startPage));
+}
+
+/** Stops a document's running search. */
+export async function cancelSearch(docId: number): Promise<void> {
+  unwrap(await commands.cancelSearch(docId));
+}
+
+/** Calls `handler` with every search progress batch; resolves to an unlisten function. */
+export async function onSearchProgress(
+  handler: (progress: SearchProgress) => void,
+): Promise<() => void> {
+  return events.searchProgressEvent.listen(({ payload }) => {
+    const { progress } = payload;
+    const hits: SearchHit[] = [];
+    for (const hit of progress.hits) {
+      const rects = hit.rects.map(finiteRect).filter((r): r is Rect => r !== null);
+      hits.push({ ...hit, rects });
+    }
+    handler({
+      docId: payload.docId,
+      searchId: payload.searchId,
+      hits,
+      pagesSearched: progress.pagesSearched,
+      pageCount: progress.pageCount,
+      done: progress.done,
+      truncated: progress.truncated,
+    });
+  });
 }

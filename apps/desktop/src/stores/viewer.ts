@@ -42,6 +42,8 @@ export interface ScrollRequest {
   y?: number;
   /** Distance from the left of the page, in display points. */
   x?: number;
+  /** Only scroll when the point is outside the viewport. */
+  ifHidden?: boolean;
   nonce: number;
 }
 
@@ -70,7 +72,11 @@ interface ViewerState {
   setCoverPage: (docId: number, coverPage: boolean) => void;
   rotate: (docId: number, dir: 1 | -1) => void;
   setCurrentPage: (docId: number, page: number) => void;
-  goToPage: (docId: number, page: number, at?: { x?: number; y?: number }) => void;
+  goToPage: (
+    docId: number,
+    page: number,
+    at?: { x?: number; y?: number; ifHidden?: boolean },
+  ) => void;
   consumeZoomAnchor: (docId: number) => ZoomAnchor | null;
 }
 

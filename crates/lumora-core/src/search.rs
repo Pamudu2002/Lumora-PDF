@@ -1,10 +1,13 @@
 //! Whole-document search, page by page, with progress and cancellation.
 
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 
 use lumora_engine::{DocId, EngineError, PdfEngine, SearchHit, SearchOptions};
-use lumora_jobs::CancelToken;
-use serde::Serialize;
+use lumora_jobs::{CancelToken, JobError, JobHandle};
+use serde::{Deserialize, Serialize};
 
 /// Results are reported at least this often while searching.
 const REPORT_EVERY: Duration = Duration::from_millis(120);
@@ -28,7 +31,7 @@ pub struct SearchRequest {
 
 /// A batch of search progress.
 #[cfg_attr(feature = "specta", derive(specta::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchProgress {
     /// New matches since the previous report.
@@ -101,10 +104,76 @@ pub fn search_document(
     Ok(())
 }
 
+/// Identifies one search, so late reports from a replaced search can be told apart.
+pub type SearchId = u32;
+
+/// Runs at most one background search per document; starting a new one cancels the previous.
+pub struct Searches {
+    engine: Arc<dyn PdfEngine>,
+    running: Mutex<HashMap<DocId, (SearchId, JobHandle)>>,
+    next_id: AtomicU32,
+}
+
+impl Searches {
+    /// No searches yet, over `engine`.
+    pub fn new(engine: Arc<dyn PdfEngine>) -> Self {
+        Self {
+            engine,
+            running: Mutex::new(HashMap::new()),
+            next_id: AtomicU32::new(1),
+        }
+    }
+
+    fn running(&self) -> MutexGuard<'_, HashMap<DocId, (SearchId, JobHandle)>> {
+        self.running.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
+    /// Starts searching `req.doc` on a job thread and returns the search's id. `report` receives
+    /// that id with every batch of progress (see [`search_document`]), ending with `done`.
+    pub fn start(
+        &self,
+        req: SearchRequest,
+        report: impl Fn(SearchId, SearchProgress) + Send + 'static,
+    ) -> Result<SearchId, JobError> {
+        let id = self.next_id.fetch_add(1, Ordering::Relaxed);
+        let doc = req.doc;
+        let engine = Arc::clone(&self.engine);
+        let mut running = self.running();
+        if let Some((_, previous)) = running.remove(&doc) {
+            previous.cancel();
+        }
+        let job = lumora_jobs::spawn("search", move |token| {
+            if let Err(err) = search_document(engine.as_ref(), &req, &token, |p| report(id, p)) {
+                tracing::debug!(doc, %err, "search ended early");
+                report(
+                    id,
+                    SearchProgress {
+                        hits: Vec::new(),
+                        pages_searched: 0,
+                        page_count: req.page_count,
+                        done: true,
+                        truncated: false,
+                    },
+                );
+            }
+        })?;
+        running.retain(|_, (_, job)| !job.is_finished());
+        running.insert(doc, (id, job));
+        Ok(id)
+    }
+
+    /// Cancels the document's search, if one is running. Doesn't wait for it to stop.
+    pub fn cancel(&self, doc: DocId) {
+        if let Some((_, job)) = self.running().remove(&doc) {
+            job.cancel();
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::Path;
-    use std::sync::Mutex;
+    use std::sync::mpsc;
 
     use lumora_engine::{
         DocInfo, DocProperties, OpenOptions, OutlineItem, PageIndex, PageLink, PageSize, PageText,
@@ -117,6 +186,8 @@ mod tests {
     #[derive(Default)]
     struct Fake {
         order: Mutex<Vec<PageIndex>>,
+        /// Time each page takes to search.
+        delay: Duration,
     }
 
     impl PdfEngine for Fake {
@@ -150,6 +221,7 @@ mod tests {
             query: &str,
             _: SearchOptions,
         ) -> Result<Vec<SearchHit>, EngineError> {
+            std::thread::sleep(self.delay);
             self.order.lock().unwrap().push(page);
             Ok(vec![SearchHit {
                 page,
@@ -205,6 +277,36 @@ mod tests {
         assert!(engine.order.lock().unwrap().is_empty());
         assert_eq!(reports.len(), 1);
         assert!(reports[0].done);
+    }
+
+    #[test]
+    fn a_new_search_cancels_the_previous_one() {
+        let searches = Searches::new(Arc::new(Fake {
+            delay: Duration::from_millis(2),
+            ..Fake::default()
+        }));
+        let (tx, rx) = mpsc::channel();
+        let tx2 = tx.clone();
+        let first = searches
+            .start(request(1_000, 0), move |id, p| {
+                if p.done {
+                    tx.send((id, p.pages_searched)).unwrap();
+                }
+            })
+            .unwrap();
+        let second = searches
+            .start(request(3, 0), move |id, p| {
+                if p.done {
+                    tx2.send((id, p.pages_searched)).unwrap();
+                }
+            })
+            .unwrap();
+        assert_ne!(first, second);
+        let mut done: Vec<_> = (0..2).map(|_| rx.recv().unwrap()).collect();
+        done.sort();
+        assert_eq!(done[1], (second, 3));
+        // The first one stopped early: its 1000 pages would take two seconds.
+        assert!(done[0].0 == first && done[0].1 < 100);
     }
 
     #[test]

@@ -8,5 +8,7 @@ mod search;
 mod session;
 
 pub use documents::Documents;
-pub use search::{MAX_SEARCH_HITS, SearchProgress, SearchRequest, search_document};
+pub use search::{
+    MAX_SEARCH_HITS, SearchId, SearchProgress, SearchRequest, Searches, search_document,
+};
 pub use session::{DocSession, DocSummary, Revision};

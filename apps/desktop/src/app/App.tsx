@@ -7,6 +7,7 @@ import { useApplyTheme } from "@/lib/theme/useApplyTheme";
 import { useDocumentsStore } from "@/stores/documents";
 import { Home } from "./Home";
 import { useAppErrors } from "./useAppErrors";
+import { useSearchEvents } from "./useSearchEvents";
 import { useFileDrop, useOpenFileDialog, useOpenShortcut } from "./useFileOpening";
 
 export function App() {
@@ -20,6 +21,7 @@ export function App() {
   useOpenShortcut(openFileDialog);
   const dragging = useFileDrop();
   const [internalError, dismissInternalError] = useAppErrors();
+  useSearchEvents();
 
   return (
     <TooltipProvider delayDuration={400}>

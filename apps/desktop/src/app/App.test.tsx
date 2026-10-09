@@ -1,7 +1,8 @@
 import { emit } from "@tauri-apps/api/event";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useDocumentsStore } from "@/stores/documents";
+import { useSearchStore } from "@/stores/search";
 import { useViewerStore } from "@/stores/viewer";
 import { installTauriMocks } from "@/test/tauri";
 import { App } from "./App";
@@ -10,8 +11,8 @@ function pageField(): HTMLInputElement {
   return screen.getByRole<HTMLInputElement>("textbox", { name: "Page number, 1 to 3" });
 }
 
-/** Makes open_document return a three-page "report.pdf" with id 7. */
-function mockReport() {
+/** Makes open_document return a three-page "report.pdf" with id 7; `other` answers the rest. */
+function mockReport(other: (cmd: string) => unknown = () => undefined) {
   installTauriMocks((cmd) => {
     if (cmd === "open_document") {
       return {
@@ -30,7 +31,7 @@ function mockReport() {
         revision: 0,
       };
     }
-    return undefined;
+    return other(cmd);
   });
 }
 
@@ -101,6 +102,59 @@ describe("App", () => {
     expect(pageField().value).toBe("1");
     fireEvent.keyDown(pageField(), { key: "Enter" });
     expect(current()).toBe(0);
+  });
+
+  it("finds text with the find bar and steps through the matches", async () => {
+    mockReport((cmd) => (cmd === "start_search" ? 5 : undefined));
+    render(<App />);
+    await act(() => useDocumentsStore.getState().open("C:\\docs\\report.pdf"));
+
+    fireEvent.keyDown(document.body, { key: "f", ctrlKey: true });
+    const field = screen.getByRole("textbox", { name: "Find in document" });
+    expect(document.activeElement).toBe(field);
+    fireEvent.change(field, { target: { value: "fox" } });
+    // The search starts once typing pauses.
+    expect(await screen.findByText("Searching…")).toBeDefined();
+    await vi.waitFor(() => {
+      expect(useSearchStore.getState().searches[7]?.searchId).toBe(5);
+    });
+
+    const rect = { x: 72, y: 100, width: 20, height: 10 };
+    const hit = (page: number) => ({
+      page,
+      rects: [rect],
+      snippet: "a fox",
+      matchStart: 2,
+      matchLen: 3,
+    });
+    await act(() =>
+      emit("search-progress-event", {
+        docId: 7,
+        searchId: 5,
+        progress: {
+          hits: [hit(0), hit(2)],
+          pagesSearched: 3,
+          pageCount: 3,
+          done: true,
+          truncated: false,
+        },
+      }),
+    );
+    expect(screen.getByText("1 of 2")).toBeDefined();
+    fireEvent.keyDown(field, { key: "Enter" });
+    expect(screen.getByText("2 of 2")).toBeDefined();
+    expect(useViewerStore.getState().views[7]?.currentPage).toBe(2);
+    fireEvent.keyDown(field, { key: "Enter", shiftKey: true });
+    expect(screen.getByText("1 of 2")).toBeDefined();
+
+    fireEvent.click(screen.getByRole("button", { name: "Match case" }));
+    expect(screen.getByRole("button", { name: "Match case" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
+
+    fireEvent.keyDown(field, { key: "Escape" });
+    expect(screen.queryByRole("search")).toBeNull();
+    expect(useSearchStore.getState().searches[7]).toBeUndefined();
   });
 
   it("explains why a file could not be opened", async () => {
