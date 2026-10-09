@@ -14,19 +14,22 @@ function mockFiles() {
       const id = ids.get(path) ?? ids.size + 1;
       ids.set(path, id);
       return {
-        id,
-        path,
-        fileName: path.split("\\").pop() ?? path,
-        info: {
-          pageCount: 2,
-          title: null,
-          author: null,
-          isEncrypted: false,
-          hasForms: false,
-          pdfVersion: "1.7",
+        document: {
+          id,
+          path,
+          fileName: path.split("\\").pop() ?? path,
+          info: {
+            pageCount: 2,
+            title: null,
+            author: null,
+            isEncrypted: false,
+            hasForms: false,
+            pdfVersion: "1.7",
+          },
+          pageSizes: [{ widthPt: 612, heightPt: 792 }],
+          revision: 0,
         },
-        pageSizes: [{ widthPt: 612, heightPt: 792 }],
-        revision: 0,
+        view: { page: 0, zoom: null, zoomMode: null },
       };
     }
     if (cmd === "close_document") closed.push((args as { docId: number }).docId);

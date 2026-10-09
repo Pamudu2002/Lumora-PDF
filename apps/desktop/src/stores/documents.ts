@@ -1,8 +1,43 @@
 import { create } from "zustand";
 import { openErrorMessage } from "@/lib/errors";
-import { closeDocument, openDocument, type OpenDocument } from "@/lib/ipc";
+import {
+  closeDocument,
+  openDocument,
+  saveView,
+  type OpenDocument,
+  type SavedView,
+} from "@/lib/ipc";
 import { useSearchStore } from "./search";
-import { useViewerStore } from "./viewer";
+import { clampZoom, useViewerStore, type DocView, type ZoomMode } from "./viewer";
+
+const ZOOM_MODES: readonly string[] = [
+  "custom",
+  "fitWidth",
+  "fitPage",
+  "auto",
+] satisfies ZoomMode[];
+
+/** The parts of a saved view that the viewer can use. */
+function restoredView(view: SavedView, pageCount: number): Partial<DocView> {
+  const restored: Partial<DocView> = {};
+  if (view.page > 0 && view.page < pageCount) restored.currentPage = view.page;
+  if (view.zoomMode && ZOOM_MODES.includes(view.zoomMode)) {
+    restored.zoomMode = view.zoomMode as ZoomMode;
+  }
+  if (view.zoom !== null && restored.zoomMode === "custom") restored.zoom = clampZoom(view.zoom);
+  return restored;
+}
+
+/** Saves how a document is being viewed, so it reopens there. */
+export function rememberView(doc: OpenDocument): void {
+  const view = useViewerStore.getState().views[doc.id];
+  if (!view) return;
+  void saveView(doc.path, {
+    page: view.currentPage,
+    zoom: view.zoom,
+    zoomMode: view.zoomMode,
+  }).catch(() => undefined);
+}
 
 /** A file that failed to open, with a user-facing message. */
 export interface OpenFailure {
@@ -58,6 +93,8 @@ export const useDocumentsStore = create<DocumentsState>()((set, get) => {
     const { docs, activeId } = get();
     const index = docs.findIndex((d) => d.id === docId);
     if (index < 0) return;
+    const doc = docs[index];
+    if (doc) rememberView(doc);
     const rest = docs.filter((d) => d.id !== docId);
     // Closing the active tab shows its right neighbour, or the left one at the end.
     const nextActive =
@@ -88,7 +125,12 @@ export const useDocumentsStore = create<DocumentsState>()((set, get) => {
       }
       set({ opening: true, failure: null });
       try {
-        const doc = await openDocument(path);
+        const { doc, view } = await openDocument(path);
+        const restored = restoredView(view, doc.info.pageCount);
+        useViewerStore.getState().init(doc.id, restored);
+        if (restored.currentPage !== undefined) {
+          useViewerStore.getState().goToPage(doc.id, restored.currentPage);
+        }
         set((s) => ({ docs: [...s.docs, doc], activeId: doc.id, opening: false }));
       } catch (error) {
         set({

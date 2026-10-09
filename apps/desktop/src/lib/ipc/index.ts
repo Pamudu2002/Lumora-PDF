@@ -9,10 +9,11 @@ import {
   type LinkTarget,
   type OutlineItem,
   type Rect as RawRect,
+  type SavedView,
   type SearchOptions,
 } from "./bindings";
 
-export type { DocInfo, EngineErrorKind, LinkTarget, OutlineItem, SearchOptions };
+export type { DocInfo, EngineErrorKind, LinkTarget, OutlineItem, SavedView, SearchOptions };
 
 /** A rectangle in display points (top-left origin). */
 export interface Rect {
@@ -77,17 +78,18 @@ function unwrap<T>(result: { status: "ok"; data: T } | { status: "error"; error:
   return result.data;
 }
 
-/** Opens a PDF. Throws {@link IpcError} on failure. */
-export async function openDocument(path: string): Promise<OpenDocument> {
-  const summary = unwrap(await commands.openDocument(path));
-  return {
-    ...summary,
+/** Opens a PDF (and adds it to the recent files). Throws {@link IpcError} on failure. */
+export async function openDocument(path: string): Promise<{ doc: OpenDocument; view: SavedView }> {
+  const { document, view } = unwrap(await commands.openDocument(path));
+  const doc = {
+    ...document,
     // Rust guarantees finite sizes; specta types f32 as `number | null` because JSON can't hold NaN.
-    pageSizes: summary.pageSizes.map((s) => ({
+    pageSizes: document.pageSizes.map((s) => ({
       widthPt: s.widthPt ?? 0,
       heightPt: s.heightPt ?? 0,
     })),
   };
+  return { doc, view };
 }
 
 /** Closes a document. Throws {@link IpcError} on failure. */
@@ -202,4 +204,36 @@ export async function getPageLinks(docId: number, page: number): Promise<PageLin
 /** Opens a web or email link in the system's default app. Ask the user before calling this. */
 export async function openExternalLink(url: string): Promise<void> {
   unwrap(await commands.openExternalLink(url));
+}
+
+/** A recently opened file. */
+export interface RecentFile {
+  path: string;
+  fileName: string;
+  pageCount: number;
+  /** When it was last opened (ms since the Unix epoch). */
+  lastOpenedMs: number;
+  /** False when the file has been moved or deleted. */
+  exists: boolean;
+}
+
+/** Recently opened files, newest first. */
+export async function listRecentFiles(): Promise<RecentFile[]> {
+  return unwrap(await commands.listRecentFiles()).map(({ file, exists }) => ({
+    path: file.path,
+    fileName: file.fileName,
+    pageCount: file.pageCount,
+    lastOpenedMs: file.lastOpenedMs ?? 0,
+    exists,
+  }));
+}
+
+/** Takes a file off the recent list. */
+export async function removeRecentFile(path: string): Promise<void> {
+  unwrap(await commands.removeRecentFile(path));
+}
+
+/** Remembers the page and zoom of an open document for next time. */
+export async function saveView(path: string, view: SavedView): Promise<void> {
+  unwrap(await commands.saveView(path, view));
 }

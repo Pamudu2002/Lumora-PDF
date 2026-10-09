@@ -358,7 +358,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - [x] 1.9 Find: Ctrl+F bar, match case / whole word, results list in sidebar, highlight hits on pages, next/prev.
 - [x] 1.10 Links: internal links navigate; external links open in the browser **after a confirmation dialog**.
 - [x] 1.11 Tabs: multiple documents, reorder tabs, middle-click close, confirm on unsaved changes.
-- [ ] 1.12 Recent files (SQLite via `lumora-store`), remember last page + zoom per file; home screen.
+- [x] 1.12 Recent files (SQLite via `lumora-store`), remember last page + zoom per file; home screen.
 - [ ] 1.13 Password-protected PDFs: password dialog, retry.
 - [ ] 1.14 Page dark mode (renderer-side) + UI themes.
 - [ ] 1.15 Print: render pages to the OS print dialog (Windows: via WebView print of rendered pages or native print API — pick the approach that keeps quality at 300 dpi; record decision).
@@ -386,6 +386,7 @@ Status legend: `- [ ]` todo · `- [x]` done. Each phase lists **acceptance crite
 - 2026-10-09 — 1.9: `start_search`/`cancel_search` commands run `lumora-core::Searches` (one job per document, new search cancels the old) and stream `SearchProgressEvent` batches; find bar (Ctrl+F, Enter/Shift+Enter, F3, Esc, match case, whole words), page highlights with a stronger current match, virtualized results tab in the sidebar. 250-page document with 7,500 matches: all found ~0.66 s after typing stops.
 - 2026-10-09 — 1.10: `get_page_links` command and a link layer per page (internal links go to their page); web/email links open only after a confirmation dialog, through `open_external_link`, which allows http, https and mailto only (checked again in Rust). New deps: `tauri-plugin-opener`, `@radix-ui/react-alert-dialog` (both MIT).
 - 2026-10-09 — 1.11: documents store holds every open document in tab order; tab strip with drag-to-reorder (pointer events), middle-click and button close, Ctrl+Tab / Ctrl+PageUp/PageDown, arrow keys and Ctrl+Shift+PageUp/PageDown on a focused tab; opening a file that is already open switches to its tab; each document keeps its scroll position across tab switches; closing a document with unsaved changes asks first (the dirty flag is set by Phase 2 edits).
+- 2026-10-09 — 1.12: `lumora-store` (rusqlite, bundled) with `user_version` migrations; `open_document` records the file and returns its saved view (page, zoom, zoom mode), which the viewer restores; the view is saved 1 s after it changes and on close; home screen lists up to 50 recent files (name, folder, opened, pages; missing files marked; remove from list).
 
 ---
 
@@ -659,6 +660,7 @@ Do these **in this order**; editing existing text is last because it is the hard
 | 2026-10-09 | External links are opened from Rust (`tauri-plugin-opener`, no JS permission) and only for http, https and mailto | Other schemes (file:, custom app protocols) could launch programs; keeping the check in Rust means the webview can't bypass it |
 | 2026-10-09 | Keep the native window title bar; the tab strip is its own row above the toolbar | A custom title bar (as in the mockup) needs our own window controls, snap layouts and drag regions; it can be done later without changing the tab code |
 | 2026-10-09 | Only the active tab's viewer is mounted; switching tabs saves and restores the page point at the viewport centre | Keeps memory and tile work proportional to one document; a page anchor survives zoom and window size changes, unlike a raw scroll offset |
+| 2026-10-09 | The database lives at `<app local data>/lumora.db` (WAL); if it can't be opened the app runs without recents instead of failing | Remembering files is a convenience; it must never stop a PDF from opening |
 | 2026-10-09 | PageUp/PageDown move a whole page (or spread) in every layout; Space and the arrow keys still scroll by screen/line in the continuous layout | The plan lists them as page navigation; it makes them predictable across layouts, and screen-wise scrolling stays one key away |
 | _(Claude Code: add new decisions here)_ | | |
 

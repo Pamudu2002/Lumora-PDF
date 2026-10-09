@@ -20,6 +20,7 @@ export function App() {
   const opening = useDocumentsStore((s) => s.opening);
   const failure = useDocumentsStore((s) => s.failure);
   const dismissFailure = useDocumentsStore((s) => s.dismissFailure);
+  const openPath = useDocumentsStore((s) => s.open);
   const openFileDialog = useOpenFileDialog();
   useOpenShortcut(openFileDialog);
   const dragging = useFileDrop();
@@ -60,7 +61,12 @@ export function App() {
           {current ? (
             <Viewer key={current.id} doc={current} />
           ) : (
-            <Home onOpenFile={() => void openFileDialog()} dragging={dragging} opening={opening} />
+            <Home
+              onOpenFile={() => void openFileDialog()}
+              onOpenPath={(path) => void openPath(path)}
+              dragging={dragging}
+              opening={opening}
+            />
           )}
         </div>
       </div>

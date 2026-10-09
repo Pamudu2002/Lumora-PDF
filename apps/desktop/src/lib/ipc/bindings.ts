@@ -7,8 +7,8 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 
 /** Commands */
 export const commands = {
-	/**  Opens the PDF at `path` and returns what the UI needs to show it. */
-	openDocument: (path: string) => typedError<DocSummary, AppError>(__TAURI_INVOKE("open_document", { path })),
+	/**  Opens the PDF at `path`, adds it to the recent files and returns what the UI needs to show it. */
+	openDocument: (path: string) => typedError<OpenedDocument, AppError>(__TAURI_INVOKE("open_document", { path })),
 	/**  Closes a document and drops its cached tiles. */
 	closeDocument: (docId: number) => typedError<null, AppError>(__TAURI_INVOKE("close_document", { docId })),
 	/**
@@ -24,6 +24,12 @@ export const commands = {
 	getPageLinks: (docId: number, page: number) => typedError<PageLink[], AppError>(__TAURI_INVOKE("get_page_links", { docId, page })),
 	/**  Opens a link from a document in the default browser or mail app. The UI asks the user first. */
 	openExternalLink: (url: string) => typedError<null, AppError>(__TAURI_INVOKE("open_external_link", { url })),
+	/**  Recently opened files, newest first. Empty when the database is unavailable. */
+	listRecentFiles: () => typedError<RecentEntry[], AppError>(__TAURI_INVOKE("list_recent_files")),
+	/**  Takes a file off the recent list. */
+	removeRecentFile: (path: string) => typedError<null, AppError>(__TAURI_INVOKE("remove_recent_file", { path })),
+	/**  Remembers the page and zoom of an open document, to restore them next time. */
+	saveView: (path: string, view: SavedView) => typedError<null, AppError>(__TAURI_INVOKE("save_view", { path, view })),
 	/**
 	 *  Starts searching a document for `query`, beginning at `start_page` and wrapping around.
 	 *  Cancels the document's previous search. Results arrive as [`SearchProgressEvent`]s.
@@ -131,6 +137,14 @@ page: number } |
 /**  The address. */
 uri: string };
 
+/**  An opened document and how it was last viewed. */
+export type OpenedDocument = {
+	/**  What the UI needs to show the document. */
+	document: DocSummary,
+	/**  The page and zoom it was left at (defaults for a file not opened before). */
+	view: SavedView,
+};
+
 /**  An outline (bookmark) entry. */
 export type OutlineItem = {
 	/**  Entry title. */
@@ -163,6 +177,28 @@ export type PageText = {
 	runs: TextRun[],
 };
 
+/**  A recent file and whether it is still there. */
+export type RecentEntry = {
+	/**  The file as last opened. */
+	file: RecentFile,
+	/**  False when the file has been moved or deleted since. */
+	exists: boolean,
+};
+
+/**  A recently opened file. */
+export type RecentFile = {
+	/**  Full path, as last opened. */
+	path: string,
+	/**  File name for display. */
+	fileName: string,
+	/**  Pages when last opened. */
+	pageCount: number,
+	/**  When it was last opened, in milliseconds since the Unix epoch. */
+	lastOpenedMs: number | null,
+	/**  How it was last viewed. */
+	view: SavedView,
+};
+
 /**  A rectangle in display points. */
 export type Rect = {
 	/**  Left edge. */
@@ -173,6 +209,16 @@ export type Rect = {
 	width: number | null,
 	/**  Height. */
 	height: number | null,
+};
+
+/**  How a document was last viewed, restored when it is opened again. */
+export type SavedView = {
+	/**  Zero-based page the reader was on. */
+	page: number,
+	/**  Zoom factor (1 = 100%), if one was saved. */
+	zoom: number | null,
+	/**  Zoom mode ("custom", "fitWidth", "fitPage", "auto"), if one was saved. */
+	zoomMode: string | null,
 };
 
 /**  One search match. */

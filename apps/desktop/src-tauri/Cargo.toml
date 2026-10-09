@@ -20,6 +20,7 @@ tauri-build = { version = "2", features = [] }
 lumora-core = { workspace = true, features = ["specta"] }
 lumora-engine = { workspace = true, features = ["specta"] }
 lumora-render.workspace = true
+lumora-store = { workspace = true, features = ["specta"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # tauri-specta v2 is in RC: keep `=` pins on specta crates (see tauri-specta docs).

@@ -36,6 +36,7 @@ LLVM libc (Apache-2.0 WITH LLVM-exception). The full notices ship with the app i
 | `lru` | Tile cache | MIT |
 | `tauri-specta`, `specta`, `specta-typescript` | Typed IPC and generated TypeScript bindings | MIT |
 | `tauri-plugin-dialog` | Native open-file dialog | MIT OR Apache-2.0 |
+| `rusqlite` (feature `bundled`, via `libsqlite3-sys`) | Local database: recent files and saved views | MIT; bundled SQLite source is public domain |
 | `tauri-plugin-opener` | Opening confirmed web and email links in the default app | MIT OR Apache-2.0 |
 
 ## JavaScript packages (direct dependencies)

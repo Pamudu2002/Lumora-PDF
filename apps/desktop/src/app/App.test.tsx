@@ -16,19 +16,22 @@ function mockReport(other: (cmd: string) => unknown = () => undefined) {
   installTauriMocks((cmd) => {
     if (cmd === "open_document") {
       return {
-        id: 7,
-        path: "C:\\docs\\report.pdf",
-        fileName: "report.pdf",
-        info: {
-          pageCount: 3,
-          title: null,
-          author: null,
-          isEncrypted: false,
-          hasForms: false,
-          pdfVersion: "1.7",
+        document: {
+          id: 7,
+          path: "C:\\docs\\report.pdf",
+          fileName: "report.pdf",
+          info: {
+            pageCount: 3,
+            title: null,
+            author: null,
+            isEncrypted: false,
+            hasForms: false,
+            pdfVersion: "1.7",
+          },
+          pageSizes: [{ widthPt: 612, heightPt: 792 }],
+          revision: 0,
         },
-        pageSizes: [{ widthPt: 612, heightPt: 792 }],
-        revision: 0,
+        view: { page: 0, zoom: null, zoomMode: null },
       };
     }
     return other(cmd);

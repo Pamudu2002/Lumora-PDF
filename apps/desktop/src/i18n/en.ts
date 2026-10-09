@@ -11,6 +11,7 @@ export const en = {
   },
   home: {
     greeting: "Every page, in good light",
+    greetingReturning: "Pick up where you left off",
     promise: "Every feature is free. Your files open and stay on this device, no account needed.",
     openFile: "Open file",
     dropTitle: "Drop a PDF here",
@@ -110,6 +111,19 @@ export const en = {
     blockedTitle: "Lumora can't open this link",
     blocked: "Only web and email links can be opened from a document.",
     ok: "OK",
+  },
+  recent: {
+    title: "Recent files",
+    name: "Name",
+    location: "Location",
+    opened: "Opened",
+    pages: "Pages",
+    actionsHeader: "Actions",
+    actions: "More actions for {{name}}",
+    remove: "Remove from list",
+    missing: "File not found",
+    today: "Today, {{time}}",
+    yesterday: "Yesterday",
   },
   tabs: {
     label: "Open documents",

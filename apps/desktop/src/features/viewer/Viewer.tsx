@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { Sidebar } from "@/features/sidebar/Sidebar";
 import type { OpenDocument } from "@/lib/ipc";
-import { useDocumentsStore } from "@/stores/documents";
+import { rememberView, useDocumentsStore } from "@/stores/documents";
 import { useSearchStore } from "@/stores/search";
 import { useUiStore } from "@/stores/ui";
-import { DEFAULT_VIEW, useViewerStore } from "@/stores/viewer";
+import { DEFAULT_VIEW, useDocView, useViewerStore } from "@/stores/viewer";
 import { DocumentView } from "./DocumentView";
 import { ExternalLinkDialog } from "./ExternalLinkDialog";
 import { FindBar } from "./FindBar";
@@ -28,6 +28,7 @@ export function Viewer({ doc }: ViewerProps) {
   useViewerShortcuts(doc.id);
   usePageKeys(doc.id, doc.info.pageCount);
   useFind(doc.id);
+  useRememberView(doc);
   const findOpen = useSearchStore((s) => s.findOpen);
 
   return (
@@ -178,4 +179,20 @@ function useFind(docId: number) {
       rect ? { x: rect.x + rect.width / 2, y: rect.y, ifHidden: true } : undefined,
     );
   }, [docId, activeNonce, goToPage]);
+}
+
+/** How long the page and zoom must stay put before they are saved for next time. */
+const REMEMBER_DELAY_MS = 1000;
+
+/** Saves the page and zoom shortly after they change, so the file reopens where it was left. */
+function useRememberView(doc: OpenDocument) {
+  const { currentPage, zoom, zoomMode } = useDocView(doc.id);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      rememberView(doc);
+    }, REMEMBER_DELAY_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [doc, currentPage, zoom, zoomMode]);
 }

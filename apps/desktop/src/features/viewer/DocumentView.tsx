@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { setVisiblePages, type OpenDocument } from "@/lib/ipc";
 import { useDevicePixelRatio } from "@/lib/useDevicePixelRatio";
@@ -117,6 +117,18 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     };
   }, [zoom, renderZoom]);
 
+  // After scrolling from code, record the position and update the viewport right away instead of
+  // on the next scroll event, so effects (current page, mounted pages) don't use the old one.
+  const syncScroll = useCallback((el: HTMLDivElement) => {
+    lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
+    setViewport({
+      top: el.scrollTop,
+      left: el.scrollLeft,
+      width: el.clientWidth,
+      height: el.clientHeight,
+    });
+  }, []);
+
   // Track the viewport: scroll position and size.
   useEffect(() => {
     const el = scrollRef.current;
@@ -211,7 +223,7 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       if (pos) {
         el.scrollLeft = pos.x - el.clientWidth / 2;
         el.scrollTop = pos.y - el.clientHeight / 2;
-        lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
+        syncScroll(el);
       }
       return;
     }
@@ -226,8 +238,19 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
     if (!pos) return;
     el.scrollLeft = pos.x - ax;
     el.scrollTop = pos.y - ay;
-    lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
-  }, [layout, zoom, mode, coverPage, rotation, vw, doc.id, consumeZoomAnchor, consumeSavedAnchor]);
+    syncScroll(el);
+  }, [
+    layout,
+    zoom,
+    mode,
+    coverPage,
+    rotation,
+    vw,
+    doc.id,
+    consumeZoomAnchor,
+    consumeSavedAnchor,
+    syncScroll,
+  ]);
 
   // Remember the position (the page point at the viewport centre) when the view goes away.
   useEffect(() => {
@@ -282,8 +305,8 @@ export function DocumentView({ doc, dark }: DocumentViewProps) {
       el.scrollTop = ty - el.clientHeight * 0.3;
       if (scrollRequest.x !== undefined) el.scrollLeft = tx - el.clientWidth / 2;
     }
-    lastScroll.current = { top: el.scrollTop, left: el.scrollLeft };
-  }, [scrollRequest, layout, sizes, zoom, rotation, doc.id, vw, finishScrollRequest]);
+    syncScroll(el);
+  }, [scrollRequest, layout, sizes, zoom, rotation, doc.id, vw, finishScrollRequest, syncScroll]);
 
   // Report the page the reader is on.
   useEffect(() => {

@@ -6,6 +6,7 @@ use std::sync::Arc;
 use lumora_core::{Documents, Searches};
 use lumora_engine::{EngineErrorKind, PdfEngine, PdfiumEngine, PdfiumLibrary};
 use lumora_render::{ImageFormat, TileCache, TileService};
+use lumora_store::Store;
 use tauri::Manager;
 use tauri::path::BaseDirectory;
 
@@ -25,6 +26,9 @@ pub struct Core {
 /// reports the error, so the UI can explain it.
 pub struct AppState {
     core: Result<Core, String>,
+    /// Recent files and saved views. None if the database couldn't be opened; the app then works
+    /// without remembering anything.
+    store: Option<Arc<Store>>,
 }
 
 impl AppState {
@@ -48,7 +52,15 @@ impl AppState {
                 tracing::error!(?library, %err, "PDF engine unavailable");
                 err.to_string()
             });
-        Self { core }
+        Self {
+            core,
+            store: open_store(app),
+        }
+    }
+
+    /// The local database, if it opened.
+    pub fn store(&self) -> Option<Arc<Store>> {
+        self.store.clone()
     }
 
     /// The core, or the reason it is unavailable.
@@ -57,6 +69,22 @@ impl AppState {
             kind: EngineErrorKind::LibraryLoad,
             detail: detail.clone(),
         })
+    }
+}
+
+/// Opens `lumora.db` in the app's local data folder.
+fn open_store(app: &tauri::AppHandle) -> Option<Arc<Store>> {
+    let dir = app.path().app_local_data_dir().ok()?;
+    if let Err(err) = std::fs::create_dir_all(&dir) {
+        tracing::warn!(%err, "could not create the data folder; recent files are off");
+        return None;
+    }
+    match Store::open(&dir.join("lumora.db")) {
+        Ok(store) => Some(Arc::new(store)),
+        Err(err) => {
+            tracing::warn!(%err, "could not open the database; recent files are off");
+            None
+        }
     }
 }
 

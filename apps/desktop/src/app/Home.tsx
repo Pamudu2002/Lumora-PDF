@@ -1,27 +1,46 @@
 import { FileUp, FolderOpen } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Kbd } from "@/components/ui/Kbd";
 import { cn } from "@/lib/cn";
+import { listRecentFiles, removeRecentFile, type RecentFile } from "@/lib/ipc";
+import { RecentFiles } from "./RecentFiles";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export interface HomeProps {
   onOpenFile: () => void;
+  /** Opens a file from the recent list. */
+  onOpenPath: (path: string) => void;
   /** Files are being dragged over the window. */
   dragging: boolean;
   opening: boolean;
 }
 
-/** The home screen shown when no document is open. Recent files arrive in task 1.12. */
-export function Home({ onOpenFile, dragging, opening }: HomeProps) {
+/** The home screen shown when no document is open: open a file, or pick a recent one. */
+export function Home({ onOpenFile, onOpenPath, dragging, opening }: HomeProps) {
   const { t } = useTranslation();
+  const [recent, setRecent] = useState<RecentFile[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listRecentFiles()
+      .then((files) => {
+        if (!cancelled) setRecent(files);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="flex h-full justify-center overflow-auto bg-surface px-8 pt-12 pb-8">
       <div className="flex w-full max-w-[1040px] flex-col gap-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-col gap-1.5">
             <h1 className="m-0 font-display text-display font-medium tracking-[-0.015em] text-ink">
-              {t("home.greeting")}
+              {recent.length > 0 ? t("home.greetingReturning") : t("home.greeting")}
             </h1>
             <p className="m-0 text-body text-ink-muted">{t("home.promise")}</p>
           </div>
@@ -53,6 +72,17 @@ export function Home({ onOpenFile, dragging, opening }: HomeProps) {
             {t("home.dropHintBefore")} <Kbd>Ctrl+O</Kbd> {t("home.dropHintAfter")}
           </span>
         </button>
+
+        {recent.length > 0 ? (
+          <RecentFiles
+            files={recent}
+            onOpen={onOpenPath}
+            onRemove={(path) => {
+              setRecent((files) => files.filter((f) => f.path !== path));
+              void removeRecentFile(path).catch(() => undefined);
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );
